@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 
 import 'package:glupulse/features/authentication/presentation/screens/home_page.dart';
-import 'package:glupulse/features/authentication/presentation/screens/register_page.dart';
+import 'package:glupulse/features/authentication/presentation/screens/auth/register_page.dart';
 
 
 class LoginPage extends StatefulWidget {
