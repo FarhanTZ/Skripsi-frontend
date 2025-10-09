@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/authentication/presentation/screens/analytic_tab.dart';
+import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/authentication/presentation/screens/home_tab.dart';
 import 'package:glupulse/features/authentication/presentation/screens/menu_tab.dart';
 import 'package:glupulse/features/authentication/presentation/screens/profile_tab.dart';
@@ -33,34 +36,65 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GluPulse'), // Judul tetap sama
+        title: const Text('GluPulse'),
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      // Agar efek lengkung CurvedNavigationBar terlihat, Scaffold dibuat transparan
+      // dan body dibungkus Container dengan warna.
+      backgroundColor: Colors.transparent,
+      body: Container(
+        color: Colors.white,
+        child: _widgetOptions.elementAt(_selectedIndex),
+      ),
+      bottomNavigationBar: CurvedNavigationBar(
+        index: _selectedIndex,
+        height: 75.0,
+        items: [
+          _buildNavItem(unselectedAsset: 'images/Home.svg', selectedAsset: 'images/Home_on.svg', index: 0, label: 'Home'),
+          _buildNavItem(unselectedAsset: 'images/Analytic.svg', selectedAsset: 'images/Analytic_on.svg', index: 1, label: 'Analytic'),
+          _buildNavItem(unselectedAsset: 'images/Menu.svg', selectedAsset: 'images/Menu_on.svg', index: 2, label: 'Menu'),
+          _buildNavItem(unselectedAsset: 'images/Profile.svg', selectedAsset: 'images/Profile_on.svg', index: 3, label: 'Profile'),
+        ], // Ganti dengan path ikon SVG Anda
+        color: Theme.of(context).colorScheme.primary,
+        buttonBackgroundColor: AppTheme.inputLabelColor,
+        backgroundColor: Colors.transparent,
+        animationCurve: Curves.easeInOut,
+        animationDuration: const Duration(milliseconds: 400),
+        onTap: _onItemTapped,
+        letIndexChange: (index) => true,
+      ),
+    );
+  }
+
+  Widget _buildNavItem({required String unselectedAsset, required String selectedAsset, required int index, required String label}) {
+    final bool isSelected = _selectedIndex == index;
+    final String assetName = isSelected ? selectedAsset : unselectedAsset;
+    final Color itemColor = Colors.white;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Tambahkan SizedBox untuk mendorong ikon ke bawah saat tidak dipilih
+        if (!isSelected)
+          const SizedBox(height: 8),
+
+        SvgPicture.asset(
+          assetName,
+          width: 28,
+          height: 28,
+          colorFilter: ColorFilter.mode(
+            itemColor,
+            BlendMode.srcIn,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics),
-            label: 'Analytic',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            label: 'Menu',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+        ),
+        // Hanya tampilkan teks jika item tidak sedang dipilih
+        if (!isSelected) ...[
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(color: itemColor, fontSize: 10),
           ),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        onTap: _onItemTapped,
-      ),
+      ],
     );
   }
 }

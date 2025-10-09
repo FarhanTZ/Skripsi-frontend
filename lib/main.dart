@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app/theme/app_theme.dart';
 import 'features/authentication/presentation/screens/auth/introduction/introduction_screen.dart';
+import 'features/authentication/presentation/screens/home_page.dart';
 
 
 void main() {
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'GluPulse',
       theme: AppTheme.lightTheme,
-      home: const IntroductionScreen(),
+      home: const HomePage(),
       debugShowCheckedModeBanner: false,
     );
   }
