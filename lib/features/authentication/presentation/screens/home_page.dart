@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:glupulse/features/authentication/presentation/screens/analytic_tab.dart';
+import 'package:glupulse/features/authentication/presentation/screens/User/analytic_tab.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
-import 'package:glupulse/features/authentication/presentation/screens/home_tab.dart';
-import 'package:glupulse/features/authentication/presentation/screens/menu_tab.dart';
-import 'package:glupulse/features/authentication/presentation/screens/profile_tab.dart';
+import 'package:glupulse/features/authentication/presentation/screens/User/home_tab.dart';
+import 'package:glupulse/features/authentication/presentation/screens/User/menu_tab.dart';
+import 'package:glupulse/features/authentication/presentation/screens/User/profile_tab.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -35,14 +35,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('GluPulse'),
-      ),
       // Agar efek lengkung CurvedNavigationBar terlihat, Scaffold dibuat transparan
       // dan body dibungkus Container dengan warna.
       backgroundColor: Colors.transparent,
       body: Container(
-        color: Colors.white,
+        color: const Color(0xFFF2F5F9),
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: CurvedNavigationBar(

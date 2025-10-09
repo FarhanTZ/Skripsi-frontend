@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app/theme/app_theme.dart';
-import 'features/authentication/presentation/screens/auth/introduction/introduction_screen.dart';
+import 'features/authentication/presentation/screens/introduction/introduction_screen.dart';
 import 'features/authentication/presentation/screens/home_page.dart';
 
 
