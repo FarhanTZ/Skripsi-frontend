@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+
+import 'app/theme/app_theme.dart';
 import 'features/authentication/presentation/screens/login_page.dart';
 
 
@@ -14,10 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'GluPulse',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
       home: const LoginPage(),
       debugShowCheckedModeBanner: false,
     );
