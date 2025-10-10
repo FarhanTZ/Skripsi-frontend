@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:glupulse/features/presentation/screens/User/activity_detail_page.dart';
 import 'package:glupulse/features/presentation/screens/User/food_detail_page.dart';
 
 class HomeTab extends StatelessWidget {
@@ -288,7 +289,7 @@ class HomeTab extends StatelessWidget {
             height: 191, // Menyamakan tinggi dengan Smart Health Metrix
             child: ListView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0), // Menggunakan padding horizontal
               children: [
                 _buildRecommendationCard(
                   context: context,
@@ -339,7 +340,7 @@ class HomeTab extends StatelessWidget {
             height: 191, // Menyamakan tinggi dengan Smart Health Metrix
             child: ListView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0), // Menggunakan padding horizontal
               children: [
                 _buildRecommendationCard(
                   context: context,
@@ -347,22 +348,37 @@ class HomeTab extends StatelessWidget {
                   description: '30 minutes',
                   icon: Icons.directions_walk,
                   color: Colors.lightBlue,
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ActivityDetailPage(activityName: 'Walking'),
+                    ));
+                  },
                 ),
                 const SizedBox(width: 12),
                 _buildRecommendationCard(
                   context: context,
-                  title: 'Yoga',
+                  title: 'Yoga', // Mengganti title menjadi Yoga
                   description: '15 minutes',
                   icon: Icons.self_improvement,
                   color: Colors.purpleAccent,
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ActivityDetailPage(activityName: 'Yoga'),
+                    ));
+                  },
                 ),
                 const SizedBox(width: 12),
                 _buildRecommendationCard(
                   context: context,
-                  title: 'Cycling',
+                  title: 'Cycling', // Mengganti title menjadi Cycling
                   description: '20 minutes',
                   icon: Icons.directions_bike,
                   color: Colors.orange,
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ActivityDetailPage(activityName: 'Cycling'),
+                    ));
+                  },
                 ),
               ],
             ),
@@ -465,6 +481,7 @@ class HomeTab extends StatelessWidget {
     required String description,
     required IconData icon,
     required Color color,
+    VoidCallback? onTap, // Menambahkan parameter onTap opsional
   }) {
     return SizedBox(
       width: 160, // Menyamakan lebar dengan card lain
@@ -474,9 +491,9 @@ class HomeTab extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         clipBehavior: Clip.antiAlias, // Ensures InkWell ripple effect is clipped
         child: InkWell(
-          onTap: () {
+          onTap: onTap ?? () { // Jika onTap tidak disediakan, gunakan navigasi default ke FoodDetailPage
             Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => FoodDetailPage(foodName: title),
+              builder: (context) => FoodDetailPage(foodName: title), // Default ke FoodDetailPage
             ));
           },
           child: Padding(

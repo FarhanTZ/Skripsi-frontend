@@ -31,11 +31,25 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Menggunakan Stack untuk menumpuk header, gambar, dan konten
-      body: Stack( // Stack utama untuk menempatkan tombol kembali di atas segalanya
-        children: [
-          // Konten utama yang bisa di-scroll
-          SingleChildScrollView(
+      extendBodyBehindAppBar: true, // Memungkinkan body untuk berada di belakang AppBar
+      appBar: AppBar(
+        backgroundColor: Colors.transparent, // Membuat AppBar transparan
+        elevation: 0, // Menghilangkan bayangan AppBar
+        centerTitle: false, // Membuat judul tidak di tengah
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white), // Tombol kembali
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Detail Makanan', // Judul AppBar
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
             child: Column(
               children: [
                 // Stack untuk menumpuk header biru dan kartu gambar
@@ -211,35 +225,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                 ),
               ],
             ),
-          ),
-          // Tombol kembali dan Judul di bagian atas
-          Positioned(
-            top: 50,
-            left: 16,
-            right: 16,
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    'Detail Makanan', // Judul header tetap
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+          ), // Penutup SingleChildScrollView
     );
   }
 
