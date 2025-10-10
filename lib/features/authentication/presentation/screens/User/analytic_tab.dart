@@ -108,6 +108,33 @@ class AnalyticTab extends StatelessWidget {
                       fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
+                // --- Kartu Metrik ---
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildMetricCard(
+                        context: context,
+                        title: 'Blood Sugar',
+                        value: '110',
+                        unit: 'mg/dL',
+                        icon: Icons.water_drop_outlined,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildMetricCard(
+                        context: context,
+                        title: 'Blood Pressure',
+                        value: '120/80',
+                        unit: 'mmHg',
+                        icon: Icons.favorite_border,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 _buildCategoryCard(
                   context: context,
                   title: 'Category Blood Sugar',
@@ -130,6 +157,43 @@ class AnalyticTab extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMetricCard({
+    required BuildContext context,
+    required String title,
+    required String value,
+    required String unit,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Card(
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 14)),
+                Icon(icon, color: color, size: 24),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+            ),
+            const SizedBox(height: 2),
+            Text(unit, style: const TextStyle(fontSize: 14, color: AppTheme.inputLabelColor)),
+          ],
+        ),
       ),
     );
   }
