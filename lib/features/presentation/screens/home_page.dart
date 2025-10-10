@@ -6,6 +6,7 @@ import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/presentation/screens/User/home_tab.dart';
 import 'package:glupulse/features/presentation/screens/User/menu_tab.dart';
 import 'package:glupulse/features/presentation/screens/User/profile_tab.dart';
+import 'package:glupulse/features/presentation/screens/cart_page.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -39,8 +40,39 @@ class _HomePageState extends State<HomePage> {
       // dan body dibungkus Container dengan warna.
       backgroundColor: Colors.transparent,
       body: Container(
-        color: const Color(0xFFF2F5F9),
-        child: _widgetOptions.elementAt(_selectedIndex),
+        // Menggunakan Stack untuk menempatkan Floating Action Button di atas konten
+        child: Stack(
+          children: [
+            // Konten utama halaman (HomeTab, AnalyticTab, dll.)
+            Container(
+              color: const Color(0xFFF2F5F9),
+              child: _widgetOptions.elementAt(_selectedIndex),
+            ),
+            // Tombol keranjang belanja global
+            Positioned(
+              bottom: 30.0, // Menurunkan posisi lebih jauh agar pas di atas lengkungan NavBar
+              right: 24.0,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const CartPage()),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary, // Warna biru dari tema
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5)),
+                    ],
+                  ),
+                  child: SvgPicture.asset('images/shopping_cart.svg', colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn), width: 28, height: 28),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: CurvedNavigationBar(
         index: _selectedIndex,
