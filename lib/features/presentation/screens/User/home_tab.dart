@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/presentation/screens/User/activity_detail_page.dart';
 import 'package:glupulse/features/presentation/screens/User/food_detail_page.dart';
+import 'package:glupulse/features/presentation/screens/User/health_metric_detail_page.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -231,6 +232,18 @@ class HomeTab extends StatelessWidget {
                   value: '110',
                   unit: 'mg/dL',
                   status: 'After Meal',
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const HealthMetricDetailPage(
+                        title: 'Blood Sugar',
+                        value: '110',
+                        unit: 'mg/dL',
+                        status: 'After Meal',
+                        icon: Icons.water_drop_outlined,
+                        iconColor: Colors.redAccent,
+                      ),
+                    ));
+                  },
                 ),
                 const SizedBox(width: 12),
                 // --- Card Tekanan Darah ---
@@ -242,6 +255,18 @@ class HomeTab extends StatelessWidget {
                   value: '120/80',
                   unit: 'mmHg',
                   status: 'Normal',
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const HealthMetricDetailPage(
+                        title: 'Blood Pressure',
+                        value: '120/80',
+                        unit: 'mmHg',
+                        status: 'Normal',
+                        icon: Icons.favorite_border,
+                        iconColor: Colors.blueAccent,
+                      ),
+                    ));
+                  },
                 ),
                 const SizedBox(width: 12),
                 // --- Card Info Gula Darah Rendah ---
@@ -398,35 +423,40 @@ class HomeTab extends StatelessWidget {
     required String value,
     required String unit,
     required String status,
+    required VoidCallback onTap,
   }) {
     return SizedBox(
       width: 160, // Menyamakan lebar dengan card lain
       child: Card(
         elevation: 1,
         color: Colors.white,
+        clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(category.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: iconColor.withOpacity(0.8))),
-                  // Placeholder untuk menyamakan tinggi dengan card info
-                  const SizedBox(height: 22), 
-                  const Spacer(),
-                  Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Theme.of(context).colorScheme.primary)),
-                  Text('$unit - $status', style: const TextStyle(fontSize: 13, color: Colors.grey)),
-                ],
+        child: InkWell(
+          onTap: onTap,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(category.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: iconColor.withOpacity(0.8))),
+                    // Placeholder untuk menyamakan tinggi dengan card info
+                    const SizedBox(height: 22), 
+                    const Spacer(),
+                    Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Theme.of(context).colorScheme.primary)),
+                    Text('$unit - $status', style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                  ],
+                ),
               ),
-            ),
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Icon(icon, color: iconColor, size: 24),
-            ),
-          ],
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Icon(icon, color: iconColor, size: 24),
+              ),
+            ],
+          ),
         ),
       ),
     );
