@@ -32,26 +32,39 @@ class MenuTab extends StatelessWidget {
                   bottom: Radius.circular(40), // Mengatur lengkungan di bawah
                 ),
               ),
-              child: const Padding(
-                padding: EdgeInsets.only(
+              child: Padding(
+                padding: const EdgeInsets.only(
                     top: 60, left: 24, right: 24), // Padding from top and sides
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Location',
-                          style: TextStyle(
-                            color: Colors.white70, // Grayish color (transparent white)
-                            fontSize: 16,
-                          ),
+                        const Row(
+                          children: [
+                            Text(
+                              'Location',
+                              style: TextStyle(
+                                color: Colors.white70, // Grayish color (transparent white)
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(
+                              Icons.edit,
+                              color: Colors.white70,
+                              size: 18,
+                            ),
+                          ],
                         ),
-                        SizedBox(width: 8),
-                        Icon(
-                          Icons.edit,
-                          color: Colors.white70,
-                          size: 18,
+                        CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: Icon(
+                            Icons.notifications_outlined,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 24,
+                          ),
                         ),
                       ],
                     ),
