@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/presentation/screens/HealthData/health_metric_detail_page.dart';
+import 'package:glupulse/features/presentation/screens/HealthData/input_health_data_page.dart';
 
 class AnalyticTab extends StatelessWidget {
   const AnalyticTab({super.key});
@@ -55,7 +57,9 @@ class AnalyticTab extends StatelessWidget {
                       const SizedBox(height: 24), // Spasi sebelum tombol
                       ElevatedButton(
                         onPressed: () {
-                          // TODO: Implementasi aksi untuk input data kesehatan
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const InputHealthDataPage(),
+                          ));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
@@ -119,6 +123,19 @@ class AnalyticTab extends StatelessWidget {
                         unit: 'mg/dL',
                         icon: Icons.water_drop_outlined,
                         color: Colors.redAccent,
+                        status: 'Normal',
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const HealthMetricDetailPage(
+                              title: 'Blood Sugar',
+                              value: '110',
+                              unit: 'mg/dL',
+                              status: 'Normal',
+                              icon: Icons.water_drop_outlined,
+                              iconColor: Colors.redAccent,
+                            ),
+                          ));
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -130,6 +147,19 @@ class AnalyticTab extends StatelessWidget {
                         unit: 'mmHg',
                         icon: Icons.favorite_border,
                         color: Colors.blueAccent,
+                        status: 'Normal',
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const HealthMetricDetailPage(
+                              title: 'Blood Pressure',
+                              value: '120/80',
+                              unit: 'mmHg',
+                              status: 'Normal',
+                              icon: Icons.favorite_border,
+                              iconColor: Colors.blueAccent,
+                            ),
+                          ));
+                        },
                       ),
                     ),
                   ],
@@ -168,31 +198,37 @@ class AnalyticTab extends StatelessWidget {
     required String unit,
     required IconData icon,
     required Color color,
+    required String status,
+    required VoidCallback onTap,
   }) {
     return Card(
       elevation: 2,
       color: Colors.white,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 14)),
-                Icon(icon, color: color, size: 24),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-            ),
-            const SizedBox(height: 2),
-            Text(unit, style: const TextStyle(fontSize: 14, color: AppTheme.inputLabelColor)),
-          ],
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 14)),
+                  Icon(icon, color: color, size: 24),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                value,
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+              ),
+              const SizedBox(height: 2),
+              Text(unit, style: const TextStyle(fontSize: 14, color: AppTheme.inputLabelColor)),
+            ],
+          ),
         ),
       ),
     );

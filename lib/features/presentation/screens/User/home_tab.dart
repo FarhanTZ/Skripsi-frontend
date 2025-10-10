@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:glupulse/features/presentation/screens/User/activity_detail_page.dart';
-import 'package:glupulse/features/presentation/screens/User/food_detail_page.dart';
-import 'package:glupulse/features/presentation/screens/User/health_metric_detail_page.dart';
+import 'package:glupulse/features/presentation/screens/Aktivity/activity_detail_page.dart';
+import 'package:glupulse/features/presentation/screens/Food/food_detail_page.dart';
+import 'package:glupulse/features/presentation/screens/HealthData/input_health_data_page.dart';
+import 'package:glupulse/features/presentation/screens/HealthData/health_metric_detail_page.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -153,52 +154,59 @@ class HomeTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Card(
-            elevation: 2,
-            color: Colors.white,
-            clipBehavior: Clip.antiAlias, // Penting agar child mengikuti lengkungan Card
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: SizedBox(
-              width: 405,
-              height: 106,
-              child: Row(
-                children: [
-                  Container(
-                    width: 120, // Lebar container biru
-                    color: Theme.of(context).colorScheme.primary,
-                    child: const Center(
-                      child: Text(
-                        '85', // Contoh Skor
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold),
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const InputHealthDataPage(),
+              ));
+            },
+            child: Card(
+              elevation: 2,
+              color: Colors.white,
+              clipBehavior: Clip.antiAlias, // Penting agar child mengikuti lengkungan Card
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: SizedBox(
+                width: 405,
+                height: 106,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 120, // Lebar container biru
+                      color: Theme.of(context).colorScheme.primary,
+                      child: const Center(
+                        child: Text(
+                          '85', // Contoh Skor
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
-                  ),
-                  const Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Glupulse Score',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
-                          SizedBox(height: 4),
-                          Text(
-                            'based on your data, we think your health status is above average',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                            maxLines: 3,
-                          ),
-                        ],
+                    const Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Glupulse Score',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16)),
+                            SizedBox(height: 4),
+                            Text(
+                              'based on your data, we think your health status is above average',
+                              style: TextStyle(fontSize: 14, color: Colors.grey),
+                              maxLines: 3,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

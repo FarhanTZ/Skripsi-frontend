@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
-import 'package:glupulse/features/presentation/screens/User/food_detail_page.dart';
+import 'package:glupulse/features/presentation/screens/Food/food_detail_page.dart';
 
 class MenuTab extends StatelessWidget {
   const MenuTab({super.key});
