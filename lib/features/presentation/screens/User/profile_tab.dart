@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/presentation/screens/User/edit_profile_page.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -65,7 +66,9 @@ class ProfileTab extends StatelessWidget {
                         icon: Icons.person_outline,
                         text: 'Edit Profile',
                         onTap: () {
-                          // TODO: Implement navigation to Edit Profile page
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const EditProfilePage(),
+                          ));
                         },
                       ),
                       _buildProfileMenuItem(
