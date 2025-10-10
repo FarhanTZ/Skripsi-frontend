@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'app/theme/app_theme.dart';
-import 'features/authentication/presentation/screens/introduction/introduction_screen.dart';
-import 'features/authentication/presentation/screens/home_page.dart';
+import 'features/presentation/screens/introduction/introduction_screen.dart';
+import 'features/presentation/screens/home_page.dart';
 
 
 void main() {

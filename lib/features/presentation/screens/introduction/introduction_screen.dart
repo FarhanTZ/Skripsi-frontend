@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
-import 'package:glupulse/features/authentication/presentation/screens/auth/login_page.dart';
+import 'package:glupulse/features/presentation/screens/auth/login_page.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 

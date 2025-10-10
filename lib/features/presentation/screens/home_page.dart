@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:glupulse/features/authentication/presentation/screens/User/analytic_tab.dart';
+import 'package:glupulse/features/presentation/screens/User/analytic_tab.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
-import 'package:glupulse/features/authentication/presentation/screens/User/home_tab.dart';
-import 'package:glupulse/features/authentication/presentation/screens/User/menu_tab.dart';
-import 'package:glupulse/features/authentication/presentation/screens/User/profile_tab.dart';
+import 'package:glupulse/features/presentation/screens/User/home_tab.dart';
+import 'package:glupulse/features/presentation/screens/User/menu_tab.dart';
+import 'package:glupulse/features/presentation/screens/User/profile_tab.dart';
 
 
 class HomePage extends StatefulWidget {
