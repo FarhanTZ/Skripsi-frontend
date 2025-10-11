@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/presentation/screens/Aktivity/activity_detail_page.dart';
 import 'package:glupulse/features/presentation/screens/Food/food_detail_page.dart';
 import 'package:glupulse/features/presentation/screens/HealthData/input_health_data_page.dart';
+import 'package:glupulse/features/presentation/screens/notification_page.dart';
 import 'package:glupulse/features/presentation/screens/HealthData/health_metric_detail_page.dart';
 
 class HomeTab extends StatelessWidget {
@@ -103,15 +104,20 @@ class HomeTab extends StatelessWidget {
                         ],
                       ),
                       // Ikon Notifikasi
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.notifications_outlined,
-                          color: Theme.of(context).colorScheme.primary,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => const NotificationPage()));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.notifications_outlined,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                       ),
                     ],
