@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/presentation/screens/order_tracking_page.dart';
 import 'package:intl/intl.dart';
 
 class PaymentOrderPage extends StatefulWidget {
@@ -365,10 +366,12 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
           ElevatedButton(
             onPressed: () {
               // TODO: Implementasi logika pembayaran
-              _showModernDialog(
+              _showPaymentSuccessDialog(
                   context: context,
-                  message: 'Memproses pembayaran...',
-                  type: SnackBarType.info);
+                  message: 'Your payment was successful!',
+                  type: SnackBarType.success,
+                  orderItems: widget.orderItems,
+                  finalTotal: _finalTotal);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
@@ -424,8 +427,57 @@ void _showModernDialog({
   );
 }
 
+// Dialog khusus untuk sukses pembayaran yang akan bernavigasi
+void _showPaymentSuccessDialog(
+    {required BuildContext context,
+    required String message,
+    required SnackBarType type,
+    required List<Map<String, dynamic>> orderItems,
+    required double finalTotal}) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Pengguna harus menekan tombol
+    builder: (BuildContext dialogContext) {
+      // Konten dialog diambil dari _buildDialogContent, tapi dengan aksi navigasi
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: _buildDialogContent(
+          dialogContext,
+          message,
+          type,
+          onOkPressed: () {
+            // 1. Tutup dialog
+            Navigator.of(dialogContext).pop();
+
+            // 2. Buat Order ID unik
+            final orderId = 'GLU-${DateTime.now().millisecondsSinceEpoch}';
+
+            // 3. Navigasi ke OrderTrackingPage dan hapus semua halaman sebelumnya
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => OrderTrackingPage(
+                  orderItems: orderItems,
+                  finalTotal: finalTotal,
+                  orderId: orderId,
+                ),
+              ),
+              (Route<dynamic> route) => route.isFirst, // Hapus sampai ke root (HomePage)
+            );
+          },
+        ),
+      );
+    },
+  );
+}
+
 // Widget untuk membangun konten dialog kustom
-Widget _buildDialogContent(BuildContext dialogContext, String message, SnackBarType type) {
+Widget _buildDialogContent(
+    BuildContext dialogContext, String message, SnackBarType type,
+    {VoidCallback? onOkPressed}) {
   Color iconBackgroundColor;
   IconData iconData;
   String title;
@@ -488,9 +540,7 @@ Widget _buildDialogContent(BuildContext dialogContext, String message, SnackBarT
             ),
             const SizedBox(height: 24.0),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(); // Tutup dialog
-              },
+              onPressed: onOkPressed ?? () => Navigator.of(dialogContext).pop(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(dialogContext).colorScheme.primary,
                 foregroundColor: Colors.white,
