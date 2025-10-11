@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app/theme/app_theme.dart';
-import 'features/presentation/screens/introduction/introduction_screen.dart';
-import 'features/presentation/screens/home_page.dart';
+import 'features/presentation/screens/splash_screen.dart';
 
 
 void main() {
@@ -17,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'GluPulse',
       theme: AppTheme.lightTheme,
-      home: const HomePage(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
