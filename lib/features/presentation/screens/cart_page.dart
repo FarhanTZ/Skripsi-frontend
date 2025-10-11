@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/presentation/screens/payment_order_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -332,7 +333,19 @@ class _CartPageState extends State<CartPage> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              // TODO: Implementasi logika checkout
+              // Ambil item yang dipilih
+              final selectedItems = _cartItems.where((item) => item['isSelected']).toList();
+
+              if (selectedItems.isNotEmpty) {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => PaymentOrderPage(
+                    orderItems: selectedItems,
+                    totalPrice: _totalPrice,
+                  ),
+                ));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih item terlebih dahulu untuk checkout.')));
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
