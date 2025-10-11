@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/presentation/screens/order_history_page.dart';
 import 'package:intl/intl.dart';
 
 class OrderTrackingPage extends StatefulWidget {
@@ -114,7 +115,15 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
           ),
           child: IconButton(
             icon: const Icon(Icons.close, color: Colors.black),
-            onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+            onPressed: () {
+              // Cek apakah halaman riwayat sudah ada di tumpukan navigasi
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop(); // Kembali ke halaman sebelumnya (OrderHistoryPage)
+              } else {
+                // Jika tidak, ganti halaman saat ini dengan OrderHistoryPage
+                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const OrderHistoryPage()));
+              }
+            },
           ),
         ),
       ),

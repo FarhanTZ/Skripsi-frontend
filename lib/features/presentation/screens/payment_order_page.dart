@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/presentation/screens/order_tracking_page.dart';
 import 'package:intl/intl.dart';
+import 'package:glupulse/features/presentation/screens/order_history_page.dart';
 
 class PaymentOrderPage extends StatefulWidget {
   final List<Map<String, dynamic>> orderItems;
@@ -456,17 +457,22 @@ void _showPaymentSuccessDialog(
             // 2. Buat Order ID unik
             final orderId = 'GLU-${DateTime.now().millisecondsSinceEpoch}';
 
-            // 3. Navigasi ke OrderTrackingPage dan hapus semua halaman sebelumnya
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (context) => OrderTrackingPage(
-                  orderItems: orderItems,
-                  finalTotal: finalTotal,
-                  orderId: orderId,
-                ),
-              ),
-              (Route<dynamic> route) => route.isFirst, // Hapus sampai ke root (HomePage)
+            // 3. Hapus semua halaman sampai ke root (HomePage)
+            Navigator.of(context).popUntil((route) => route.isFirst);
+
+            // 4. Dorong halaman Riwayat Pesanan
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const OrderHistoryPage()),
             );
+
+            // 5. Dorong halaman Lacak Pesanan di atasnya
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => OrderTrackingPage(
+                orderItems: orderItems,
+                finalTotal: finalTotal,
+                orderId: orderId,
+              ),
+            ));
           },
         ),
       );

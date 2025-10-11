@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/presentation/screens/Food/food_detail_page.dart';
 
+import '../order_history_page.dart';
 class MenuTab extends StatelessWidget {
   const MenuTab({super.key});
 
@@ -59,12 +60,17 @@ class MenuTab extends StatelessWidget {
                             ),
                           ],
                         ),
-                        CircleAvatar(
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            Icons.notifications_outlined,
-                            color: Theme.of(context).colorScheme.primary,
-                            size: 24,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const OrderHistoryPage()));
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              Icons.receipt_long, // Mengganti ikon menjadi seperti kertas/nota
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ],
