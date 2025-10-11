@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
-import 'package:glupulse/features/presentation/screens/order_tracking_page.dart';
+import 'package:glupulse/features/presentation/screens/Food/order_tracking_page.dart';
 import 'package:intl/intl.dart';
-import 'package:glupulse/features/presentation/screens/order_history_page.dart';
+import 'package:glupulse/features/presentation/screens/Food/order_history_page.dart';
+import 'package:glupulse/features/presentation/screens/address_list_page.dart';
 
 class PaymentOrderPage extends StatefulWidget {
   final List<Map<String, dynamic>> orderItems;
@@ -22,6 +23,12 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
   String? _selectedPaymentMethod = 'Credit Card'; // Metode pembayaran default
   double _discountAmount = 0.0;
   String _appliedDiscountCode = '';
+
+  // State untuk alamat pengiriman
+  Map<String, String> _shippingAddress = {
+    'label': 'Home',
+    'address': 'Jl. Telekomunikasi No. 1, Bandung, Jawa Barat',
+  };
 
   // Data dummy untuk pilihan diskon
   final List<Map<String, dynamic>> _availableDiscounts = [
@@ -111,35 +118,51 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
   }
 
   Widget _buildAddressCard() {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            const Icon(Icons.location_on_outlined, color: AppTheme.inputLabelColor, size: 32),
-            const SizedBox(width: 16),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Home',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Jl. Telekomunikasi No. 1, Bandung, Jawa Barat',
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 18),
-          ],
+    return InkWell(
+      onTap: () async {
+        final selectedAddress = await Navigator.of(context).push<Map<String, String>>(
+          MaterialPageRoute(
+            builder: (context) => AddressListPage(currentAddress: _shippingAddress),
+          ),
+        );
+
+        if (selectedAddress != null) {
+          setState(() {
+            _shippingAddress = selectedAddress;
+          });
+        }
+      },
+      borderRadius: BorderRadius.circular(15),
+      child: Card(
+        elevation: 2,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              const Icon(Icons.location_on_outlined, color: AppTheme.inputLabelColor, size: 32),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _shippingAddress['label']!,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _shippingAddress['address']!,
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ), // Tutup Expanded
+              const SizedBox(width: 8),
+              Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 18),
+            ], // Tutup children Row
+          ), // Tutup Row
         ),
       ),
     );

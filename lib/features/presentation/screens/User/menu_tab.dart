@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/presentation/screens/Food/food_detail_page.dart';
+import 'package:glupulse/features/presentation/screens/address_list_page.dart';
 
-import '../order_history_page.dart';
-class MenuTab extends StatelessWidget {
+import '../Food/order_history_page.dart';
+
+class MenuTab extends StatefulWidget {
   const MenuTab({super.key});
 
+  @override
+  State<MenuTab> createState() => _MenuTabState();
+}
+
+class _MenuTabState extends State<MenuTab> {
   // Data untuk kategori
   final List<String> categories = const [
     'Main',
@@ -14,6 +21,12 @@ class MenuTab extends StatelessWidget {
     'Desert',
     'Drink'
   ];
+
+  // State untuk alamat yang sedang aktif
+  Map<String, String> _currentAddress = {
+    'label': 'Home',
+    'address': 'Jl. Telekomunikasi No. 1, Bandung',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -43,22 +56,38 @@ class MenuTab extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
-                          children: [
-                            Text(
-                              'Location',
-                              style: TextStyle(
-                                color: Colors.white70, // Grayish color (transparent white)
-                                fontSize: 16,
+                        GestureDetector(
+                          onTap: () async {
+                            final selectedAddress = await Navigator.of(context)
+                                .push<Map<String, String>>(
+                              MaterialPageRoute(
+                                builder: (context) => AddressListPage(
+                                    currentAddress: _currentAddress),
                               ),
-                            ),
-                            SizedBox(width: 8),
-                            Icon(
-                              Icons.edit,
-                              color: Colors.white70,
-                              size: 18,
-                            ),
-                          ],
+                            );
+                            if (selectedAddress != null) {
+                              setState(() {
+                                _currentAddress = selectedAddress;
+                              });
+                            }
+                          },
+                          child: const Row(
+                            children: [
+                              Text(
+                                'Location',
+                                style: TextStyle(
+                                  color: Colors.white70, // Grayish color (transparent white)
+                                  fontSize: 16,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(
+                                Icons.edit,
+                                color: Colors.white70,
+                                size: 18,
+                              ),
+                            ],
+                          ),
                         ),
                         GestureDetector(
                           onTap: () {
@@ -77,7 +106,7 @@ class MenuTab extends StatelessWidget {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Jl. Telekomunikasi No. 1, Bandung',
+                      _currentAddress['address']!,
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,

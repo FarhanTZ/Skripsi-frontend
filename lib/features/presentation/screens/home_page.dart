@@ -6,7 +6,7 @@ import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/presentation/screens/User/home_tab.dart';
 import 'package:glupulse/features/presentation/screens/User/menu_tab.dart';
 import 'package:glupulse/features/presentation/screens/User/profile_tab.dart';
-import 'package:glupulse/features/presentation/screens/cart_page.dart';
+import 'package:glupulse/features/presentation/screens/Food/cart_page.dart';
 
 
 class HomePage extends StatefulWidget {
