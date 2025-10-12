@@ -40,7 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             // Menambahkan gambar di sini
             Image.asset(
-              'images/Ellipse.png', // Path disesuaikan dengan pubspec.yaml
+              'assets/images/Ellipse.png', // Path disesuaikan dengan pubspec.yaml
               width: double.infinity,
               height: 220,
               fit: BoxFit.cover,
@@ -130,7 +130,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           borderRadius: BorderRadius.circular(15.0),
                         ),
                         child: Image.asset(
-                          'images/google_logo.png', // Pastikan Anda punya file ini
+                          'assets/images/google_logo.png', // Pastikan Anda punya file ini
                           height: 30,
                           width: 30,
                         ),

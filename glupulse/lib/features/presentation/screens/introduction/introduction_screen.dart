@@ -117,7 +117,7 @@ class _IntroductionScreenState extends State<IntroductionScreen> {
                       ),
                       const SizedBox(height: 40),
                       Image.asset(
-                        'images/Introduction_1.png',
+                        'assets/images/Introduction_1.png',
                         width: double.infinity,
                         fit: BoxFit.fitWidth,
                       ),
@@ -176,12 +176,12 @@ class _IntroductionScreenState extends State<IntroductionScreen> {
                     ],
                   ),
                   IntroPage(
-                    imageUrl: 'images/Introduction_2.png',
+                    imageUrl: 'assets/images/Introduction_2.png',
                     title: 'Personalize Your Health\nwith Smart AI',
                     description: 'Achieve your wellness goals with our AI-powered platform to your unique needs.',
                   ),
                   const IntroPage(
-                    imageUrl: 'images/Introduction_3.png',
+                    imageUrl: 'assets/images/Introduction_3.png',
                     title: 'Your Intelligent Fitness Companion.',
                     description: 'Track your calory & fitness nutrition with AI and get special recommendations.',
                   ),

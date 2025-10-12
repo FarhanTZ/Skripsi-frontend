@@ -211,7 +211,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                                 shape: BoxShape.circle,
                               ),
                               child: SvgPicture.asset(
-                                'images/shopping_cart.svg', // Menggunakan SVG
+                                'assets/images/shopping_cart.svg', // Menggunakan SVG
                                 colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                 width: 24,
                                 height: 24,

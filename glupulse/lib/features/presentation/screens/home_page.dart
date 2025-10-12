@@ -36,16 +36,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Agar efek lengkung CurvedNavigationBar terlihat, Scaffold dibuat transparan
-      // dan body dibungkus Container dengan warna.
-      backgroundColor: Colors.transparent,
+      // Atur warna background Scaffold. Warna ini akan muncul di lengkungan NavBar.
+      backgroundColor: const Color(0xFFF2F5F9),
       body: Container(
         // Menggunakan Stack untuk menempatkan Floating Action Button di atas konten
         child: Stack(
           children: [
             // Konten utama halaman (HomeTab, AnalyticTab, dll.)
             Container(
-              color: const Color(0xFFF2F5F9),
               child: _widgetOptions.elementAt(_selectedIndex),
             ),
             // Tombol keranjang belanja global
@@ -67,7 +65,7 @@ class _HomePageState extends State<HomePage> {
                       BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5)),
                     ],
                   ),
-                  child: SvgPicture.asset('images/shopping_cart.svg', colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn), width: 28, height: 28),
+                  child: SvgPicture.asset('assets/images/shopping_cart.svg', colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn), width: 28, height: 28),
                 ),
               ),
             ),
@@ -78,11 +76,11 @@ class _HomePageState extends State<HomePage> {
         index: _selectedIndex,
         height: 75.0,
         items: [
-          _buildNavItem(unselectedAsset: 'images/Home.svg', selectedAsset: 'images/Home_on.svg', index: 0, label: 'Home'),
-          _buildNavItem(unselectedAsset: 'images/Analytic.svg', selectedAsset: 'images/Analytic_on.svg', index: 1, label: 'Analytic'),
-          _buildNavItem(unselectedAsset: 'images/Menu.svg', selectedAsset: 'images/Menu_on.svg', index: 2, label: 'Menu'),
-          _buildNavItem(unselectedAsset: 'images/Profile.svg', selectedAsset: 'images/Profile_on.svg', index: 3, label: 'Profile'),
-        ], // Ganti dengan path ikon SVG Anda
+          _buildNavItem(unselectedAsset: 'assets/images/Home.svg', selectedAsset: 'assets/images/Home_On.svg', index: 0, label: 'Home'),
+          _buildNavItem(unselectedAsset: 'assets/images/Analytic.svg', selectedAsset: 'assets/images/analytic_On.svg', index: 1, label: 'Analytic'),
+          _buildNavItem(unselectedAsset: 'assets/images/Menu.svg', selectedAsset: 'assets/images/Menu_On.svg', index: 2, label: 'Menu'),
+          _buildNavItem(unselectedAsset: 'assets/images/Profile.svg', selectedAsset: 'assets/images/Profile_On.svg', index: 3, label: 'Profile'),
+        ],
         color: Theme.of(context).colorScheme.primary,
         buttonBackgroundColor: AppTheme.inputLabelColor,
         backgroundColor: Colors.transparent,

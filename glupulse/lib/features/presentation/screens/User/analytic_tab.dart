@@ -9,11 +9,15 @@ class AnalyticTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Container(
-            width: 430,
+    // Menggunakan ConstrainedBox untuk memastikan konten mengisi seluruh tinggi layar
+    // jika kontennya lebih pendek dari layar.
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+            width: double.infinity,
             height: 400,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
@@ -22,8 +26,7 @@ class AnalyticTab extends StatelessWidget {
                 bottomRight: Radius.circular(30),
               ),
             ),
-            child: Stack(
-              // Menggunakan Stack untuk menumpuk widget
+            child: Stack( // Menggunakan Stack untuk menumpuk widget
               children: [
                 Center(
                   child: Column(
@@ -98,95 +101,96 @@ class AnalyticTab extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Smart Health Metrix',
-                  style: textTheme.headlineSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                // --- Kartu Metrik ---
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildMetricCard(
-                        context: context,
-                        title: 'Blood Sugar',
-                        value: '110',
-                        unit: 'mg/dL',
-                        icon: Icons.water_drop_outlined,
-                        color: Colors.redAccent,
-                        status: 'Normal',
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const HealthMetricDetailPage(
-                              title: 'Blood Sugar',
-                              value: '110',
-                              unit: 'mg/dL',
-                              status: 'Normal',
-                              icon: Icons.water_drop_outlined,
-                              iconColor: Colors.redAccent,
-                            ),
-                          ));
-                        },
+           ),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Smart Health Metrix',
+                    style: textTheme.headlineSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  // --- Kartu Metrik ---
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildMetricCard(
+                          context: context,
+                          title: 'Blood Sugar',
+                          value: '110',
+                          unit: 'mg/dL',
+                          icon: Icons.water_drop_outlined,
+                          color: Colors.redAccent,
+                          status: 'Normal',
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const HealthMetricDetailPage(
+                                title: 'Blood Sugar',
+                                value: '110',
+                                unit: 'mg/dL',
+                                status: 'Normal',
+                                icon: Icons.water_drop_outlined,
+                                iconColor: Colors.redAccent,
+                              ),
+                            ));
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildMetricCard(
-                        context: context,
-                        title: 'Blood Pressure',
-                        value: '120/80',
-                        unit: 'mmHg',
-                        icon: Icons.favorite_border,
-                        color: Colors.blueAccent,
-                        status: 'Normal',
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const HealthMetricDetailPage(
-                              title: 'Blood Pressure',
-                              value: '120/80',
-                              unit: 'mmHg',
-                              status: 'Normal',
-                              icon: Icons.favorite_border,
-                              iconColor: Colors.blueAccent,
-                            ),
-                          ));
-                        },
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildMetricCard(
+                          context: context,
+                          title: 'Blood Pressure',
+                          value: '120/80',
+                          unit: 'mmHg',
+                          icon: Icons.favorite_border,
+                          color: Colors.blueAccent,
+                          status: 'Normal',
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const HealthMetricDetailPage(
+                                title: 'Blood Pressure',
+                                value: '120/80',
+                                unit: 'mmHg',
+                                status: 'Normal',
+                                icon: Icons.favorite_border,
+                                iconColor: Colors.blueAccent,
+                              ),
+                            ));
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                _buildCategoryCard(
-                  context: context,
-                  title: 'Category Blood Sugar',
-                  description:
-                      'Your blood sugar is in the normal range. Keep up the good work!',
-                  icon: Icons.water_drop_outlined,
-                  color: Colors.redAccent,
-                ),
-                const SizedBox(height: 12),
-                _buildCategoryCard(
-                  context: context,
-                  title: 'Category Blood Pressure',
-                  description:
-                      'Your blood pressure is slightly high. Consider consulting a doctor.',
-                  icon: Icons.favorite_border,
-                  color: Colors.blueAccent,
-                ),
-                const SizedBox(height: 24),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildCategoryCard(
+                    context: context,
+                    title: 'Category Blood Sugar',
+                    description:
+                        'Your blood sugar is in the normal range. Keep up the good work!',
+                    icon: Icons.water_drop_outlined,
+                    color: Colors.redAccent,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildCategoryCard(
+                    context: context,
+                    title: 'Category Blood Pressure',
+                    description:
+                        'Your blood pressure is slightly high. Consider consulting a doctor.',
+                    icon: Icons.favorite_border,
+                    color: Colors.blueAccent,
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

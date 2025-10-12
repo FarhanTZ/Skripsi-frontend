@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             // Menambahkan gambar di sini
             Image.asset(
-              'images/Ellipse.png', // Path diperbarui sesuai permintaan
+              'assets/images/Ellipse.png', // Path diperbarui sesuai permintaan
               width: double.infinity, // Membuat gambar mengisi lebar penuh
               height: 220, // Anda bisa sesuaikan tingginya
               fit: BoxFit.cover, // Memastikan gambar mengisi area tanpa distorsi
@@ -165,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(15.0),
                         ),
                         child: Image.asset(
-                          'images/google_logo.png', // Pastikan Anda punya file ini
+                          'assets/images/google_logo.png', // Pastikan Anda punya file ini
                           height: 30,
                           width: 30,
                         ),

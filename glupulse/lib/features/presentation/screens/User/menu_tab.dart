@@ -39,7 +39,7 @@ class _MenuTabState extends State<MenuTab> {
         Column(
           children: [
             Container(
-              width: 446,
+              width: double.infinity,
               height: 320, // Mengurangi tinggi container biru
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,

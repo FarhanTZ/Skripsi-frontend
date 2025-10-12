@@ -15,7 +15,7 @@ class HomeTab extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 430,
+            width: double.infinity,
             // Tinggi diatur otomatis oleh children
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
@@ -39,7 +39,7 @@ class HomeTab extends StatelessWidget {
                           Row(
                             children: [
                               SvgPicture.asset(
-                                'images/celender.svg', // Pastikan path ini benar
+                                'assets/images/celender.svg', // Pastikan path ini benar
                                 colorFilter: const ColorFilter.mode(
                                     Colors.white, BlendMode.srcIn),
                                 width: 20,
@@ -78,18 +78,18 @@ class HomeTab extends StatelessWidget {
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
-                                      SvgPicture.asset(
-                                        'images/hearttick.svg', // Path ke ikon baru
+                                      SvgPicture.asset('assets/images/hearttick.svg', // Path ke ikon baru
                                         colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                         width: 18,
                                       ),
                                       const SizedBox(width: 6),
                                       const Text('85%', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
                                       const SizedBox(width: 8),
-                                      const Text('•', style: TextStyle(color: Colors.white, fontSize: 16)),
+                                      const Text('•',
+                                          style: TextStyle(
+                                              color: Colors.white, fontSize: 16)),
                                       const SizedBox(width: 6),
-                                      SvgPicture.asset(
-                                        'images/member.svg', // Pastikan path ini benar
+                                      SvgPicture.asset('assets/images/member.svg', // Pastikan path ini benar
                                         colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                         width: 18,
                                       ),
