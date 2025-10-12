@@ -24,10 +24,20 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> register(
       {required String username,
       required String email,
-      required String password}) async {
+      required String password,
+      required String firstName,
+      required String lastName,
+      required String dob,
+      required String gender}) async {
     try {
       await remoteDataSource.register(
-          username: username, email: email, password: password);
+          username: username,
+          email: email,
+          password: password,
+          firstName: firstName,
+          lastName: lastName,
+          dob: dob,
+          gender: gender);
     } on ServerException catch (e) {
       throw ServerFailure(e.message);
     } catch (e) {

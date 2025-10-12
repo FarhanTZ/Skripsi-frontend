@@ -10,15 +10,30 @@ class RegisterUseCase {
       username: params.username,
       email: params.email,
       password: params.password,
+      firstName: params.firstName,
+      lastName: params.lastName,
+      dob: params.dob,
+      gender: params.gender,
     );
   }
 }
 
 class RegisterParams {
+  final String firstName;
+  final String lastName;
   final String username;
   final String email;
   final String password;
+  final String dob;
+  final String gender;
 
-  RegisterParams(
-      {required this.username, required this.email, required this.password});
+  RegisterParams({
+    required this.firstName,
+    required this.lastName,
+    required this.username,
+    required this.email,
+    required this.password,
+    required this.dob,
+    required this.gender,
+  });
 }

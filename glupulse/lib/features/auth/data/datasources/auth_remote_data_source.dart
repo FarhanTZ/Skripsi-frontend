@@ -6,9 +6,13 @@ import 'package:http/http.dart' as http;
 abstract class AuthRemoteDataSource {
   Future<AuthResponseModel> login(String username, String password);
   Future<void> register(
-      {required String username,
+      {required String firstName,
+      required String lastName,
+      required String username,
       required String email,
-      required String password});
+      required String password,
+      required String dob,
+      required String gender});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -47,7 +51,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> register(
       {required String username,
       required String email,
-      required String password}) async {
+      required String password,
+      required String firstName,
+      required String lastName,
+      required String dob,
+      required String gender}) async {
     final url = Uri.parse('$_baseUrl/signup');
     final response = await client.post(
       url,
@@ -57,9 +65,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'X-Platform': 'mobile',
       },
       body: jsonEncode({
+        'first_name': firstName,
+        'last_name': lastName,
         'username': username,
         'email': email,
         'password': password,
+        'dob': dob,
+        'gender': gender,
       }),
     );
 
