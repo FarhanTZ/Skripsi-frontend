@@ -103,77 +103,81 @@ class _IntroductionScreenState extends State<IntroductionScreen> {
                 },
                 children: [
                   // Slide pertama dengan layout khusus
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start, // Mulai dari atas
-                    children: [
-                      const SizedBox(height: 20), // Beri jarak dari kontrol di atas
-                      Text(
-                        'Welcome to\nGlupulse App',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      Image.asset(
-                        'assets/images/Introduction_1.png',
-                        width: double.infinity,
-                        fit: BoxFit.fitWidth,
-                      ),
-                      const SizedBox(height: 40),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Text(
-                            'Explore the amazing features of our app to monitor your health.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: AppTheme.inputLabelColor)),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeIn,
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0),
+                  // Dibungkus dengan SingleChildScrollView agar tidak overflow
+                  SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start, // Mulai dari atas
+                      children: [
+                        const SizedBox(height: 20), // Beri jarak dari kontrol di atas
+                        Text(
+                          'Welcome to\nGlupulse App',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: const Text('Get Started', style: TextStyle(fontSize: 16)),
-                      ),
-                      const SizedBox(height: 40),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Already have an account? ",
-                            style: TextStyle(color: AppTheme.inputLabelColor),
-                          ),
-                          TextButton(
-                            onPressed: _navigateToHome,
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        const SizedBox(height: 40),
+                        Image.asset(
+                          'assets/images/Introduction_1.png',
+                          width: double.infinity,
+                          fit: BoxFit.fitWidth,
+                        ),
+                        const SizedBox(height: 40),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24.0),
+                          child: Text(
+                              'Explore the amazing features of our app to monitor your health.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: AppTheme.inputLabelColor)),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeIn,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
                             ),
-                            child: const Text(
-                              'Sign In',
-                              style: TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: Colors.red),
-                            ),
                           ),
-                        ],
-                      ),
-                    ],
+                          child: const Text('Get Started', style: TextStyle(fontSize: 16)),
+                        ),
+                        const SizedBox(height: 40),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Already have an account? ",
+                              style: TextStyle(color: AppTheme.inputLabelColor),
+                            ),
+                            TextButton(
+                              onPressed: _navigateToHome,
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                'Sign In',
+                                style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20), // Beri padding bawah
+                      ],
+                    ),
                   ),
                   IntroPage(
                     imageUrl: 'assets/images/Introduction_2.png',
@@ -210,43 +214,47 @@ class IntroPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              // Teks judul
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
+    // Dibungkus SingleChildScrollView agar fleksibel di berbagai ukuran layar
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                // Teks judul
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.left,
                 ),
-                textAlign: TextAlign.left,
-              ),
 
-              // Deskripsi (jika ada)
-              if (description.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text(description,
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(color: AppTheme.inputLabelColor)),
+                // Deskripsi (jika ada)
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(description,
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(color: AppTheme.inputLabelColor)),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-        const Spacer(), // Mendorong gambar ke bawah
-        // Gambar di tengah
-        Image.asset(
-          imageUrl,
-          width: double.infinity,
-          fit: BoxFit.fitWidth,
-        ),
-      ],
+          const SizedBox(height: 40), // Memberi jarak antara teks dan gambar
+          // Gambar di tengah
+          Image.asset(
+            imageUrl,
+            width: double.infinity,
+            fit: BoxFit.fitWidth,
+          ),
+          const SizedBox(height: 20), // Padding bawah
+        ],
+      ),
     );
   }
 }
