@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app/theme/app_theme.dart';
-import 'features/presentation/screens/splash_screen.dart';
+import 'splash_screen.dart';
 
 
 void main() {
