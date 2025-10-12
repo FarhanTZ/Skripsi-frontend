@@ -31,7 +31,8 @@
             </ul>
         </div>
 
-        <a href="#" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center whitespace-nowrap">
+        {{-- Arahkan ke route untuk membuat menu baru --}}
+        <a href="{{ route('seller.menu.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center whitespace-nowrap">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
             Tambah Menu
         </a>
@@ -89,11 +90,73 @@
                         </span>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                        <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a>
+                        {{-- Arahkan ke route edit dengan parameter ID menu (contoh: 1) --}}
+                        <a href="{{ route('seller.menu.edit', ['id' => 1]) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a>
                         <a href="#" class="text-red-600 hover:text-red-900">Hapus</a>
                     </td>
                 </tr>
-                <!-- Tambahkan item menu lainnya di sini -->
+                <!-- Contoh Item 2 -->
+                <tr>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 w-16 h-16">
+                                <img class="w-full h-full rounded-md object-cover" src="https://via.placeholder.com/150" alt="Es Teh" />
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-900 whitespace-no-wrap font-semibold">
+                                    Es Teh Manis
+                                </p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">Minuman</p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">Rp 8.000</p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <span class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
+                            <span aria-hidden class="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
+                            <span class="relative">Tersedia</span>
+                        </span>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                        <a href="{{ route('seller.menu.edit', ['id' => 2]) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a>
+                        <a href="#" class="text-red-600 hover:text-red-900">Hapus</a>
+                    </td>
+                </tr>
+                <!-- Contoh Item 3 -->
+                <tr>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 w-16 h-16">
+                                <img class="w-full h-full rounded-md object-cover" src="https://via.placeholder.com/150" alt="Kentang Goreng" />
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-900 whitespace-no-wrap font-semibold">
+                                    Kentang Goreng
+                                </p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">Camilan</p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">Rp 15.000</p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <span class="relative inline-block px-3 py-1 font-semibold text-red-900 leading-tight">
+                            <span aria-hidden class="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
+                            <span class="relative">Habis</span>
+                        </span>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                        <a href="{{ route('seller.menu.edit', ['id' => 3]) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a>
+                        <a href="#" class="text-red-600 hover:text-red-900">Hapus</a>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
