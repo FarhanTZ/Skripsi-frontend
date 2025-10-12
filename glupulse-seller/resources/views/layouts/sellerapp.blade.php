@@ -12,7 +12,7 @@
     {{-- Memuat Flowbite JS untuk komponen interaktif seperti Tab --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-white">
     {{-- 2. Pindahkan state Alpine ke pembungkus utama --}}
     {{-- Gunakan $persist untuk menyimpan state 'isLocked' di localStorage --}}
     <div class="flex" x-data="{ isLocked: $persist(false), isHovering: false }">
@@ -22,7 +22,7 @@
         {{-- 3. Wrapper untuk Konten Utama yang akan bergeser --}}
         <div class="flex-grow flex flex-col transition-all duration-300 ease-in-out" :style="(isLocked || isHovering) ? 'margin-left: 250px' : 'margin-left: 72px'">
             {{-- Main Content --}}
-            <main class="flex-grow p-6 bg-white">
+            <main class="flex-grow p-6">
                 @yield('content')
             </main>
         </div>
