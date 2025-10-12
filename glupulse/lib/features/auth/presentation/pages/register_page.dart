@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/core/error/failures.dart';
+import 'package:glupulse/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:glupulse/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
+import 'package:http/http.dart' as http;
 
+import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -14,6 +20,19 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _isLoading = false;
+  late final RegisterUseCase _registerUseCase;
+
+  @override
+  void initState() {
+    super.initState();
+    // Dependency Injection sederhana
+    final client = http.Client();
+    final remoteDataSource = AuthRemoteDataSourceImpl(client: client);
+    final repository = AuthRepositoryImpl(remoteDataSource: remoteDataSource);
+    _registerUseCase = RegisterUseCase(repository);
+  }
+
 
   @override
   void dispose() {
@@ -24,10 +43,59 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  void _register() {
-    // TODO: Implement registration logic here
-    // For now, just pop back to the login page
-    Navigator.of(context).pop();
+  Future<void> _register() async {
+    if (_isLoading) return;
+
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Semua field harus diisi!')),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password dan konfirmasi password tidak cocok!')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _registerUseCase.execute(
+        RegisterParams(username: username, email: email, password: password),
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registrasi berhasil! Silakan login.')),
+        );
+        // Kembali ke halaman login setelah registrasi sukses
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false);
+      }
+    } on ServerFailure catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Registrasi Gagal: ${e.message}')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -94,9 +162,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         elevation: 5,
                       ),
-                      child: const Text('Sign Up',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: _isLoading
+                          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                          : const Text('Sign Up',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 20),
