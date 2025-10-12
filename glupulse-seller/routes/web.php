@@ -12,6 +12,12 @@ Route::prefix('seller')->group(function () {
     Route::view('/menu/create', 'seller.menu-create')->name('seller.menu.create');
     // Route untuk menampilkan halaman edit menu. {id} adalah placeholder untuk ID menu.
     Route::view('/menu/{id}/edit', 'seller.menu-edit')->name('seller.menu.edit');
+    // Route untuk menghandle proses update data menu.
+    // Ini tidak menampilkan view, tapi akan menghandle logic (nantinya).
+    // Untuk sekarang, kita arahkan kembali ke halaman menu.
+    Route::put('/menu/{id}', function () {
+        return redirect()->route('seller.menu');
+    })->name('seller.menu.update');
     Route::view('/orders', 'seller.orders')->name('seller.orders');
     Route::view('/finance', 'seller.finance')->name('seller.finance');
     Route::view('/settings', 'seller.settings')->name('seller.settings');
