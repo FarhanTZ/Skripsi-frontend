@@ -18,6 +18,21 @@ Route::prefix('seller')->group(function () {
     Route::put('/menu/{id}', function () {
         return redirect()->route('seller.menu');
     })->name('seller.menu.update');
+
+    // Routes untuk Promosi
+    Route::view('/promotions', 'seller.promotion')->name('seller.promotion.index');
+    Route::view('/promotions/create', 'seller.promotion-create')->name('seller.promotion.create');
+    Route::post('/promotions', function () {
+        return redirect()->route('seller.promotion.index');
+    })->name('seller.promotion.store');
+    Route::view('/promotions/{id}/edit', 'seller.promotion-edit')->name('seller.promotion.edit');
+    Route::put('/promotions/{id}', function () {
+        return redirect()->route('seller.promotion.index');
+    })->name('seller.promotion.update');
+    Route::delete('/promotions/{id}', function () {
+        return redirect()->route('seller.promotion.index');
+    })->name('seller.promotion.destroy');
+
     Route::view('/orders', 'seller.orders')->name('seller.orders');
     Route::view('/finance', 'seller.finance')->name('seller.finance');
     Route::view('/settings', 'seller.settings')->name('seller.settings');
