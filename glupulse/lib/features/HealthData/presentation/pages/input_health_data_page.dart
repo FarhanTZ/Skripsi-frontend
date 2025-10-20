@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'dart:math';
 
 class InputHealthDataPage extends StatefulWidget {
   const InputHealthDataPage({super.key});
@@ -9,24 +10,53 @@ class InputHealthDataPage extends StatefulWidget {
 }
 
 class _InputHealthDataPageState extends State<InputHealthDataPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  // Controller
   final _bloodSugarController = TextEditingController();
   final _systolicController = TextEditingController();
   final _diastolicController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final _weightController = TextEditingController();
+  final _heightController = TextEditingController();
+  final _bmiController = TextEditingController();
+  final _heartRateController = TextEditingController();
+  final _notesController = TextEditingController();
+
   bool _isSmoker = false;
   bool _hasHeartDiseaseHistory = false;
 
   @override
+  void dispose() {
+    _bloodSugarController.dispose();
+    _systolicController.dispose();
+    _diastolicController.dispose();
+    _weightController.dispose();
+    _heightController.dispose();
+    _bmiController.dispose();
+    _heartRateController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  // Fungsi untuk menghitung BMI
+  void _calculateBMI() {
+    final weight = double.tryParse(_weightController.text);
+    final height = double.tryParse(_heightController.text);
+
+    if (weight != null && height != null && height > 0) {
+      final bmi = weight / pow(height / 100, 2); // tinggi dalam cm
+      _bmiController.text = bmi.toStringAsFixed(2);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Mengubah warna background agar konsisten
       backgroundColor: const Color(0xFFF2F5F9),
       appBar: AppBar(
-        toolbarHeight: 80, // Menambah tinggi AppBar
+        toolbarHeight: 80,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(30), // Membuat lengkungan di bawah
-          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
         ),
         title: const Text(
           'Input Health Data',
@@ -37,7 +67,7 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
           ),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
-        iconTheme: const IconThemeData(color: Colors.white), // Warna ikon kembali
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         child: Form(
@@ -48,14 +78,39 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 16),
-                _buildSectionTitle('Gula Darah (mg/dL)'),
+                _buildSectionTitle('Berat & Tinggi Badan'),
                 const SizedBox(height: 8),
-                _buildTextField(
-                  controller: _bloodSugarController,
-                  hintText: 'Contoh: 110',
-                  icon: Icons.water_drop_outlined,
-                  keyboardType: TextInputType.number,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        controller: _weightController,
+                        hintText: 'Berat (kg)',
+                        icon: Icons.monitor_weight_outlined,
+                        keyboardType: TextInputType.number,
+                        onChanged: (_) => _calculateBMI(),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildTextField(
+                        controller: _heightController,
+                        hintText: 'Tinggi (cm)',
+                        icon: Icons.height_outlined,
+                        keyboardType: TextInputType.number,
+                        onChanged: (_) => _calculateBMI(),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _bmiController,
+                  hintText: 'BMI otomatis terhitung',
+                  icon: Icons.calculate_outlined,
+                  readOnly: true,
+                ),
+
                 const SizedBox(height: 24),
                 _buildSectionTitle('Tekanan Darah (mmHg)'),
                 const SizedBox(height: 8),
@@ -64,7 +119,7 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
                     Expanded(
                       child: _buildTextField(
                         controller: _systolicController,
-                        hintText: 'Sistolik (Contoh: 120)',
+                        hintText: 'Sistolik (contoh: 120)',
                         icon: Icons.favorite_border,
                         keyboardType: TextInputType.number,
                       ),
@@ -73,18 +128,50 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
                     Expanded(
                       child: _buildTextField(
                         controller: _diastolicController,
-                        hintText: 'Diastolik (Contoh: 80)',
+                        hintText: 'Diastolik (contoh: 80)',
                         icon: Icons.favorite_border,
                         keyboardType: TextInputType.number,
                       ),
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 24),
+                _buildSectionTitle('Gula Darah (mg/dL)'),
+                const SizedBox(height: 8),
+                _buildTextField(
+                  controller: _bloodSugarController,
+                  hintText: 'Contoh: 110',
+                  icon: Icons.water_drop_outlined,
+                  keyboardType: TextInputType.number,
+                ),
+
+                const SizedBox(height: 24),
+                _buildSectionTitle('Detak Jantung (BPM)'),
+                const SizedBox(height: 8),
+                _buildTextField(
+                  controller: _heartRateController,
+                  hintText: 'Contoh: 72',
+                  icon: Icons.monitor_heart_outlined,
+                  keyboardType: TextInputType.number,
+                ),
+
+                const SizedBox(height: 24),
+                _buildSectionTitle('Catatan Tambahan'),
+                const SizedBox(height: 8),
+                _buildTextField(
+                  controller: _notesController,
+                  hintText: 'Tambahkan catatan (opsional)',
+                  icon: Icons.note_alt_outlined,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 3,
+                ),
+
                 const SizedBox(height: 24),
                 _buildSectionTitle('Informasi Tambahan'),
                 const SizedBox(height: 8),
                 _buildCheckboxTile(
-                  title: 'Are you a smoker?',
+                  title: 'Apakah Anda perokok?',
                   value: _isSmoker,
                   onChanged: (value) {
                     setState(() {
@@ -94,7 +181,7 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
                 ),
                 const SizedBox(height: 12),
                 _buildCheckboxTile(
-                  title: 'Do you have a history of heart disease?',
+                  title: 'Apakah ada riwayat penyakit jantung?',
                   value: _hasHeartDiseaseHistory,
                   onChanged: (value) {
                     setState(() {
@@ -102,7 +189,7 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
                     });
                   },
                 ),
-                const SizedBox(height: 16), // Memberi jarak di akhir list sebelum tombol
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -110,58 +197,50 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: SafeArea( // Memastikan tombol tidak terlalu ke bawah pada perangkat dengan notch
+        child: SafeArea(
           child: ElevatedButton(
-          onPressed: () {
-            // TODO: Implementasi logika penyimpanan data
-            if (_formKey.currentState!.validate()) {
-              // Menampilkan pop-up dialog
-              showDialog(
-                context: context,
-                builder: (BuildContext dialogContext) {
-                  // Menggunakan Dialog kustom untuk tampilan yang lebih modern
-                  return Dialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    elevation: 0,
-                    backgroundColor: Colors.transparent,
-                    child: _buildSuccessDialog(dialogContext),
-                  );
-                },
-              );
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 55),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0),
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) {
+                    return Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      backgroundColor: Colors.transparent,
+                      child: _buildSuccessDialog(dialogContext),
+                    );
+                  },
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 55),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              elevation: 5,
             ),
-            elevation: 5,
-          ),
-          child: const Text('Simpan Data',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Simpan Data',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
       ),
     );
   }
 
-  // Widget untuk membangun konten dialog kustom
+  // Dialog sukses
   Widget _buildSuccessDialog(BuildContext dialogContext) {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
-        // Konten utama dialog
         Container(
-          padding: const EdgeInsets.only(
-            left: 20,
-            top: 65, // Memberi ruang untuk ikon di atas
-            right: 20,
-            bottom: 20,
-          ),
+          padding: const EdgeInsets.only(left: 20, top: 65, right: 20, bottom: 20),
           margin: const EdgeInsets.only(top: 45),
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
@@ -169,13 +248,14 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: const [
               BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10.0,
-                  offset: Offset(0.0, 10.0)),
+                color: Colors.black26,
+                blurRadius: 10.0,
+                offset: Offset(0.0, 10.0),
+              ),
             ],
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min, // Membuat dialog menjadi sepadat kontennya
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               const Text(
                 'Success!',
@@ -190,8 +270,23 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
               const SizedBox(height: 24.0),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(dialogContext).pop(); // Tutup dialog
-                  Navigator.of(context).pop(); // Kembali ke halaman sebelumnya
+                  // TODO: Implementasi logika untuk menyimpan data ke backend
+
+                  // Buat objek atau map untuk menampung data yang akan dikembalikan
+                  final healthData = {
+                    'bloodSugar': _bloodSugarController.text,
+                    'systolic': _systolicController.text,
+                    'diastolic': _diastolicController.text,
+                    'weight': _weightController.text,
+                    'height': _heightController.text,
+                    'bmi': _bmiController.text,
+                    'heartRate': _heartRateController.text,
+                  };
+
+                  // Tutup dialog sukses
+                  Navigator.of(dialogContext).pop();
+                  // Kembali ke halaman sebelumnya dan kirim data
+                  Navigator.of(context).pop(healthData);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
@@ -204,12 +299,11 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
             ],
           ),
         ),
-        // Ikon centang di atas dialog
         const Positioned(
           left: 20,
           right: 20,
           child: CircleAvatar(
-            backgroundColor: Color(0xFF4CAF50), // Warna hijau untuk sukses
+            backgroundColor: Color(0xFF4CAF50),
             radius: 45,
             child: Icon(Icons.check, color: Colors.white, size: 50),
           ),
@@ -234,10 +328,16 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
     required String hintText,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
+    bool readOnly = false,
+    int maxLines = 1,
+    void Function(String)? onChanged,
   }) {
     return TextFormField(
       controller: controller,
+      readOnly: readOnly,
+      onChanged: onChanged,
       keyboardType: keyboardType,
+      maxLines: maxLines,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: const TextStyle(color: AppTheme.inputLabelColor),
@@ -254,7 +354,8 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15.0),
-          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+          borderSide:
+              BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
         ),
       ),
     );
@@ -266,7 +367,6 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
     required ValueChanged<bool?> onChanged,
   }) {
     return InkWell(
-      // Membuat seluruh baris dapat di-tap
       onTap: () {
         onChanged(!value);
       },
@@ -279,13 +379,15 @@ class _InputHealthDataPageState extends State<InputHealthDataPage> {
               value: value,
               onChanged: onChanged,
               activeColor: Theme.of(context).colorScheme.primary,
-              shape: const CircleBorder(), // Membuat checkbox berbentuk lingkaran
+              shape: const CircleBorder(),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(title,
-                  style: const TextStyle(
-                      color: Colors.black87, fontWeight: FontWeight.w500)),
+              child: Text(
+                title,
+                style: const TextStyle(
+                    color: Colors.black87, fontWeight: FontWeight.w500),
+              ),
             ),
           ],
         ),
