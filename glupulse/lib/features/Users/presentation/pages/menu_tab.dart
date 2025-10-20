@@ -177,7 +177,7 @@ class _MenuTabState extends State<MenuTab> {
                   'Recommendation Food',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
               ),
@@ -191,24 +191,24 @@ class _MenuTabState extends State<MenuTab> {
                 children: [
                   _buildRecommendationCard(
                     context: context,
-                    title: 'Oatmeal',
-                    description: 'Good for breakfast',
+                    title: 'Oatmeal Sehat',
+                    price: 'Rp 25.000',
                     icon: Icons.breakfast_dining_outlined,
                     color: Colors.brown,
                   ),
                   const SizedBox(width: 12),
                   _buildRecommendationCard(
                     context: context,
-                    title: 'Salmon',
-                    description: 'Rich in Omega-3',
+                    title: 'Salmon Panggang',
+                    price: 'Rp 75.000',
                     icon: Icons.set_meal_outlined,
                     color: Colors.pink,
                   ),
                   const SizedBox(width: 12),
                   _buildRecommendationCard(
                     context: context,
-                    title: 'Avocado',
-                    description: 'Healthy fats',
+                    title: 'Salad Sayur',
+                    price: 'Rp 35.000',
                     icon: Icons.spa_outlined,
                     color: Colors.green,
                   ),
@@ -225,7 +225,7 @@ class _MenuTabState extends State<MenuTab> {
                   'Food Menu',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
               ),
@@ -239,24 +239,24 @@ class _MenuTabState extends State<MenuTab> {
                 children: [
                   _buildRecommendationCard(
                     context: context,
-                    title: 'Oatmeal',
-                    description: 'Good for breakfast',
+                    title: 'Nasi Goreng Merah',
+                    price: 'Rp 30.000',
                     icon: Icons.breakfast_dining_outlined,
                     color: Colors.brown,
                   ),
                   const SizedBox(width: 12),
                   _buildRecommendationCard(
                     context: context,
-                    title: 'Salmon',
-                    description: 'Rich in Omega-3',
+                    title: 'Ayam Bakar Madu',
+                    price: 'Rp 45.000',
                     icon: Icons.set_meal_outlined,
                     color: Colors.pink,
                   ),
                   const SizedBox(width: 12),
                   _buildRecommendationCard(
                     context: context,
-                    title: 'Avocado',
-                    description: 'Healthy fats',
+                    title: 'Gado-gado Spesial',
+                    price: 'Rp 28.000',
                     icon: Icons.spa_outlined,
                     color: Colors.green,
                   ),
@@ -274,7 +274,7 @@ class _MenuTabState extends State<MenuTab> {
                   'Drink Menu',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
               ),
@@ -288,24 +288,24 @@ class _MenuTabState extends State<MenuTab> {
                 children: [
                   _buildRecommendationCard(
                     context: context,
-                    title: 'Water',
-                    description: 'Stay hydrated',
+                    title: 'Air Mineral',
+                    price: 'Rp 5.000',
                     icon: Icons.water_drop,
                     color: Colors.blue,
                   ),
                   const SizedBox(width: 12),
                   _buildRecommendationCard(
                     context: context,
-                    title: 'Orange Juice',
-                    description: 'Rich in Vitamin C',
+                    title: 'Jus Jeruk',
+                    price: 'Rp 15.000',
                     icon: Icons.local_drink,
                     color: Colors.orange,
                   ),
                   const SizedBox(width: 12),
                   _buildRecommendationCard(
                     context: context,
-                    title: 'Green Smoothie',
-                    description: 'Full of nutrients',
+                    title: 'Smoothie Hijau',
+                    price: 'Rp 20.000',
                     icon: Icons.blender,
                     color: Colors.teal,
                   ),
@@ -412,16 +412,16 @@ class _MenuTabState extends State<MenuTab> {
   Widget _buildRecommendationCard({
     required BuildContext context,
     required String title,
-    required String description,
     required IconData icon,
     required Color color,
+    String? price, // Menambahkan parameter harga opsional
   }) {
     return SizedBox(
-      width: 160, // Matching width with other cards
+      width: 170, // Matching width with other cards
       child: Card(
         elevation: 1,
         color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
         clipBehavior: Clip.antiAlias, // Ensures InkWell ripple effect is clipped
         child: InkWell(
           onTap: () {
@@ -429,25 +429,43 @@ class _MenuTabState extends State<MenuTab> {
               builder: (context) => FoodDetailPage(foodName: title),
             ));
           },
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: color.withOpacity(0.15),
-                  child: Icon(icon, color: color, size: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Bagian Gambar/Ikon
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.15),
+                  ),
+                  child: Center(
+                    child: Icon(icon, color: color, size: 40),
+                  ),
                 ),
-                const Spacer(),
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              // Bagian Teks (Judul dan Harga/Deskripsi)
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      price ?? '', // Tampilkan harga jika ada, jika tidak tampilkan string kosong
+                      style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(description, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

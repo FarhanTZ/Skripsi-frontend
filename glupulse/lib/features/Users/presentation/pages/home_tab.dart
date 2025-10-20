@@ -154,7 +154,7 @@ class HomeTab extends StatelessWidget {
                 'Health Score',
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold),
               ),
             ),
@@ -174,8 +174,8 @@ class HomeTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: SizedBox(
-                width: 405,
-                height: 106,
+                width: 385,
+                height: 105,
                 child: Row(
                   children: [
                     Container(
@@ -186,7 +186,7 @@ class HomeTab extends StatelessWidget {
                           '85', // Contoh Skor
                           style: TextStyle(
                               color: Colors.white,
-                              fontSize: 36,
+                              fontSize: 48,
                               fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -225,7 +225,7 @@ class HomeTab extends StatelessWidget {
                 'Smart Health Metrix',
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold),
               ),
             ),
@@ -241,11 +241,18 @@ class HomeTab extends StatelessWidget {
                 _buildHealthMetricCard(
                   context: context,
                   category: 'Blood Sugar',
-                  icon: Icons.water_drop_outlined,
+                  iconWidget: SvgPicture.asset(
+                    'assets/images/Health.svg', // Menggunakan SVG asset
+                    colorFilter: const ColorFilter.mode(Colors.redAccent, BlendMode.srcIn),
+                    width: 24,
+                  ),
                   iconColor: Colors.redAccent,
                   value: '110',
                   unit: 'mg/dL',
                   status: 'After Meal',
+                  statusText: 'Normal', // Status baru
+                  statusColor: const Color(0xFF9CF0A6), // Warna BG Hijau
+                  statusTextColor: const Color(0xFF02A916), // Warna Teks Hijau
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const HealthMetricDetailPage(
@@ -264,11 +271,18 @@ class HomeTab extends StatelessWidget {
                 _buildHealthMetricCard(
                   context: context,
                   category: 'Blood Pressure',
-                  icon: Icons.favorite_border,
+                  iconWidget: SvgPicture.asset(
+                    'assets/images/Health.svg', // Menggunakan SVG asset
+                    colorFilter: const ColorFilter.mode(Colors.blueAccent, BlendMode.srcIn),
+                    width: 24,
+                  ),
                   iconColor: Colors.blueAccent,
                   value: '120/80',
                   unit: 'mmHg',
                   status: 'Normal',
+                  statusText: 'Normal', // Status baru
+                  statusColor: const Color(0xFF9CF0A6), // Warna BG Hijau
+                  statusTextColor: const Color(0xFF02A916), // Warna Teks Hijau
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const HealthMetricDetailPage(
@@ -290,6 +304,9 @@ class HomeTab extends StatelessWidget {
                   title: 'Low Blood Sugar',
                   description: 'Learn about hypoglycemia.',
                   icon: Icons.arrow_downward_rounded,
+                  statusText: 'Low',
+                  statusColor: const Color(0xFFFDFD66), // Warna BG Kuning
+                  statusTextColor: const Color(0xFFB7B726), // Warna Teks Kuning
                   color: Colors.orangeAccent,
                 ),
                 const SizedBox(width: 12),
@@ -300,6 +317,9 @@ class HomeTab extends StatelessWidget {
                   title: 'High Blood Pressure',
                   description: 'Learn about hypertension.',
                   icon: Icons.arrow_upward_rounded,
+                  statusText: 'Critical',
+                  statusColor: const Color(0xFFFA4D5E), // Warna BG Merah
+                  statusTextColor: const Color(0xFFBF070A), // Warna Teks Merah
                   color: Colors.purpleAccent,
                 ),
               ],
@@ -316,7 +336,7 @@ class HomeTab extends StatelessWidget {
                 'Recommendation Food',
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold),
               ),
             ),
@@ -332,8 +352,8 @@ class HomeTab extends StatelessWidget {
               children: [
                 _buildRecommendationCard(
                   context: context,
-                  title: 'Oatmeal',
-                  description: 'Good for breakfast',
+                  title: 'Oatmeal Sehat',
+                  price: 'Rp 25.000',
                   icon: Icons.breakfast_dining_outlined,
                   color: Colors.brown,
                 ),
@@ -341,16 +361,16 @@ class HomeTab extends StatelessWidget {
                 _buildRecommendationCard(
                   context: context,
                   title: 'Salmon',
-                  description: 'Rich in Omega-3',
-                  icon: Icons.set_meal_outlined,
+                  price: 'Rp 75.000',
+                  icon: Icons.set_meal_outlined,  
                   color: Colors.pink,
                 ),
                 const SizedBox(width: 12),
                 _buildRecommendationCard(
                   context: context,
-                  title: 'Avocado',
-                  description: 'Healthy fats',
-                  icon: Icons.spa_outlined,
+                  title: 'Salad Sayur',
+                  price: 'Rp 35.000',
+                  icon: Icons.spa_outlined, // Mungkin bisa diganti dengan Icons.restaurant
                   color: Colors.green,
                 ),
               ],
@@ -367,7 +387,7 @@ class HomeTab extends StatelessWidget {
                 'Recommendation Activity',
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold),
               ),
             ),
@@ -383,8 +403,8 @@ class HomeTab extends StatelessWidget {
               children: [
                 _buildRecommendationCard(
                   context: context,
-                  title: 'Walking',
-                  description: '30 minutes',
+                  title: 'Walking Class',
+                  price: 'Rp 50.000',
                   icon: Icons.directions_walk,
                   color: Colors.lightBlue,
                   onTap: () {
@@ -396,8 +416,8 @@ class HomeTab extends StatelessWidget {
                 const SizedBox(width: 12),
                 _buildRecommendationCard(
                   context: context,
-                  title: 'Yoga', // Mengganti title menjadi Yoga
-                  description: '15 minutes',
+                  title: 'Yoga Class',
+                  price: 'Rp 65.000',
                   icon: Icons.self_improvement,
                   color: Colors.purpleAccent,
                   onTap: () {
@@ -409,8 +429,8 @@ class HomeTab extends StatelessWidget {
                 const SizedBox(width: 12),
                 _buildRecommendationCard(
                   context: context,
-                  title: 'Cycling', // Mengganti title menjadi Cycling
-                  description: '20 minutes',
+                  title: 'Cycling Tour',
+                  price: 'Rp 80.000',
                   icon: Icons.directions_bike,
                   color: Colors.orange,
                   onTap: () {
@@ -431,16 +451,19 @@ class HomeTab extends StatelessWidget {
   // Widget helper untuk membuat card metrik agar kode tidak berulang
   Widget _buildHealthMetricCard({
     required BuildContext context,
-    required IconData icon,
+    required Widget iconWidget,
     required String category,
     required Color iconColor,
     required String value,
     required String unit,
     required String status,
+    String? statusText,
+    Color? statusColor,
+    Color? statusTextColor,
     required VoidCallback onTap,
   }) {
     return SizedBox(
-      width: 160, // Menyamakan lebar dengan card lain
+      width: 170, // Menyamakan lebar dengan card lain
       child: Card(
         elevation: 1,
         color: Colors.white,
@@ -456,8 +479,25 @@ class HomeTab extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(category.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: iconColor.withOpacity(0.8))),
-                    // Placeholder untuk menyamakan tinggi dengan card info
-                    const SizedBox(height: 22), 
+                    if (statusText != null && statusColor != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            statusText,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: statusTextColor ?? Colors.white,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ),
                     const Spacer(),
                     Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Theme.of(context).colorScheme.primary)),
                     Text('$unit - $status', style: const TextStyle(fontSize: 13, color: Colors.grey)),
@@ -467,7 +507,7 @@ class HomeTab extends StatelessWidget {
               Positioned(
                 top: 12,
                 right: 12,
-                child: Icon(icon, color: iconColor, size: 24),
+                child: iconWidget,
               ),
             ],
           ),
@@ -484,9 +524,12 @@ class HomeTab extends StatelessWidget {
     required String description,
     required IconData icon,
     required Color color,
+    String? statusText,
+    Color? statusColor,
+    Color? statusTextColor,
   }) {
     return SizedBox(
-      width: 160,
+      width: 170,
       child: Card(
         elevation: 1,
         color: Colors.white,
@@ -499,7 +542,27 @@ class HomeTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(category.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: color.withOpacity(0.8))),
-                  const SizedBox(height: 4),
+                  if (statusText != null && statusColor != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6.0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: statusColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          statusText,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: statusTextColor ?? Colors.white,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    const SizedBox(height: 4),
                   const Spacer(),
                   Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   const SizedBox(height: 4),
@@ -522,15 +585,16 @@ class HomeTab extends StatelessWidget {
   Widget _buildRecommendationCard({
     required BuildContext context,
     required String title,
-    required String description,
+    required String price,
     required IconData icon,
     required Color color,
     VoidCallback? onTap, // Menambahkan parameter onTap opsional
   }) {
     return SizedBox(
-      width: 160, // Menyamakan lebar dengan card lain
+      width: 170, // Menyamakan lebar dengan card lain
       child: Card(
         elevation: 1,
+        margin: EdgeInsets.zero, // Menghapus margin default Card untuk mencegah overflow
         color: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         clipBehavior: Clip.antiAlias, // Ensures InkWell ripple effect is clipped
@@ -540,25 +604,46 @@ class HomeTab extends StatelessWidget {
               builder: (context) => FoodDetailPage(foodName: title), // Default ke FoodDetailPage
             ));
           },
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: color.withOpacity(0.15),
-                  child: Icon(icon, color: color, size: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Bagian Gambar
+              SizedBox(
+                height: 100, // Memberikan tinggi tetap untuk area gambar
+                child:SizedBox.expand(child: Container(
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.15),
+                  ),
+                  child: Center(
+                    child: Icon(icon, color: color, size: 40),
+                  ),
                 ),
-                const Spacer(),
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              )),
+              // Bagian Teks (Judul dan Deskripsi)
+              SizedBox(
+                height: 91, // Tinggi tetap untuk area teks
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        maxLines: 2, // Batasi judul hingga 2 baris
+                        overflow: TextOverflow.ellipsis, // Tampilkan '...' jika lebih dari 2 baris
+                      ),
+                      const SizedBox(height: 4),
+                      Text(price, style: TextStyle(
+                        fontSize: 14, 
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold
+                      )),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 4),
-                Text(description, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
