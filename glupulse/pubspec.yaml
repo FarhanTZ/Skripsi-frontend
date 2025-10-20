@@ -45,6 +45,9 @@ dependencies:
   dio: ^5.9.0
   http: ^1.2.1
 
+  # Google Sign-In
+  google_sign_in: ^6.2.1
+
   # Routing
   go_router: ^14.8.1
 

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "590446937145",
+    "project_id": "auditenergy-da29c",
+    "storage_bucket": "auditenergy-da29c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:590446937145:android:ffb1aa6a6e96ce78e2b9e8",
+        "android_client_info": {
+          "package_name": "com.example.glupulse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "590446937145-hhugrr7j1evqpmb8jmsuc07vak5eeh8i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.glupulse",
+            "certificate_hash": "d199b9498458f4efaecee8ce95def8b0742dff50"
+          }
+        },
+        {
+          "client_id": "590446937145-rg6695lds91v760sd6qiedbu1djfhmv7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP70bsndFpWk3QythCIr2Q8Ge_dZezLzk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "590446937145-rg6695lds91v760sd6qiedbu1djfhmv7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

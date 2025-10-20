@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/auth/presentation/pages/login_page.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 
 class ProfileTab extends StatelessWidget {
@@ -57,7 +58,7 @@ class ProfileTab extends StatelessWidget {
                         textColor: Colors.red,
                         iconColor: Colors.red,
                         onTap: () {
-                          // TODO: Implement logout logic
+                          _showModernLogoutDialog(context);
                         },
                       ),
                     ],
@@ -66,6 +67,98 @@ class ProfileTab extends StatelessWidget {
                 const SizedBox(height: 24),
               ],
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showModernLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Pengguna harus memilih salah satu tombol
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: _buildLogoutDialogContent(dialogContext, context),
+        );
+      },
+    );
+  }
+
+  Widget _buildLogoutDialogContent(BuildContext dialogContext, BuildContext pageContext) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        // Konten utama dialog
+        Container(
+          padding: const EdgeInsets.only(
+            left: 20,
+            top: 65, // Memberi ruang untuk ikon di atas
+            right: 20,
+            bottom: 20,
+          ),
+          margin: const EdgeInsets.only(top: 45),
+          decoration: BoxDecoration(
+            shape: BoxShape.rectangle,
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: Offset(0.0, 10.0)),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const Text(
+                'Konfirmasi Logout',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16.0),
+              const Text(
+                'Apakah Anda yakin ingin keluar dari akun Anda?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16.0, color: Colors.black54),
+              ),
+              const SizedBox(height: 24.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: const Text('Batal', style: TextStyle(fontSize: 16)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop(); // Tutup dialog
+                      Navigator.of(pageContext).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        (Route<dynamic> route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('Logout', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        // Ikon peringatan di atas dialog
+        const Positioned(
+          left: 20,
+          right: 20,
+          child: CircleAvatar(
+            backgroundColor: Colors.orange,
+            radius: 45,
+            child: Icon(Icons.warning_amber_rounded, color: Colors.white, size: 50),
           ),
         ),
       ],

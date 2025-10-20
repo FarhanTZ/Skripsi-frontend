@@ -2,10 +2,16 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/core/error/failures.dart';
+import 'package:glupulse/core/error/exceptions.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:glupulse/home_page.dart';
 import 'package:glupulse/features/auth/presentation/pages/register_page.dart';
+import 'package:glupulse/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:glupulse/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -19,6 +25,19 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  late final AuthRemoteDataSource _authDataSource;
+  late final LoginUseCase _loginUseCase;
+
+  @override
+  void initState() {
+    super.initState();
+    // Dependency Injection sederhana. Dalam aplikasi nyata, gunakan GetIt atau Provider.
+    _authDataSource = AuthRemoteDataSourceImpl(client: http.Client());
+    final client = http.Client();
+    final remoteDataSource = AuthRemoteDataSourceImpl(client: client);
+    final repository = AuthRepositoryImpl(remoteDataSource: remoteDataSource);
+    _loginUseCase = LoginUseCase(repository);
+  }
 
   @override
   void dispose() {
@@ -47,63 +66,80 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final url = Uri.parse('https://noncereal-uncongenially-gloria.ngrok-free.dev/login');
-
-    // Buat client yang tidak mengikuti redirect secara otomatis
-    final client = http.Client();
-
     try {
-      final request = http.Request('POST', url)
-        ..headers['Content-Type'] = 'application/json'
-        ..headers['Accept'] = 'application/json' // Penting: Minta respons JSON
-        ..headers['X-Platform'] = 'mobile' // Header tambahan sesuai permintaan
-        ..body = jsonEncode({
-          'Username': username,
-          'Password': password,
-        });
+      // Memanggil use case
+      final authResponse = await _loginUseCase.execute(username, password);
 
-      final streamedResponse = await client.send(request);
-      final response = await http.Response.fromStream(streamedResponse);
-
-      // Cek jika status adalah 200 (OK)
-      if (response.statusCode == 200) {
-        // Jika login berhasil
-        // TODO: Simpan token jika ada
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        }
-      } else {
-        // Jika login gagal (termasuk 302, 401, 422, dll)
-        String errorMessage = 'Login Gagal: Username atau password salah.';
-        if (response.body.isNotEmpty) {
-          try {
-            final decodedBody = jsonDecode(response.body);
-            if (decodedBody is Map<String, dynamic> && decodedBody.containsKey('message')) {
-              errorMessage = 'Login Gagal: ${decodedBody['message']}';
-            }
-          } catch (e) {
-            // Abaikan jika body bukan JSON, gunakan pesan default
-          }
-        }
-
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-    } catch (e) {
-      // Error jaringan atau lainnya
+      // Jika sukses, authResponse akan berisi data. Jika gagal, akan melempar exception.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Terjadi kesalahan: $e')),
+            SnackBar(content: Text('Login berhasil! Halo, ${authResponse.user.username}')));
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       }
+    } on ServerFailure catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login Gagal: ${e.message}')));
+    } catch(e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+      }
     } finally {
-      client.close(); // Selalu tutup client
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Ganti 'YOUR_WEB_CLIENT_ID' dengan Client ID yang Anda salin dari Google Cloud Console
+      const String webClientId = '590446937145-rg6695lds91v760sd6qiedbu1djfhmv7.apps.googleusercontent.com';
+
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId: webClientId,
+      );
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // Pengguna membatalkan proses login
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw Exception('Gagal mendapatkan ID Token dari Google.');
+      }
+
+      // Panggil data source yang sudah kita buat
+      final authResponse = await _authDataSource.loginWithGoogle(idToken);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login berhasil! Halo, ${authResponse.user.username}')));
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
+    } on ServerException catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login Gagal: ${e.message}')));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -232,9 +268,7 @@ class _LoginPageState extends State<LoginPage> {
                   // Tombol Login dengan Google
                   Center(
                     child: GestureDetector(
-                      onTap: () {
-                        // TODO: Implement Google Sign-In logic
-                      },
+                      onTap: _loginWithGoogle,
                       child: Container(
                         padding: const EdgeInsets.all(12.0),
                         decoration: BoxDecoration(
