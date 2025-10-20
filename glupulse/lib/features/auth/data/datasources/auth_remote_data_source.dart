@@ -13,6 +13,7 @@ abstract class AuthRemoteDataSource {
       required String password,
       required String dob,
       required String gender});
+  Future<AuthResponseModel> loginWithGoogle(String idToken);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -80,5 +81,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw ServerException(message: errorBody['message'] ?? 'Registrasi Gagal');
     }
     // Tidak mengembalikan apa-apa jika sukses
+  }
+
+  @override
+  Future<AuthResponseModel> loginWithGoogle(String idToken) async {
+    final url = Uri.parse('$_baseUrl/auth/mobile/google');
+    final response = await client.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Platform': 'mobile',
+      },
+      body: jsonEncode({'id_token': idToken}),
+    );
+
+    if (response.statusCode == 200) {
+      return AuthResponseModel.fromJson(jsonDecode(response.body));
+    } else {
+      final errorBody = jsonDecode(response.body);
+      throw ServerException(message: errorBody['message'] ?? 'Login dengan Google gagal');
+    }
   }
 }
