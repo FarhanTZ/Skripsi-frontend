@@ -152,10 +152,24 @@ class _MenuTabState extends State<MenuTab> {
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(40), // Mengatur lengkungan di bawah
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                  ],
                 ),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(50),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 60, 24, 24), // Padding diubah

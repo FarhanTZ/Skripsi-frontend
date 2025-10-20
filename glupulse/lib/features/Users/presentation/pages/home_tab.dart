@@ -18,11 +18,24 @@ class HomeTab extends StatelessWidget {
             width: double.infinity,
             // Tinggi diatur otomatis oleh children
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                ],
               ),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(50),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
             child: Padding(
               padding: const EdgeInsets.only(top: 48.0, left: 24.0, right: 24.0),
@@ -297,30 +310,64 @@ class HomeTab extends StatelessWidget {
                   },
                 ),
                 const SizedBox(width: 12),
-                // --- Card Info Gula Darah Rendah ---
-                _buildInfoCard(
+                // --- Card BMI ---
+                _buildHealthMetricCard(
                   context: context,
-                  category: 'Category Blood Sugar',
-                  title: 'Low Blood Sugar',
-                  description: 'Learn about hypoglycemia.',
-                  icon: Icons.arrow_downward_rounded,
-                  statusText: 'Low',
-                  statusColor: const Color(0xFFFDFD66), // Warna BG Kuning
-                  statusTextColor: const Color(0xFFB7B726), // Warna Teks Kuning
-                  color: Colors.orangeAccent,
+                  category: 'BMI',
+                  iconWidget: SvgPicture.asset(
+                    'assets/images/Health.svg', // Menggunakan SVG asset yang sama
+                    colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
+                    width: 24,
+                  ),
+                  iconColor: Colors.green,
+                  value: '22.5',
+                  unit: 'kg/m²',
+                  status: 'Normal',
+                  statusText: 'Normal',
+                  statusColor: const Color(0xFF9CF0A6),
+                  statusTextColor: const Color(0xFF02A916),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const HealthMetricDetailPage(
+                        title: 'BMI',
+                        value: '22.5',
+                        unit: 'kg/m²',
+                        status: 'Normal',
+                        icon: Icons.calculate_outlined,
+                        iconColor: Colors.green,
+                      ),
+                    ));
+                  },
                 ),
                 const SizedBox(width: 12),
-                // --- Card Info Tekanan Darah Tinggi ---
-                _buildInfoCard(
+                // --- Card Heart Rate ---
+                _buildHealthMetricCard(
                   context: context,
-                  category: 'Category Blood Pressure',
-                  title: 'High Blood Pressure',
-                  description: 'Learn about hypertension.',
-                  icon: Icons.arrow_upward_rounded,
-                  statusText: 'Critical',
-                  statusColor: const Color(0xFFFA4D5E), // Warna BG Merah
-                  statusTextColor: const Color(0xFFBF070A), // Warna Teks Merah
-                  color: Colors.purpleAccent,
+                  category: 'Heart Rate',
+                  iconWidget: SvgPicture.asset(
+                    'assets/images/Health.svg', // Menggunakan SVG asset yang sama
+                    colorFilter: const ColorFilter.mode(Colors.orangeAccent, BlendMode.srcIn),
+                    width: 24,
+                  ),
+                  iconColor: Colors.orangeAccent,
+                  value: '72',
+                  unit: 'BPM',
+                  status: 'Resting',
+                  statusText: 'Normal',
+                  statusColor: const Color(0xFF9CF0A6),
+                  statusTextColor: const Color(0xFF02A916),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const HealthMetricDetailPage(
+                        title: 'Heart Rate',
+                        value: '72',
+                        unit: 'BPM',
+                        status: 'Resting',
+                        icon: Icons.monitor_heart_outlined,
+                        iconColor: Colors.orangeAccent,
+                      ),
+                    ));
+                  },
                 ),
               ],
             ),

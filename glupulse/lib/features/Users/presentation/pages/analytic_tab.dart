@@ -20,11 +20,24 @@ class AnalyticTab extends StatelessWidget {
             width: double.infinity,
             height: 400,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                ],
               ),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(50),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
             child: Stack( // Menggunakan Stack untuk menumpuk widget
               children: [
@@ -116,60 +129,99 @@ class AnalyticTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   // --- Kartu Metrik ---
-                  Row(
+                  Column(
                     children: [
-                      Expanded(
-                        child: _buildMetricCard(
-                          context: context,
-                          title: 'Blood Sugar',
-                          value: '110',
-                          unit: 'mg/dL',
-                          icon: Icons.water_drop_outlined,
-                          color: Colors.redAccent,
-                          status: 'Normal',
-                          statusColor: const Color(0xFF9CF0A6),
-                          statusTextColor: const Color(0xFF02A916),
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const HealthMetricDetailPage(
-                                title: 'Blood Sugar',
-                                value: '110',
-                                unit: 'mg/dL',
-                                status: 'Normal',
-                                icon: Icons.water_drop_outlined,
-                                iconColor: Colors.redAccent,
-                              ),
-                            ));
-                          },
-                        ),
+                      _buildMetricCard(
+                        context: context,
+                        icon: Icons.water_drop_outlined,
+                        color: Colors.redAccent,
+                        status: 'Normal',
+                        statusColor: const Color(0xFF9CF0A6),
+                        statusTextColor: const Color(0xFF02A916),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const HealthMetricDetailPage(
+                              title: 'Blood Sugar',
+                              value: '110',
+                              unit: 'mg/dL',
+                              status: 'Normal',
+                              icon: Icons.water_drop_outlined,
+                              iconColor: Colors.redAccent,
+                            ),
+                          ));
+                        },
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildMetricCard(
-                          context: context,
-                          title: 'Blood Pressure',
-                          value: '120/80',
-                          unit: 'mmHg',
-                          icon: Icons.favorite_border,
-                          color: Colors.blueAccent,
-                          status: 'Normal',
-                          statusColor: const Color(0xFF9CF0A6),
-                          statusTextColor: const Color(0xFF02A916),
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const HealthMetricDetailPage(
-                                title: 'Blood Pressure',
-                                value: '120/80',
-                                unit: 'mmHg',
-                                status: 'Normal',
-                                icon: Icons.favorite_border,
-                                iconColor: Colors.blueAccent,
-                              ),
-                            ));
-                          },
-                        ),
+                      const SizedBox(height: 12),
+                      _buildMetricCard(
+                        context: context,
+                        icon: Icons.favorite_border,
+                        color: Colors.blueAccent,
+                        status: 'Normal',
+                        statusColor: const Color(0xFF9CF0A6),
+                        statusTextColor: const Color(0xFF02A916),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const HealthMetricDetailPage(
+                              title: 'Blood Pressure',
+                              value: '120/80',
+                              unit: 'mmHg',
+                              status: 'Normal',
+                              icon: Icons.favorite_border,
+                              iconColor: Colors.blueAccent,
+                            ),
+                          ));
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _buildMetricCard(
+                        context: context,
+                        icon: Icons.calculate_outlined,
+                        color: Colors.green,
+                        status: 'Normal',
+                        statusColor: const Color(0xFF9CF0A6),
+                        statusTextColor: const Color(0xFF02A916),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const HealthMetricDetailPage(
+                              title: 'BMI',
+                              value: '22.5',
+                              unit: 'kg/m²',
+                              status: 'Normal',
+                              icon: Icons.calculate_outlined,
+                              iconColor: Colors.green,
+                            ),
+                          ));
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _buildMetricCard(
+                        context: context,
+                        icon: Icons.monitor_heart_outlined,
+                        color: Colors.orangeAccent,
+                        status: 'Normal',
+                        statusColor: const Color(0xFF9CF0A6),
+                        statusTextColor: const Color(0xFF02A916),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const HealthMetricDetailPage(
+                              title: 'Heart Rate',
+                              value: '72',
+                              unit: 'BPM',
+                              status: 'Normal',
+                              icon: Icons.monitor_heart_outlined,
+                              iconColor: Colors.orangeAccent,
+                            ),
+                          ));
+                        },
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Category Health',
+                    style: textTheme.headlineSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   _buildCategoryCard(
@@ -189,6 +241,24 @@ class AnalyticTab extends StatelessWidget {
                     icon: Icons.favorite_border,
                     color: Colors.blueAccent,
                   ),
+                  const SizedBox(height: 12),
+                  _buildCategoryCard(
+                    context: context,
+                    title: 'Category BMI',
+                    description:
+                        'Your BMI is in the healthy weight range. Great job!',
+                    icon: Icons.calculate_outlined,
+                    color: Colors.green,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildCategoryCard(
+                    context: context,
+                    title: 'Category Heart Rate',
+                    description:
+                        'Your resting heart rate is normal. This indicates good cardiovascular health.',
+                    icon: Icons.monitor_heart_outlined,
+                    color: Colors.blueAccent,
+                  ),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -201,9 +271,6 @@ class AnalyticTab extends StatelessWidget {
 
   Widget _buildMetricCard({
     required BuildContext context,
-    required String title,
-    required String value,
-    required String unit,
     required IconData icon,
     required Color color,
     String? status,
@@ -211,8 +278,28 @@ class AnalyticTab extends StatelessWidget {
     Color? statusTextColor,
     required VoidCallback onTap,
   }) {
+    // Data dummy, nantinya akan diganti dengan data dinamis
+    String title, value, unit;
+    if (icon == Icons.water_drop_outlined) {
+      title = 'Blood Sugar';
+      value = '110';
+      unit = 'mg/dL';
+    } else if (icon == Icons.favorite_border) {
+      title = 'Blood Pressure';
+      value = '120/80';
+      unit = 'mmHg';
+    } else if (icon == Icons.calculate_outlined) {
+      title = 'BMI';
+      value = '22.5';
+      unit = 'kg/m²';
+    } else {
+      title = 'Heart Rate';
+      value = '72';
+      unit = 'BPM';
+    }
+
     return SizedBox(
-      height: 191, // Menyamakan tinggi dengan card di home_tab
+      // Tinggi diatur otomatis oleh konten di dalamnya
       child: Card(
         elevation: 1,
         color: Colors.white,
@@ -220,41 +307,48 @@ class AnalyticTab extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: InkWell(
           onTap: onTap,
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: color.withOpacity(0.8))),
-                    if (status != null && statusColor != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6.0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: statusColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            status,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: statusTextColor ?? Colors.white,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      ),
-                    const Spacer(),
-                    Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Theme.of(context).colorScheme.primary)),
-                    Text(unit, style: const TextStyle(fontSize: 13, color: Colors.grey)),
-                  ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: color.withOpacity(0.15),
+                  child: Icon(icon, color: color, size: 32),
                 ),
-              ),
-              Positioned(top: 12, right: 12, child: Icon(icon, color: color, size: 24)),
-            ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Theme.of(context).colorScheme.primary)),
+                          const SizedBox(width: 8),
+                          Text(unit, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (status != null && statusColor != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      status,
+                      style: TextStyle(fontWeight: FontWeight.bold, color: statusTextColor ?? Colors.white, fontSize: 12),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
