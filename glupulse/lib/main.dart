@@ -1,25 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
+import 'package:glupulse/features/auth/presentation/pages/login_page.dart';
+import 'package:glupulse/home_page.dart';
+import 'package:glupulse/injection_container.dart' as di;
+import 'package:glupulse/injection_container.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 
-import 'app/theme/app_theme.dart';
-import 'splash_screen.dart';
-import 'home_page.dart';
-
-
-
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init(); // Inisialisasi service locator
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'GluPulse',
-      theme: AppTheme.lightTheme,
-      home: const HomePage(),
-      debugShowCheckedModeBanner: false,
+    return BlocProvider(
+      create: (_) => sl<AuthCubit>(),
+      child: MaterialApp(
+        title: 'GluPulse',
+        theme: AppTheme.lightTheme,
+        home: BlocBuilder<AuthCubit, AuthState>(
+          builder: (context, state) {
+            if (state is AuthAuthenticated) {
+              // Jika sudah terotentikasi, langsung ke HomePage
+              return const HomePage(); // Pastikan HomePage sudah di-import
+            } else if (state is AuthOtpRequired) {
+              // Jika butuh verifikasi OTP, arahkan ke OtpVerificationPage
+              return OtpVerificationPage(userId: state.user.id);
+            }
+            // Jika tidak (AuthInitial, AuthUnauthenticated, AuthError), tampilkan LoginPage
+            return const LoginPage();
+          },
+        ),
+      ),
     );
   }
 }
+
+// Path: d:\Skripsi\Codingan_Skirpsi\Frontend\glupulse\lib\features\auth\presentation\pages\login_page.dart

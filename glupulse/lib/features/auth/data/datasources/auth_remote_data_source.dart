@@ -1,106 +1,105 @@
-import 'dart:convert';
+import 'package:glupulse/core/api/api_client.dart';
 import 'package:glupulse/core/error/exceptions.dart';
-import 'package:glupulse/features/auth/data/models/auth_response_model.dart';
-import 'package:http/http.dart' as http;
+import 'package:glupulse/features/auth/data/models/login_response_model.dart';
+import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
 
+/// Abstract class untuk mendefinisikan kontrak dari Auth Remote Data Source.
+/// Ini berguna untuk dependency injection dan testing.
 abstract class AuthRemoteDataSource {
-  Future<AuthResponseModel> login(String username, String password);
-  Future<void> register(
-      {required String firstName,
-      required String lastName,
-      required String username,
-      required String email,
-      required String password,
-      required String dob,
-      required String gender});
-  Future<AuthResponseModel> loginWithGoogle(String idToken);
+  Future<LoginResponseModel> login(String username, String password);
+  Future<LoginResponseModel> loginWithGoogle(String idToken);
+  Future<LoginResponseModel> register({required RegisterParams params});
+  Future<LoginResponseModel> verifyOtp(String userId, String otpCode);
 }
 
+/// Implementasi konkret dari AuthRemoteDataSource.
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final http.Client client;
-  // Ganti dengan URL base Anda, bisa dari environment variable
-  final String _baseUrl = 'https://noncereal-uncongenially-gloria.ngrok-free.dev';
+  final ApiClient apiClient;
 
-  AuthRemoteDataSourceImpl({required this.client});
+  AuthRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<AuthResponseModel> login(String username, String password) async {
-    final url = Uri.parse('$_baseUrl/login');
-
-    final request = http.Request('POST', url)
-      ..headers['Content-Type'] = 'application/json'
-      ..headers['Accept'] = 'application/json'
-      ..headers['X-Platform'] = 'mobile'
-      ..body = jsonEncode({
-        'Username': username,
-        'Password': password,
-      });
-
-    final streamedResponse = await client.send(request);
-    final response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode == 200) {
-      return AuthResponseModel.fromJson(jsonDecode(response.body));
-    } else {
-      // Melempar exception yang akan ditangkap oleh Repository
-      final errorBody = jsonDecode(response.body);
-      throw ServerException(message: errorBody['message'] ?? 'Login Gagal');
+  Future<LoginResponseModel> login(String username, String password) async {
+    try {
+      final response = await apiClient.post(
+        '/login', // Endpoint spesifik untuk login
+        body: {
+          'Username': username,
+          'Password': password,
+        },
+      );
+      // Parsing response JSON menjadi LoginResponseModel
+      return LoginResponseModel.fromJson(response);
+    } on ServerException {
+      rethrow; // Jika sudah ServerException (dari ApiClient), lempar kembali.
+    } catch (e) {
+      // Melempar ServerException agar bisa ditangkap oleh Repository
+      throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
     }
   }
 
   @override
-  Future<void> register(
-      {required String username,
-      required String email,
-      required String password,
-      required String firstName,
-      required String lastName,
-      required String dob,
-      required String gender}) async {
-    final url = Uri.parse('$_baseUrl/signup');
-    final response = await client.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Platform': 'mobile',
-      },
-      body: jsonEncode({
-        'first_name': firstName,
-        'last_name': lastName,
-        'username': username,
-        'email': email,
-        'password': password,
-        'dob': dob,
-        'gender': gender,
-      }),
-    );
-
-    if (response.statusCode != 201 && response.statusCode != 200) { // 201 Created atau 200 OK
-      final errorBody = jsonDecode(response.body);
-      throw ServerException(message: errorBody['message'] ?? 'Registrasi Gagal');
+  Future<LoginResponseModel> loginWithGoogle(String idToken) async {
+    try {
+      final response = await apiClient.post(
+        '/auth/mobile/google', // Endpoint spesifik untuk Google login
+        body: {
+          'id_token': idToken,
+        },
+      );
+      // Parsing response JSON menjadi LoginResponseModel
+      return LoginResponseModel.fromJson(response);
+    } on ServerException {
+      rethrow; // Jika sudah ServerException (dari ApiClient), lempar kembali.
+    } catch (e) {
+      // Melempar ServerException agar bisa ditangkap oleh Repository
+      throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
     }
-    // Tidak mengembalikan apa-apa jika sukses
   }
 
   @override
-  Future<AuthResponseModel> loginWithGoogle(String idToken) async {
-    final url = Uri.parse('$_baseUrl/auth/mobile/google');
-    final response = await client.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Platform': 'mobile',
-      },
-      body: jsonEncode({'id_token': idToken}),
-    );
+  Future<LoginResponseModel> register({required RegisterParams params}) async {
+    try {
+      final response = await apiClient.post(
+        '/signup', // Endpoint spesifik untuk registrasi
+        body: {
+          "username": params.username,
+          "password": params.password,
+          "email": params.email,
+          "first_name": params.firstName,
+          "last_name": params.lastName,
+          "dob": params.dob,
+          "gender": params.gender,
+          "address_line1": params.addressLine1,
+          "city": params.city,
+        },
+      );
+      // Kita asumsikan responsenya sama dengan login (mengembalikan data user)
+      return LoginResponseModel.fromJson(response);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+    }
+  }
 
-    if (response.statusCode == 200) {
-      return AuthResponseModel.fromJson(jsonDecode(response.body));
-    } else {
-      final errorBody = jsonDecode(response.body);
-      throw ServerException(message: errorBody['message'] ?? 'Login dengan Google gagal');
+  @override
+  Future<LoginResponseModel> verifyOtp(String userId, String otpCode) async {
+    try {
+      final response = await apiClient.post(
+        '/verify-otp', // Endpoint spesifik untuk verifikasi OTP
+        body: {
+          'user_id': userId,
+          'otp_code': otpCode,
+        },
+      );
+      // Parsing response JSON menjadi LoginResponseModel
+      return LoginResponseModel.fromJson(response);
+    } on ServerException {
+      rethrow; // Jika sudah ServerException (dari ApiClient), lempar kembali.
+    } catch (e) {
+      // Tangani error koneksi atau error tak terduga lainnya.
+      throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
     }
   }
 }

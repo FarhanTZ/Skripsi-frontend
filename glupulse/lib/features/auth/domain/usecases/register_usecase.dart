@@ -1,39 +1,46 @@
+import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
+import 'package:glupulse/core/error/failures.dart';
+import 'package:glupulse/core/usecases/usecase.dart';
+import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/domain/repositories/auth_repository.dart';
 
-class RegisterUseCase {
+/// Use case untuk melakukan registrasi pengguna baru.
+class RegisterUseCase implements UseCase<UserEntity, RegisterParams> {
   final AuthRepository repository;
 
   RegisterUseCase(this.repository);
 
-  Future<void> execute(RegisterParams params) {
-    return repository.register(
-      username: params.username,
-      email: params.email,
-      password: params.password,
-      firstName: params.firstName,
-      lastName: params.lastName,
-      dob: params.dob,
-      gender: params.gender,
-    );
+  @override
+  Future<Either<Failure, UserEntity>> call(RegisterParams params) async {
+    return await repository.register(params: params);
   }
 }
 
-class RegisterParams {
+/// Parameter yang dibutuhkan oleh RegisterUseCase.
+class RegisterParams extends Equatable {
+  final String username;
+  final String password;
+  final String email;
   final String firstName;
   final String lastName;
-  final String username;
-  final String email;
-  final String password;
   final String dob;
   final String gender;
+  final String addressLine1;
+  final String city;
 
-  RegisterParams({
+  const RegisterParams({
+    required this.username,
+    required this.password,
+    required this.email,
     required this.firstName,
     required this.lastName,
-    required this.username,
-    required this.email,
-    required this.password,
     required this.dob,
     required this.gender,
+    required this.addressLine1,
+    required this.city,
   });
+
+  @override
+  List<Object?> get props => [username, password, email, firstName, lastName, dob, gender, addressLine1, city];
 }

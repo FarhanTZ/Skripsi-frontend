@@ -1,37 +1,37 @@
-import 'package:glupulse/features/auth/domain/entities/user.dart';
+import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 
+/// UserModel adalah implementasi dari UserEntity di layer data.
+/// Ia bertanggung jawab untuk konversi data dari/ke format eksternal (JSON).
 class UserModel extends UserEntity {
-  UserModel({
-    required super.userId,
+  const UserModel({
+    required super.id,
     required super.username,
     required super.email,
-    super.firstName,
-    super.lastName,
-    super.dob,
-    super.gender,
+    required super.name,
   });
 
+  /// Factory constructor untuk membuat instance UserModel dari Map (JSON).
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      userId: json['user_id'] as String? ?? '',
+      // Backend mengirim 'user_id' saat login, dan mungkin 'id' di konteks lain.
+      id: (json['user_id'] ?? json['id']) as String? ?? '',
       username: json['username'] as String? ?? '',
       email: json['email'] as String? ?? '',
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      dob: json['dob'],
-      gender: json['gender'],
+      // Menggabungkan first_name dan last_name untuk field 'name'
+      name: [
+        json['first_name'] as String? ?? '',
+        json['last_name'] as String? ?? ''
+      ].where((e) => e.isNotEmpty).join(' ').trim(),
     );
   }
 
+  /// Method untuk mengubah instance UserModel menjadi Map (JSON).
   Map<String, dynamic> toJson() {
     return {
-      'user_id': userId,
+      'id': id,
       'username': username,
       'email': email,
-      'first_name': firstName,
-      'last_name': lastName,
-      'dob': dob,
-      'gender': gender,
+      'name': name,
     };
   }
 }
