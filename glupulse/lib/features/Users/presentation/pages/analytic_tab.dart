@@ -127,6 +127,8 @@ class AnalyticTab extends StatelessWidget {
                           icon: Icons.water_drop_outlined,
                           color: Colors.redAccent,
                           status: 'Normal',
+                          statusColor: const Color(0xFF9CF0A6),
+                          statusTextColor: const Color(0xFF02A916),
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => const HealthMetricDetailPage(
@@ -151,6 +153,8 @@ class AnalyticTab extends StatelessWidget {
                           icon: Icons.favorite_border,
                           color: Colors.blueAccent,
                           status: 'Normal',
+                          statusColor: const Color(0xFF9CF0A6),
+                          statusTextColor: const Color(0xFF02A916),
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => const HealthMetricDetailPage(
@@ -202,35 +206,54 @@ class AnalyticTab extends StatelessWidget {
     required String unit,
     required IconData icon,
     required Color color,
-    required String status,
+    String? status,
+    Color? statusColor,
+    Color? statusTextColor,
     required VoidCallback onTap,
   }) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return SizedBox(
+      height: 191, // Menyamakan tinggi dengan card di home_tab
+      child: Card(
+        elevation: 1,
+        color: Colors.white,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: InkWell(
+          onTap: onTap,
+          child: Stack(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 14)),
-                  Icon(icon, color: color, size: 24),
-                ],
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: color.withOpacity(0.8))),
+                    if (status != null && statusColor != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            status,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: statusTextColor ?? Colors.white,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ),
+                    const Spacer(),
+                    Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Theme.of(context).colorScheme.primary)),
+                    Text(unit, style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-              ),
-              const SizedBox(height: 2),
-              Text(unit, style: const TextStyle(fontSize: 14, color: AppTheme.inputLabelColor)),
+              Positioned(top: 12, right: 12, child: Icon(icon, color: color, size: 24)),
             ],
           ),
         ),
