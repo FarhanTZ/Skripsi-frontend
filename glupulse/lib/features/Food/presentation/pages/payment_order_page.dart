@@ -3,6 +3,7 @@ import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/Food/presentation/pages/order_tracking_page.dart';
 import 'package:intl/intl.dart';
 import 'package:glupulse/features/Food/presentation/pages/order_history_page.dart';
+import 'package:glupulse/features/Address/domain/entities/address.dart';
 import 'package:glupulse/features/Address/presentation/pages/address_list_page.dart';
 
 class PaymentOrderPage extends StatefulWidget {
@@ -25,10 +26,12 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
   String _appliedDiscountCode = '';
 
   // State untuk alamat pengiriman
-  Map<String, String> _shippingAddress = {
-    'label': 'Home',
-    'address': 'Jl. Telekomunikasi No. 1, Bandung, Jawa Barat',
-  };
+  Address _shippingAddress = const Address(
+    label: 'Home',
+    addressDetail: 'Jl. Telekomunikasi No. 1, Bandung, Jawa Barat',
+    latitude: -6.9740,
+    longitude: 107.6304,
+  );
 
   // Data dummy untuk pilihan diskon
   final List<Map<String, dynamic>> _availableDiscounts = [
@@ -119,8 +122,8 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
 
   Widget _buildAddressCard() {
     return InkWell(
-      onTap: () async {
-        final selectedAddress = await Navigator.of(context).push<Map<String, String>>(
+      onTap: () async { // Perubahan di sini
+        final selectedAddress = await Navigator.of(context).push<Address>(
           MaterialPageRoute(
             builder: (context) => AddressListPage(currentAddress: _shippingAddress),
           ),
@@ -147,13 +150,13 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _shippingAddress['label']!,
+                    Text( // Perubahan di sini
+                      _shippingAddress.label,
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      _shippingAddress['address']!,
+                    Text( // Perubahan di sini
+                      _shippingAddress.addressDetail,
                       style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                   ],

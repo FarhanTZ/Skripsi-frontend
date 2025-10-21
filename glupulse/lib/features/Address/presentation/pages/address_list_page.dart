@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:glupulse/features/Address/domain/entities/address.dart';
 import 'package:glupulse/features/Address/presentation/pages/edit_address_page.dart';
 import 'package:glupulse/features/Address/presentation/pages/add_address_page.dart';
 
 class AddressListPage extends StatefulWidget {
-  final Map<String, String> currentAddress;
+  final Address currentAddress;
   const AddressListPage({super.key, required this.currentAddress});
 
   @override
@@ -11,20 +12,23 @@ class AddressListPage extends StatefulWidget {
 }
 
 class _AddressListPageState extends State<AddressListPage> {
-  // Data dummy untuk alamat
-  List<Map<String, String>> _addresses = [
-    {
-      'label': 'Home',
-      'address': 'Jl. Telekomunikasi No. 1, Bandung, Jawa Barat',
-    },
-    {
-      'label': 'Office',
-      'address': 'Jl. Gatot Subroto No. 123, Jakarta Selatan, DKI Jakarta',
-    },
-    {
-      'label': 'Parents House',
-      'address': 'Jl. Merdeka No. 45, Surabaya, Jawa Timur',
-    },
+  // Data dummy untuk alamat, sekarang menggunakan List<Address>
+  final List<Address> _addresses = [
+    const Address(
+        label: 'Home',
+        addressDetail: 'Jl. Telekomunikasi No. 1, Bandung, Jawa Barat',
+        latitude: -6.9740,
+        longitude: 107.6304),
+    const Address(
+        label: 'Office',
+        addressDetail: 'Jl. Gatot Subroto No. 123, Jakarta Selatan, DKI Jakarta',
+        latitude: -6.225,
+        longitude: 106.822),
+    const Address(
+        label: 'Parents House',
+        addressDetail: 'Jl. Merdeka No. 45, Surabaya, Jawa Timur',
+        latitude: -7.257,
+        longitude: 112.752),
   ];
 
   late String _selectedAddressLabel;
@@ -32,7 +36,7 @@ class _AddressListPageState extends State<AddressListPage> {
   @override
   void initState() {
     super.initState();
-    _selectedAddressLabel = widget.currentAddress['label']!;
+    _selectedAddressLabel = widget.currentAddress.label;
   }
 
   @override
@@ -62,7 +66,7 @@ class _AddressListPageState extends State<AddressListPage> {
         itemCount: _addresses.length,
         itemBuilder: (context, index) {
           final address = _addresses[index];
-          final isSelected = _selectedAddressLabel == address['label'];
+          final isSelected = _selectedAddressLabel == address.label;
 
           return Card(
             elevation: 2,
@@ -82,11 +86,11 @@ class _AddressListPageState extends State<AddressListPage> {
             child: ListTile(
               contentPadding:
                   const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              title: Text(address['label']!,
+              title: Text(address.label,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text(address['address']!),
+              subtitle: Text(address.addressDetail),
               leading: Radio<String>(
-                value: address['label']!,
+                value: address.label,
                 groupValue: _selectedAddressLabel,
                 onChanged: (String? value) {
                   setState(() {
@@ -98,12 +102,12 @@ class _AddressListPageState extends State<AddressListPage> {
               trailing: IconButton(
                 icon: const Icon(Icons.edit_outlined, color: Colors.grey),
                 onPressed: () {
-                  _navigateToEditAddress(address, index);
+                  _navigateToEditAddress(address.toMap(), index);
                 },
               ),
               onTap: () {
                 setState(() {
-                  _selectedAddressLabel = address['label']!;
+                  _selectedAddressLabel = address.label;
                 });
               },
             ),
@@ -120,7 +124,7 @@ class _AddressListPageState extends State<AddressListPage> {
         child: ElevatedButton(
           onPressed: () {
             final selected = _addresses
-                .firstWhere((addr) => addr['label'] == _selectedAddressLabel);
+                .firstWhere((addr) => addr.label == _selectedAddressLabel);
             Navigator.of(context).pop(selected);
           },
           style: ElevatedButton.styleFrom(
@@ -145,7 +149,7 @@ class _AddressListPageState extends State<AddressListPage> {
 
     if (newAddress != null) {
       setState(() {
-        _addresses.add(newAddress);
+        _addresses.add(Address.fromMap(newAddress));
       });
     }
   }
@@ -159,7 +163,7 @@ class _AddressListPageState extends State<AddressListPage> {
 
     if (updatedAddress != null) {
       setState(() {
-        _addresses[index] = updatedAddress;
+        _addresses[index] = Address.fromMap(updatedAddress);
       });
     }
   }

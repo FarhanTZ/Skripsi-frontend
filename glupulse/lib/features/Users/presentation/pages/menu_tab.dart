@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
-import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
+import 'package:glupulse/features/Address/presentation/pages/address_detail_page.dart';
+import 'package:glupulse/features/Address/domain/entities/address.dart';
 import 'package:glupulse/features/Address/presentation/pages/address_list_page.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../Food/presentation/pages/order_history_page.dart';
+import '../widgets/food_menu_section.dart';
 
 class MenuTab extends StatefulWidget {
   const MenuTab({super.key});
@@ -13,6 +17,9 @@ class MenuTab extends StatefulWidget {
 }
 
 class _MenuTabState extends State<MenuTab> {
+  // Controller untuk PageView promo
+  final _promoPageController = PageController();
+
   // Data untuk kategori
   final List<String> categories = const [
     'Main',
@@ -22,34 +29,150 @@ class _MenuTabState extends State<MenuTab> {
     'Drink'
   ];
 
+  // Data dummy untuk menu
+  final List<Map<String, dynamic>> recommendationItems = const [
+    {'title': 'Oatmeal Sehat', 'price': 'Rp 25.000', 'icon': Icons.breakfast_dining_outlined, 'color': Colors.brown},
+    {'title': 'Salmon Panggang', 'price': 'Rp 75.000', 'icon': Icons.set_meal_outlined, 'color': Colors.pink},
+    {'title': 'Salad Sayur', 'price': 'Rp 35.000', 'icon': Icons.spa_outlined, 'color': Colors.green},
+  ];
+
+  final List<Map<String, dynamic>> foodMenuItems = const [
+    {'title': 'Nasi Goreng Merah', 'price': 'Rp 30.000', 'icon': Icons.breakfast_dining_outlined, 'color': Colors.brown},
+    {'title': 'Ayam Bakar Madu', 'price': 'Rp 45.000', 'icon': Icons.set_meal_outlined, 'color': Colors.pink},
+    {'title': 'Gado-gado Spesial', 'price': 'Rp 28.000', 'icon': Icons.spa_outlined, 'color': Colors.green},
+  ];
+
+  final List<Map<String, dynamic>> drinkMenuItems = const [
+    {'title': 'Air Mineral', 'price': 'Rp 5.000', 'icon': Icons.water_drop, 'color': Colors.blue},
+    {'title': 'Jus Jeruk', 'price': 'Rp 15.000', 'icon': Icons.local_drink, 'color': Colors.orange},
+    {'title': 'Smoothie Hijau', 'price': 'Rp 20.000', 'icon': Icons.blender, 'color': Colors.teal},
+  ];
+
   // State untuk alamat yang sedang aktif
-  Map<String, String> _currentAddress = {
-    'label': 'Home',
-    'address': 'Jl. Telekomunikasi No. 1, Bandung',
-  };
+  Address _currentAddress = const Address(
+    label: 'Loading...',
+    addressDetail: 'Mencari lokasi...',
+    latitude: -6.9740, // Default location
+    longitude: 107.6304,
+  );
+  bool _isFetchingAddress = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocationAndAddress();
+  }
+
+  @override
+  void dispose() {
+    // Jangan lupa dispose controller untuk menghindari memory leak
+    _promoPageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _getCurrentLocationAndAddress() async {
+    setState(() {
+      _isFetchingAddress = true;
+    });
+
+    try {
+      // 1. Cek izin lokasi
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          // Pengguna menolak izin
+          setState(() {
+            _currentAddress = _currentAddress.copyWith(
+              label: 'Lokasi tidak diizinkan',
+              addressDetail: 'Ketuk untuk mengubah',
+            );
+            _isFetchingAddress = false;
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        // Izin ditolak permanen
+        setState(() {
+          _currentAddress = _currentAddress.copyWith(
+            label: 'Izin lokasi ditolak',
+            addressDetail: 'Buka pengaturan untuk mengizinkan',
+          );
+          _isFetchingAddress = false;
+        });
+        return;
+      }
+
+      // 2. Dapatkan lokasi saat ini
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+      // 3. Ubah koordinat menjadi alamat (Reverse Geocoding)
+      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        // Membangun string alamat dengan lebih aman untuk menghindari null
+        String address = [
+          if (place.street != null && place.street!.isNotEmpty) place.street,
+          if (place.subLocality != null && place.subLocality!.isNotEmpty) place.subLocality,
+          if (place.locality != null && place.locality!.isNotEmpty) place.locality,
+          if (place.subAdministrativeArea != null && place.subAdministrativeArea!.isNotEmpty) place.subAdministrativeArea,
+          if (place.country != null && place.country!.isNotEmpty) place.country,
+        ].where((part) => part != null).join(', ');
+
+        setState(() {
+          _currentAddress = Address(
+            label: 'Lokasi Saat Ini',
+            addressDetail: address,
+            latitude: position.latitude,
+            longitude: position.longitude,
+          );
+        });
+      }
+    } catch (e) {
+      // Tangani error
+      setState(() => _currentAddress = _currentAddress.copyWith(
+        label: 'Error',
+        addressDetail: 'Gagal mendapatkan lokasi',
+      ));
+    } finally {
+      if (mounted) setState(() => _isFetchingAddress = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     // Using Stack to overlap widgets
     return SingleChildScrollView(
-        child: Stack(
-      alignment: Alignment.topCenter, // To center the promo container horizontally
-      children: [
-        // Main background widget
+        child:
         Column(
           children: [
             Container(
               width: double.infinity,
-              height: 320, // Mengurangi tinggi container biru
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(40), // Mengatur lengkungan di bawah
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                  ],
                 ),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(50),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
               child: Padding(
-                padding: const EdgeInsets.only(
-                    top: 60, left: 24, right: 24), // Padding from top and sides
+                padding: const EdgeInsets.fromLTRB(24, 60, 24, 24), // Padding diubah
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -58,11 +181,10 @@ class _MenuTabState extends State<MenuTab> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            final selectedAddress = await Navigator.of(context)
-                                .push<Map<String, String>>(
+                            final selectedAddress = await Navigator.of(context).push<Address>(
                               MaterialPageRoute(
-                                builder: (context) => AddressListPage(
-                                    currentAddress: _currentAddress),
+                                builder: (context) =>
+                                    AddressListPage(currentAddress: _currentAddress),
                               ),
                             );
                             if (selectedAddress != null) {
@@ -105,13 +227,31 @@ class _MenuTabState extends State<MenuTab> {
                       ],
                     ),
                     SizedBox(height: 8),
-                    Text(
-                      _currentAddress['address']!,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold),
-                    ),
+                    _isFetchingAddress
+                        ? const Row(
+                            children: [
+                              SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2,)),
+                              SizedBox(width: 12),
+                              Text('Mencari lokasi...', style: TextStyle(color: Colors.white70, fontSize: 18)),
+                            ],
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => AddressDetailPage(address: _currentAddress),
+                              ));
+                            },
+                            child: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(_currentAddress.addressDetail,
+                                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis),
+                                ),
+                              ],
+                            ),
+                          ),
                     SizedBox(height: 24),
                     TextField(
                       decoration: InputDecoration(
@@ -135,8 +275,71 @@ class _MenuTabState extends State<MenuTab> {
                 ),
               ),
             ),
-            // Space to prevent the category list from being overlapped by the promo card
-            SizedBox(height: (187 / 2) + 20),
+            const SizedBox(height: 24),
+            // --- Special Promo ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Special Promo',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // --- Kartu Promo dengan PageView ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.orangeAccent, // Warna dasar kartu
+                  borderRadius: BorderRadius.circular(15.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.orangeAccent.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    PageView(
+                      controller: _promoPageController,
+                      children: [
+                        _buildPromoPage(
+                          title: 'Diskon 50%',
+                          description: 'Untuk semua menu utama hari ini!',
+                        ),
+                        _buildPromoPage(
+                          title: 'Beli 1 Gratis 1',
+                          description: 'Untuk semua minuman sehat.',
+                        ),
+                        _buildPromoPage(
+                          title: 'Gratis Ongkir',
+                          description: 'Tanpa minimum pembelian.',
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: SmoothPageIndicator(
+                        controller: _promoPageController,
+                        count: 3, // Sesuaikan dengan jumlah halaman promo
+                        effect: ExpandingDotsEffect(dotHeight: 8, dotWidth: 8, activeDotColor: Colors.white, dotColor: Colors.white.withOpacity(0.5)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             // Menu Categories
             SizedBox(
               height: 32, // Reducing the height of the category list area
@@ -168,288 +371,45 @@ class _MenuTabState extends State<MenuTab> {
             ),
             const SizedBox(
                 height: 20), // Additional space below the category list
-            // --- Recommendation Food ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Recommendation Food',
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 191, // Matching height with cards on the home screen
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                children: [
-                  _buildRecommendationCard(
-                    context: context,
-                    title: 'Oatmeal',
-                    description: 'Good for breakfast',
-                    icon: Icons.breakfast_dining_outlined,
-                    color: Colors.brown,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildRecommendationCard(
-                    context: context,
-                    title: 'Salmon',
-                    description: 'Rich in Omega-3',
-                    icon: Icons.set_meal_outlined,
-                    color: Colors.pink,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildRecommendationCard(
-                    context: context,
-                    title: 'Avocado',
-                    description: 'Healthy fats',
-                    icon: Icons.spa_outlined,
-                    color: Colors.green,
-                  ),
-                ],
-              ),
-            ),
+            
+            // --- Recommendation Food (Refactored) ---
+            FoodMenuSection(title: 'Recommendation Food', items: recommendationItems),
             const SizedBox(height: 24),
-            // --- Food Menu ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Food Menu',
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 191, // Matching height with cards on the home screen
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                children: [
-                  _buildRecommendationCard(
-                    context: context,
-                    title: 'Oatmeal',
-                    description: 'Good for breakfast',
-                    icon: Icons.breakfast_dining_outlined,
-                    color: Colors.brown,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildRecommendationCard(
-                    context: context,
-                    title: 'Salmon',
-                    description: 'Rich in Omega-3',
-                    icon: Icons.set_meal_outlined,
-                    color: Colors.pink,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildRecommendationCard(
-                    context: context,
-                    title: 'Avocado',
-                    description: 'Healthy fats',
-                    icon: Icons.spa_outlined,
-                    color: Colors.green,
-                  ),
-                ],
-              ),
-            ),
+            
+            // --- Food Menu (Refactored) ---
+            FoodMenuSection(title: 'Food Menu', items: foodMenuItems),
             const SizedBox(height: 24),
 
-            // --- Drink Menu ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Drink Menu',
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 191, // Matching height with cards on the home screen
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                children: [
-                  _buildRecommendationCard(
-                    context: context,
-                    title: 'Water',
-                    description: 'Stay hydrated',
-                    icon: Icons.water_drop,
-                    color: Colors.blue,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildRecommendationCard(
-                    context: context,
-                    title: 'Orange Juice',
-                    description: 'Rich in Vitamin C',
-                    icon: Icons.local_drink,
-                    color: Colors.orange,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildRecommendationCard(
-                    context: context,
-                    title: 'Green Smoothie',
-                    description: 'Full of nutrients',
-                    icon: Icons.blender,
-                    color: Colors.teal,
-                  ),
-                ],
-              ),
-            ),
+            // --- Drink Menu (Refactored) ---
+            FoodMenuSection(title: 'Drink Menu', items: drinkMenuItems),
             const SizedBox(height: 24), // Space below
           ],
         ),
-
-        // Promo Container stacked on top
-        Positioned(
-          // Position from top: (blue container height) - (half of promo container height)
-          top: 320 - (187 / 2), // Adjusting promo container position
-          child: Container(
-            width: 383,
-            height: 187,
-            decoration: BoxDecoration(
-              color: AppTheme.inputLabelColor,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  spreadRadius: 2,
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            // Using Align to place the label container in the corner
-            child: Stack(
-              children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Container(
-                    // This is the white container that wraps the text
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      // Creating a shape like a label/tag
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20.0),
-                        bottomRight: Radius.circular(20.0),
-                      ),
-                    ),
-                    child: Text(
-                      'Promo',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.inputLabelColor),
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 20.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          color: const Color(0xFFBC9A9A),
-                          padding: const EdgeInsets.only(
-                              left: 12, right: 60, top: 0, bottom: 0),
-                          child: const Text(
-                            'Buy One get',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8), // Adding vertical space
-                        Container(
-                          color: const Color(0xFFBC9A9A),
-                          padding: const EdgeInsets.only(
-                              left: 12, right: 60, top: 0, bottom: 0),
-                          child: const Text(
-                            'One Free',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ));
+    );
   }
 
-  // Helper widget to create recommendation cards (copied from home_tab.dart)
-  Widget _buildRecommendationCard({
-    required BuildContext context,
+  // Helper widget untuk membuat ISI dari halaman promo di dalam PageView
+  Widget _buildPromoPage({
     required String title,
     required String description,
-    required IconData icon,
-    required Color color,
   }) {
-    return SizedBox(
-      width: 160, // Matching width with other cards
-      child: Card(
-        elevation: 1,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        clipBehavior: Clip.antiAlias, // Ensures InkWell ripple effect is clipped
-        child: InkWell(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => FoodDetailPage(foodName: title),
-            ));
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: color.withOpacity(0.15),
-                  child: Icon(icon, color: color, size: 24),
-                ),
-                const Spacer(),
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 4),
-                Text(description, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              ],
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.9)),
+          ),
+        ],
       ),
     );
   }

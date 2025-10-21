@@ -66,6 +66,15 @@ dependencies:
   # Charting library
   fl_chart: ^0.68.0 # Atau versi terbaru yang kompatibel
 
+  # For location services
+  geolocator: ^11.0.0
+
+  # For converting coordinates to address
+  geocoding: ^3.0.0
+  google_maps_flutter: ^2.5.3
+  dartz: ^0.10.1
+  get_it: ^8.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
