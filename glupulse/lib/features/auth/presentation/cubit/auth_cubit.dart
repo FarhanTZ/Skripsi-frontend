@@ -1,11 +1,14 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:glupulse/core/error/failures.dart';
+import 'package:glupulse/core/usecases/usecase.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_with_google_usecase.dart';
+import 'package:glupulse/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
+import 'package:dartz/dartz.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 // --- AuthState ---
@@ -60,6 +63,7 @@ class AuthCubit extends Cubit<AuthState> {
   final VerifyOtpUseCase verifyOtpUseCase;
   final RegisterUseCase registerUseCase;
   final LoginWithGoogleUseCase loginWithGoogleUseCase;
+  final GetCurrentUserUseCase getCurrentUserUseCase;
   final GoogleSignIn googleSignIn;
 
   AuthCubit({
@@ -67,8 +71,38 @@ class AuthCubit extends Cubit<AuthState> {
     required this.verifyOtpUseCase,
     required this.registerUseCase,
     required this.loginWithGoogleUseCase,
+    required this.getCurrentUserUseCase,
     required this.googleSignIn,
   }) : super(AuthInitial());
+
+  /// Metode untuk memeriksa status otentikasi saat aplikasi dimulai.
+  Future<void> checkAuthenticationStatus() async {
+    print('AuthCubit: Memeriksa status otentikasi...'); // DEBUG
+    emit(AuthLoading());
+
+    // Menjalankan pengecekan status dan timer secara bersamaan.
+    // Ini memastikan splash screen tampil minimal selama durasi timer.
+    final results = await Future.wait([
+      getCurrentUserUseCase(NoParams()),
+      Future.delayed(const Duration(seconds: 3)), // Timer 3 detik
+    ]);
+
+    // Ambil hasil dari pengecekan user (hasil pertama dari Future.wait)
+    final authResult = results[0] as Either<Failure, UserEntity>;
+
+    authResult.fold(
+      (failure) {
+        // Jika tidak ada user di cache, anggap tidak terotentikasi
+        print('AuthCubit: Tidak ada sesi ditemukan. Emitting AuthUnauthenticated.'); // DEBUG
+        emit(AuthUnauthenticated());
+      },
+      (user) {
+        print(
+            'AuthCubit: Sesi ditemukan untuk user: ${user.username}. Emitting AuthAuthenticated.'); // DEBUG
+        emit(AuthAuthenticated(user)); // Emit state setelah timer selesai
+      },
+    );
+  }
 
   /// Metode untuk melakukan proses login.
   Future<void> login(String username, String password) async {

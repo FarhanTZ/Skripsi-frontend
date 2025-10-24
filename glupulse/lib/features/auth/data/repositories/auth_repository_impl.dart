@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:glupulse/core/error/exceptions.dart';
 import 'package:glupulse/core/error/failures.dart';
+import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
@@ -9,9 +10,10 @@ import 'package:glupulse/features/auth/domain/repositories/auth_repository.dart'
 /// Implementasi dari AuthRepository.
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
-  // Anda bisa menambahkan localDataSource di sini nanti untuk caching token.
+  final AuthLocalDataSource localDataSource;
 
-  AuthRepositoryImpl({required this.remoteDataSource});
+  AuthRepositoryImpl(
+      {required this.remoteDataSource, required this.localDataSource});
 
   @override
   Future<Either<Failure, UserEntity>> login(
@@ -67,6 +69,16 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(otpResponse.user);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> getCurrentUser() async {
+    try {
+      final user = await localDataSource.getLastUser();
+      return Right(user);
+    } on CacheException {
+      return Left(CacheFailure());
     }
   }
 }
