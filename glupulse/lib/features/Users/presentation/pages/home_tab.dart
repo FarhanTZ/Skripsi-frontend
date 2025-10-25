@@ -5,6 +5,7 @@ import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/activity/presentation/pages/activity_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/notification/presentation/pages/notification_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 
@@ -284,17 +285,17 @@ class HomeTab extends StatelessWidget {
                   iconColor: Colors.redAccent,
                   value: '110',
                   unit: 'mg/dL',
-                  status: 'After Meal',
-                  statusText: 'Normal', // Status baru
-                  statusColor: const Color(0xFF9CF0A6), // Warna BG Hijau
-                  statusTextColor: const Color(0xFF02A916), // Warna Teks Hijau
+                  status: 'Critical',
+                  statusText: 'Critical', // Status baru
+                  statusColor: const Color(0xFFFA4D5E), // Warna BG Merah
+                  statusTextColor: const Color(0xFFBF070A), // Warna Teks Merah
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const HealthMetricDetailPage(
                         title: 'Blood Sugar',
                         value: '110',
                         unit: 'mg/dL',
-                        status: 'After Meal',
+                        status: 'Critical',
                         icon: Icons.water_drop_outlined,
                         iconColor: Colors.redAccent,
                       ),
@@ -307,26 +308,26 @@ class HomeTab extends StatelessWidget {
                   context: context,
                   category: 'Blood Pressure',
                   iconWidget: SvgPicture.asset(
-                    'assets/images/Health.svg', // Menggunakan SVG asset
-                    colorFilter: const ColorFilter.mode(Colors.blueAccent, BlendMode.srcIn),
+                    'assets/images/Blood_Pressure.svg', // Menggunakan SVG asset
+                    colorFilter: const ColorFilter.mode(Color(0xFF4043FD), BlendMode.srcIn),
                     width: 24,
                   ),
-                  iconColor: Colors.blueAccent,
+                  iconColor: const Color(0xFF4043FD),
                   value: '120/80',
                   unit: 'mmHg',
-                  status: 'Normal',
-                  statusText: 'Normal', // Status baru
-                  statusColor: const Color(0xFF9CF0A6), // Warna BG Hijau
-                  statusTextColor: const Color(0xFF02A916), // Warna Teks Hijau
+                  status: 'Low',
+                  statusText: 'Low', // Status baru
+                  statusColor: const Color(0xFFFDFD66), // Warna BG Kuning
+                  statusTextColor: const Color(0xFFB7B726), // Warna Teks Kuning
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const HealthMetricDetailPage(
                         title: 'Blood Pressure',
                         value: '120/80',
                         unit: 'mmHg',
-                        status: 'Normal',
+                        status: 'Low',
                         icon: Icons.favorite_border,
-                        iconColor: Colors.blueAccent,
+                        iconColor: const Color(0xFF4043FD),
                       ),
                     ));
                   },
@@ -337,8 +338,8 @@ class HomeTab extends StatelessWidget {
                   context: context,
                   category: 'BMI',
                   iconWidget: SvgPicture.asset(
-                    'assets/images/weight.svg', // Menggunakan SVG asset yang baru
-                    colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
+                    'assets/images/bmi.svg', // Menggunakan SVG asset yang baru
+                    colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn), // Warna tetap hijau
                     width: 24,
                   ),
                   iconColor: Colors.green,

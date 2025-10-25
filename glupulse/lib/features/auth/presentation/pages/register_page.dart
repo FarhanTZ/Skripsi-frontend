@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
 
 class RegisterPage extends StatefulWidget {

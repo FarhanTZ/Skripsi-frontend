@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart' as auth;
 import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase.dart';
-import 'package:glupulse/features/profile/presentation/bloc/profile_cubit.dart';
+import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
 import 'package:glupulse/injection_container.dart';
+
 
 /// Widget ini bertugas untuk menyediakan ProfileCubit ke EditProfileScreen.
 class EditProfilePage extends StatelessWidget {
@@ -47,9 +49,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.initState();
     // Ambil data user dari AuthCubit sebagai data awal jika ada
     final authState = context.read<auth.AuthCubit>().state;
-    if (authState is auth.AuthAuthenticated) {
+    if (authState is AuthAuthenticated) {
       _populateFields(authState.user);
-    } else if (authState is auth.AuthProfileIncomplete) {
+    } else if (authState is AuthProfileIncomplete) {
       _populateFields(authState.user);
     }
   }
@@ -68,9 +70,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     // Ambil data user dari AuthCubit sebagai basis, karena pasti punya username & email.
     final authState = context.read<auth.AuthCubit>().state;
     UserEntity? authUser;
-    if (authState is auth.AuthAuthenticated) {
+    if (authState is AuthAuthenticated) {
       authUser = authState.user;
-    } else if (authState is auth.AuthProfileIncomplete) {
+    } else if (authState is AuthProfileIncomplete) {
       authUser = authState.user;
     }
     print('EditProfilePage: authUser dari AuthCubit: ${authUser?.username}, ${authUser?.email}'); // DEBUG

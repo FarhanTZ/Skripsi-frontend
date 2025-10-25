@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/features/Splash/presentation/pages/splash_screen.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
 import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
 import 'package:glupulse/injection_container.dart' as di;
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (_) => sl<AuthCubit>()..checkAuthenticationStatus(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'GluPulse',
         theme: AppTheme.lightTheme,
         home: BlocBuilder<AuthCubit, AuthState>(
@@ -50,5 +52,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// Path: d:\Skripsi\Codingan_Skirpsi\Frontend\glupulse\lib\features\auth\presentation\pages\login_page.dart

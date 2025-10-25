@@ -52,7 +52,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         },
       );
     }
-
+  
     // Jika update username gagal, langsung hentikan dan tampilkan error
     if (firstFailure != null) {
       emit(ProfileError(_mapFailureToMessage(firstFailure!)));

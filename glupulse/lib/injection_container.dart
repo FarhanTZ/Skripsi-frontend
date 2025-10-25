@@ -1,5 +1,5 @@
 import 'package:get_it/get_it.dart';
-import 'package:glupulse/features/profile/presentation/bloc/profile_cubit.dart';
+import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:google_sign_in/google_sign_in.dart';

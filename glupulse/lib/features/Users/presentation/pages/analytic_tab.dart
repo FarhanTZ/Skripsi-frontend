@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
 
 class AnalyticTab extends StatelessWidget {
@@ -132,19 +133,22 @@ class AnalyticTab extends StatelessWidget {
                   Column(
                     children: [
                       _buildMetricCard(
-                        context: context,
-                        icon: Icons.water_drop_outlined,
-                        color: Colors.redAccent,
-                        status: 'Normal',
-                        statusColor: const Color(0xFF9CF0A6),
-                        statusTextColor: const Color(0xFF02A916),
+                        context: context, 
+                        iconWidget: SvgPicture.asset(
+                          'assets/images/Health.svg',
+                          colorFilter: const ColorFilter.mode(Colors.redAccent, BlendMode.srcIn),
+                        ),
+                        iconBackgroundColor: Colors.redAccent,
+                        status: 'Critical',
+                        statusColor: const Color(0xFFFA4D5E), // Warna BG Merah
+                        statusTextColor: const Color(0xFFBF070A), // Warna Teks Merah
                         onTap: () {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => const HealthMetricDetailPage(
                               title: 'Blood Sugar',
                               value: '110',
                               unit: 'mg/dL',
-                              status: 'Normal',
+                              status: 'Critical',
                               icon: Icons.water_drop_outlined,
                               iconColor: Colors.redAccent,
                             ),
@@ -154,29 +158,35 @@ class AnalyticTab extends StatelessWidget {
                       const SizedBox(height: 12),
                       _buildMetricCard(
                         context: context,
-                        icon: Icons.favorite_border,
-                        color: Colors.blueAccent,
-                        status: 'Normal',
-                        statusColor: const Color(0xFF9CF0A6),
-                        statusTextColor: const Color(0xFF02A916),
+                        iconWidget: SvgPicture.asset(
+                          'assets/images/Blood_Pressure.svg',
+                          colorFilter: const ColorFilter.mode(Color(0xFF4043FD), BlendMode.srcIn),
+                        ),
+                        iconBackgroundColor: const Color(0xFF4043FD),
+                        status: 'Low',
+                        statusColor: const Color(0xFFFDFD66), // Warna BG Kuning
+                        statusTextColor: const Color(0xFFB7B726), // Warna Teks Kuning
                         onTap: () {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => const HealthMetricDetailPage(
                               title: 'Blood Pressure',
                               value: '120/80',
                               unit: 'mmHg',
-                              status: 'Normal',
+                              status: 'Low',
                               icon: Icons.favorite_border,
-                              iconColor: Colors.blueAccent,
+                              iconColor: const Color(0xFF4043FD),
                             ),
                           ));
                         },
                       ),
                       const SizedBox(height: 12),
                       _buildMetricCard(
-                        context: context,
-                        icon: Icons.calculate_outlined,
-                        color: Colors.green,
+                        context: context, 
+                        iconWidget: SvgPicture.asset(
+                          'assets/images/bmi.svg',
+                          colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
+                        ),
+                        iconBackgroundColor: Colors.green,
                         status: 'Normal',
                         statusColor: const Color(0xFF9CF0A6),
                         statusTextColor: const Color(0xFF02A916),
@@ -196,8 +206,11 @@ class AnalyticTab extends StatelessWidget {
                       const SizedBox(height: 12),
                       _buildMetricCard(
                         context: context,
-                        icon: Icons.monitor_heart_outlined,
-                        color: Colors.orangeAccent,
+                        iconWidget: SvgPicture.asset(
+                          'assets/images/health-rate.svg',
+                          colorFilter: const ColorFilter.mode(Colors.orangeAccent, BlendMode.srcIn),
+                        ),
+                        iconBackgroundColor: Colors.orangeAccent,
                         status: 'Normal',
                         statusColor: const Color(0xFF9CF0A6),
                         statusTextColor: const Color(0xFF02A916),
@@ -271,24 +284,24 @@ class AnalyticTab extends StatelessWidget {
 
   Widget _buildMetricCard({
     required BuildContext context,
-    required IconData icon,
-    required Color color,
+    required Widget iconWidget,
+    required Color iconBackgroundColor,
     String? status,
     Color? statusColor,
     Color? statusTextColor,
     required VoidCallback onTap,
   }) {
     // Data dummy, nantinya akan diganti dengan data dinamis
-    String title, value, unit;
-    if (icon == Icons.water_drop_outlined) {
+    String title, value, unit, iconType;
+    if (iconWidget is SvgPicture && iconWidget.bytesLoader is SvgAssetLoader && (iconWidget.bytesLoader as SvgAssetLoader).assetName.contains('Health.svg')) {
       title = 'Blood Sugar';
       value = '110';
       unit = 'mg/dL';
-    } else if (icon == Icons.favorite_border) {
+    } else if (iconWidget is SvgPicture && iconWidget.bytesLoader is SvgAssetLoader && (iconWidget.bytesLoader as SvgAssetLoader).assetName.contains('Blood_Pressure.svg')) {
       title = 'Blood Pressure';
       value = '120/80';
       unit = 'mmHg';
-    } else if (icon == Icons.calculate_outlined) {
+    } else if (iconWidget is SvgPicture && iconWidget.bytesLoader is SvgAssetLoader && (iconWidget.bytesLoader as SvgAssetLoader).assetName.contains('bmi.svg')) {
       title = 'BMI';
       value = '22.5';
       unit = 'kg/m²';
@@ -313,8 +326,8 @@ class AnalyticTab extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 28,
-                  backgroundColor: color.withOpacity(0.15),
-                  child: Icon(icon, color: color, size: 32),
+                  backgroundColor: iconBackgroundColor.withOpacity(0.15),
+                  child: SizedBox(width: 32, height: 32, child: iconWidget),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -337,6 +350,8 @@ class AnalyticTab extends StatelessWidget {
                 ),
                 if (status != null && statusColor != null)
                   Container(
+                    constraints: const BoxConstraints(minWidth: 75), // Menetapkan lebar minimum
+                    alignment: Alignment.center, // Menengahkan teks di dalam badge
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: statusColor,

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 
 class OtpVerificationPage extends StatefulWidget {
   final String userId;
@@ -14,16 +16,30 @@ class OtpVerificationPage extends StatefulWidget {
 }
 
 class _OtpVerificationPageState extends State<OtpVerificationPage> {
-  final _otpController = TextEditingController();
+  late List<TextEditingController> _controllers;
+  late List<FocusNode> _focusNodes;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = List.generate(6, (_) => TextEditingController());
+    _focusNodes = List.generate(6, (_) => FocusNode());
+  }
 
   @override
   void dispose() {
-    _otpController.dispose();
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    for (var focusNode in _focusNodes) {
+      focusNode.dispose();
+    }
     super.dispose();
   }
 
   Future<void> _verifyOtp() async {
-    final otp = _otpController.text;
+    // Gabungkan teks dari semua controller
+    final otp = _controllers.map((c) => c.text).join();
 
     if (otp.isEmpty || otp.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -33,6 +49,24 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     }
     // Panggil metode verifyOtp dari AuthCubit
     context.read<AuthCubit>().verifyOtp(widget.userId, otp);
+  }
+
+  void _onOtpChanged(String value, int index) {
+    if (value.length == 1 && index < 5) {
+      // Pindah ke field berikutnya jika digit dimasukkan
+      _focusNodes[index + 1].requestFocus();
+    }
+    if (value.isEmpty && index > 0) {
+      // Pindah ke field sebelumnya jika digit dihapus (backspace)
+      _focusNodes[index - 1].requestFocus();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Fokus ke field pertama saat halaman dimuat
+    FocusScope.of(context).requestFocus(_focusNodes[0]);
   }
 
   @override
@@ -86,31 +120,12 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 40),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.inputFieldColor,
-                      borderRadius: BorderRadius.circular(15.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 7,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      controller: _otpController,
-                      decoration: const InputDecoration(
-                        hintText: 'Kode OTP',
-                        hintStyle: TextStyle(color: AppTheme.inputLabelColor),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                      ),
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      maxLength: 6,
-                    ),
+                  // --- OTP Fields ---
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(6, (index) {
+                      return _buildOtpField(index);
+                    }),
                   ),
                   const SizedBox(height: 40),
                   Padding(
@@ -143,6 +158,45 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
           ),
         );
       },
+    );
+  }
+
+  // Widget helper untuk membuat satu field OTP
+  Widget _buildOtpField(int index) {
+    return SizedBox(
+      width: 50,
+      height: 60,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.inputFieldColor,
+          borderRadius: BorderRadius.circular(15.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 7,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: TextField(
+          controller: _controllers[index],
+          focusNode: _focusNodes[index],
+          onChanged: (value) => _onOtpChanged(value, index),
+          style: Theme.of(context).textTheme.headlineSmall,
+          keyboardType: TextInputType.number,
+          textAlign: TextAlign.center,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(1),
+            FilteringTextInputFormatter.digitsOnly,
+          ],
+          decoration: const InputDecoration(
+            counterText: "", // Sembunyikan counter default
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ),
     );
   }
 }
