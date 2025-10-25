@@ -5,7 +5,7 @@ import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart' as auth;
 import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:glupulse/features/profile/presentation/bloc/profile_cubit.dart';
-import 'package:glupulse/home_page.dart';
+import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
 import 'package:glupulse/injection_container.dart';
 
 /// Widget ini bertugas untuk menyediakan ProfileCubit ke EditProfileScreen.

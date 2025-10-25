@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:glupulse/features/activity/activity_detail_page.dart';
+import 'package:glupulse/features/activity/presentation/pages/activity_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
 import 'package:glupulse/features/notification/presentation/pages/notification_page.dart';

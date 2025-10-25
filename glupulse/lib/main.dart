@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:glupulse/splash_screen.dart';
+import 'package:glupulse/features/Splash/presentation/pages/splash_screen.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
-import 'package:glupulse/home_page.dart';
+import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
 import 'package:glupulse/injection_container.dart' as di;
 import 'package:glupulse/injection_container.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
