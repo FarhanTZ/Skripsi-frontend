@@ -1,6 +1,7 @@
 import 'package:glupulse/core/api/api_client.dart';
 import 'package:glupulse/core/error/exceptions.dart';
 import 'package:glupulse/features/auth/data/models/login_response_model.dart';
+import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
 
 /// Abstract class untuk mendefinisikan kontrak dari Auth Remote Data Source.
@@ -15,8 +16,12 @@ abstract class AuthRemoteDataSource {
 /// Implementasi konkret dari AuthRemoteDataSource.
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final ApiClient apiClient;
+  final AuthLocalDataSource localDataSource;
 
-  AuthRemoteDataSourceImpl({required this.apiClient});
+  AuthRemoteDataSourceImpl({
+    required this.apiClient,
+    required this.localDataSource,
+  });
 
   @override
   Future<LoginResponseModel> login(String username, String password) async {
@@ -28,8 +33,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'Password': password,
         },
       );
+      print('AuthRemoteDataSourceImpl: Respon API /login: $response'); // DEBUG
       // Parsing response JSON menjadi LoginResponseModel
-      return LoginResponseModel.fromJson(response);
+      final loginResponse = LoginResponseModel.fromJson(response);
+      await _cacheTokens(loginResponse);
+      return loginResponse;
     } on ServerException {
       rethrow; // Jika sudah ServerException (dari ApiClient), lempar kembali.
     } catch (e) {
@@ -47,8 +55,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'id_token': idToken,
         },
       );
+      print('AuthRemoteDataSourceImpl: Respon API /auth/mobile/google: $response'); // DEBUG
       // Parsing response JSON menjadi LoginResponseModel
-      return LoginResponseModel.fromJson(response);
+      final loginResponse = LoginResponseModel.fromJson(response);
+      await _cacheTokens(loginResponse);
+      return loginResponse;
     } on ServerException {
       rethrow; // Jika sudah ServerException (dari ApiClient), lempar kembali.
     } catch (e) {
@@ -74,8 +85,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           "city": params.city,
         },
       );
+      print('AuthRemoteDataSourceImpl: Respon API /signup: $response'); // DEBUG
       // Kita asumsikan responsenya sama dengan login (mengembalikan data user)
-      return LoginResponseModel.fromJson(response);
+      final loginResponse = LoginResponseModel.fromJson(response);
+      await _cacheTokens(loginResponse);
+      return loginResponse;
     } on ServerException {
       rethrow;
     } catch (e) {
@@ -93,13 +107,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'otp_code': otpCode,
         },
       );
+      print('AuthRemoteDataSourceImpl: Respon API /verify-otp: $response'); // DEBUG
       // Parsing response JSON menjadi LoginResponseModel
-      return LoginResponseModel.fromJson(response);
+      final loginResponse = LoginResponseModel.fromJson(response);
+      await _cacheTokens(loginResponse);
+      return loginResponse;
     } on ServerException {
       rethrow; // Jika sudah ServerException (dari ApiClient), lempar kembali.
     } catch (e) {
       // Tangani error koneksi atau error tak terduga lainnya.
       throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+    }
+  }
+
+  Future<void> _cacheTokens(LoginResponseModel response) async {
+    if (response.token.isNotEmpty) {
+      await localDataSource.cacheToken(response.token);
+    }
+    if (response.refreshToken.isNotEmpty) {
+      await localDataSource.cacheRefreshToken(response.refreshToken);
     }
   }
 }

@@ -5,7 +5,7 @@ import 'package:glupulse/features/Users/presentation/pages/analytic_tab.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/Users/presentation/pages/home_tab.dart';
 import 'package:glupulse/features/Users/presentation/pages/menu_tab.dart';
-import 'package:glupulse/features/Users/presentation/pages/profile_tab.dart';
+import 'package:glupulse/features/profile/presentation/pages/profile_tab.dart';
 import 'package:glupulse/features/Food/presentation/pages/cart_page.dart';
 
 

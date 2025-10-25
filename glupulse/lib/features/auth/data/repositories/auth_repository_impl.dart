@@ -20,10 +20,7 @@ class AuthRepositoryImpl implements AuthRepository {
       String username, String password) async {
     try {
       final loginResponse = await remoteDataSource.login(username, password);
-      // Di sini Anda bisa menyimpan token, misalnya menggunakan SharedPreferences.
-      // await localDataSource.cacheToken(loginResponse.token);
-
-      // Mengembalikan sisi kanan (Right) dari Either jika sukses.
+        // Mengembalikan sisi kanan (Right) dari Either jika sukses.
       // Perhatikan kita hanya mengembalikan `user` (sebuah Entity), bukan seluruh response model.
       return Right(loginResponse.user);
     } on ServerException catch (e) {
@@ -36,9 +33,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> loginWithGoogle(String idToken) async {
     try {
       final loginResponse = await remoteDataSource.loginWithGoogle(idToken);
-      // Sama seperti login biasa, kita bisa cache token di sini jika perlu.
-      // Dan kita hanya mengembalikan UserEntity.
-      // Karena login google langsung memberikan token, kita anggap ini sudah terotentikasi penuh.
+      // Login Google langsung memberikan token, jadi kita simpan.
+      await localDataSource.cacheToken(loginResponse.token);
+      await localDataSource.cacheUser(loginResponse.user);
       return Right(loginResponse.user);
     } on ServerException catch (e) {
       // Mengembalikan sisi kiri (Left) dari Either jika terjadi kegagalan.
@@ -64,8 +61,9 @@ class AuthRepositoryImpl implements AuthRepository {
       String userId, String otpCode) async {
     try {
       final otpResponse = await remoteDataSource.verifyOtp(userId, otpCode);
-      // Sama seperti login, kita hanya butuh UserEntity-nya.
-      // Anda bisa menyimpan token baru jika backend mengirimkannya.
+      // Setelah verifikasi OTP berhasil, kita mendapatkan token. Simpan token dan user.
+      await localDataSource.cacheToken(otpResponse.token);
+      await localDataSource.cacheUser(otpResponse.user);
       return Right(otpResponse.user);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
@@ -79,6 +77,17 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(user);
     } on CacheException {
       return Left(CacheFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> logout() async {
+    try {
+      await localDataSource.clearUser();
+      await localDataSource.clearToken();
+      return const Right(null); // Return Right(null) for success
+    } on CacheException {
+      return Left(CacheFailure()); // Or a more specific logout failure
     }
   }
 }

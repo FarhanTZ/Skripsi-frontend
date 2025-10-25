@@ -2,13 +2,17 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:glupulse/core/error/failures.dart';
 import 'package:glupulse/core/usecases/usecase.dart';
+import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
+import 'package:glupulse/features/auth/domain/repositories/auth_repository.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_with_google_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
+import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
 import 'package:dartz/dartz.dart';
+import 'package:glupulse/injection_container.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 // --- AuthState ---
@@ -30,6 +34,15 @@ class AuthLoading extends AuthState {}
 class AuthAuthenticated extends AuthState {
   final UserEntity user;
   const AuthAuthenticated(this.user);
+
+  @override
+  List<Object> get props => [user];
+}
+
+/// State saat pengguna terotentikasi tetapi profilnya belum lengkap.
+class AuthProfileIncomplete extends AuthState {
+  final UserEntity user;
+  const AuthProfileIncomplete(this.user);
 
   @override
   List<Object> get props => [user];
@@ -64,6 +77,8 @@ class AuthCubit extends Cubit<AuthState> {
   final RegisterUseCase registerUseCase;
   final LoginWithGoogleUseCase loginWithGoogleUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
+  final AuthRepository authRepository; // Tambahkan AuthRepository
+  final ProfileRepository profileRepository; // Tambahkan ProfileRepository
   final GoogleSignIn googleSignIn;
 
   AuthCubit({
@@ -72,6 +87,8 @@ class AuthCubit extends Cubit<AuthState> {
     required this.registerUseCase,
     required this.loginWithGoogleUseCase,
     required this.getCurrentUserUseCase,
+    required this.authRepository, // Injeksi AuthRepository
+    required this.profileRepository, // Injeksi ProfileRepository
     required this.googleSignIn,
   }) : super(AuthInitial());
 
@@ -93,13 +110,19 @@ class AuthCubit extends Cubit<AuthState> {
     authResult.fold(
       (failure) {
         // Jika tidak ada user di cache, anggap tidak terotentikasi
+        print('AuthCubit: Gagal mendapatkan user dari local storage: $failure. Emitting AuthUnauthenticated.'); // DEBUG
         print('AuthCubit: Tidak ada sesi ditemukan. Emitting AuthUnauthenticated.'); // DEBUG
         emit(AuthUnauthenticated());
       },
       (user) {
-        print(
-            'AuthCubit: Sesi ditemukan untuk user: ${user.username}. Emitting AuthAuthenticated.'); // DEBUG
-        emit(AuthAuthenticated(user)); // Emit state setelah timer selesai
+        // Setelah mendapatkan user, cek kelengkapan profilnya
+        if (user.isProfileComplete) {
+          print('AuthCubit: Sesi ditemukan dan profil lengkap untuk user: ${user.username}. Emitting AuthAuthenticated.'); // DEBUG
+          emit(AuthAuthenticated(user));
+        } else {
+          print('AuthCubit: Sesi ditemukan tapi profil tidak lengkap untuk user: ${user.username}. Emitting AuthProfileIncomplete.'); // DEBUG
+          emit(AuthProfileIncomplete(user));
+        }
       },
     );
   }
@@ -121,6 +144,7 @@ class AuthCubit extends Cubit<AuthState> {
       (user) {
         // Sesuai permintaan, selalu arahkan ke halaman OTP setelah login berhasil.
         print('AuthCubit: Login berhasil. Emitting AuthOtpRequired untuk user ID: ${user.id}'); // DEBUG
+        print('AuthCubit: User dari login: username="${user.username}", email="${user.email}"'); // DEBUG
         emit(AuthOtpRequired(user));
       },
     );
@@ -153,8 +177,7 @@ class AuthCubit extends Cubit<AuthState> {
       // Kirim idToken ke backend
       final result = await loginWithGoogleUseCase(LoginWithGoogleParams(idToken: idToken));
       result.fold(
-        (failure) => emit(AuthError(_mapFailureToMessage(failure))),
-        (user) => emit(AuthAuthenticated(user)), // Langsung authenticated
+        (failure) => emit(AuthError(_mapFailureToMessage(failure))), (user) => _fetchProfileAndEmitState(user),
       );
     } catch (e) {
       print('AuthCubit: Terjadi error saat login Google: $e'); // DEBUG
@@ -176,6 +199,7 @@ class AuthCubit extends Cubit<AuthState> {
       },
       (user) {
         // Setelah registrasi berhasil, arahkan ke halaman OTP.
+        print('AuthCubit: User dari register: username="${user.username}", email="${user.email}"'); // DEBUG
         emit(AuthOtpRequired(user));
       },
     );
@@ -195,12 +219,58 @@ class AuthCubit extends Cubit<AuthState> {
         print('AuthCubit: Verifikasi OTP gagal. Emitting AuthError: $message'); // DEBUG
         emit(AuthError(message)); // Jika gagal, emit AuthError
       },
-      (user) {
-        print('AuthCubit: Verifikasi OTP berhasil. Emitting AuthAuthenticated untuk user: ${user.username}'); // DEBUG
-        emit(AuthAuthenticated(user));
+      (user) => _fetchProfileAndEmitState(user),
+    );
+  }
+
+  /// Helper untuk mengambil profil terbaru dan memancarkan state yang sesuai.
+  Future<void> _fetchProfileAndEmitState(UserEntity initialUser) async {
+    print('AuthCubit: Mengambil profil lengkap untuk user: ${initialUser.id}');
+    // Ambil profil lengkap dari repository
+    final profileResult = await profileRepository.getUserProfile();
+
+    profileResult.fold(
+      (failure) {
+        // Jika gagal mengambil profil, gunakan data awal dan anggap profil tidak lengkap
+        print('AuthCubit: Gagal mengambil profil lengkap, menggunakan data awal. Error: $failure');
+        emit(AuthProfileIncomplete(initialUser));
+      },
+      (fullUser) {
+        print('AuthCubit: Profil lengkap didapatkan. isProfileComplete: ${fullUser.isProfileComplete}');
+        // Gunakan data user yang sudah lengkap untuk menentukan state
+        if (fullUser.isProfileComplete) {
+          emit(AuthAuthenticated(fullUser));
+        } else {
+          emit(AuthProfileIncomplete(fullUser));
+        }
       },
     );
   }
+
+  /// Metode untuk memperbarui data user di state saat ini.
+  /// Ini berguna setelah update profil, agar UI di seluruh aplikasi konsisten.
+  void updateUser(UserEntity user) {
+    print('AuthCubit: Memperbarui user di state. isProfileComplete: ${user.isProfileComplete}'); // DEBUG
+    print('AuthCubit: User yang diperbarui: username="${user.username}", email="${user.email}"'); // DEBUG
+    if (user.isProfileComplete) {
+      emit(AuthAuthenticated(user));
+    } else {
+      // Jika setelah update profil masih belum lengkap (seharusnya tidak terjadi, tapi sebagai fallback)
+      emit(AuthProfileIncomplete(user));
+    }
+  }
+
+  /// Metode untuk logout atau membersihkan sesi.
+  Future<void> logout() async {
+    print('AuthCubit: Melakukan logout...'); // DEBUG
+    await authRepository.logout(); // Hapus token dan user dari cache
+    // Repository sudah seharusnya menghapus semua token, tapi kita pastikan di sini
+    await sl<AuthLocalDataSource>().clearRefreshToken();
+    await googleSignIn.signOut(); // Logout juga dari Google jika login via Google
+    print('AuthCubit: Sesi dibersihkan. Emitting AuthUnauthenticated.'); // DEBUG
+    emit(AuthUnauthenticated());
+  }
+
 
   /// Helper untuk mengubah objek Failure menjadi pesan yang mudah dibaca.
   String _mapFailureToMessage(Failure failure) {

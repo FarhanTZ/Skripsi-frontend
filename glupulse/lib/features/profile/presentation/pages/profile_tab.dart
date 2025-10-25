@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/pages/login_page.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 
@@ -8,68 +10,94 @@ class ProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                // Container biru di bagian atas
-                _buildProfileHeader(context),
-                const SizedBox(height: 24),
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        String fullName = 'Guest User';
+        String email = 'email@example.com';
 
-                // Daftar menu di bawah container
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    children: [
-                      _buildProfileMenuItem(
-                        context: context,
-                        icon: Icons.person_outline,
-                        text: 'Edit Profile',
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const EditProfilePage(),
-                          ));
-                        },
+        if (state is AuthAuthenticated) {
+          final user = state.user;
+          // Gabungkan nama depan dan belakang, tangani jika salah satunya null
+          fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
+          // Jika nama lengkap masih kosong (misal, baru login Google), gunakan username
+          if (fullName.isEmpty) {
+            fullName = user.username;
+          }
+          email = user.email;
+        } else if (state is AuthProfileIncomplete) {
+          // Lakukan hal yang sama untuk state AuthProfileIncomplete
+          final user = state.user;
+          fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
+          if (fullName.isEmpty) {
+            fullName = user.username;
+          }
+          email = user.email;
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Container biru di bagian atas, sekarang dengan data dinamis
+                    _buildProfileHeader(context, fullName: fullName, email: email),
+                    const SizedBox(height: 24),
+
+                    // Daftar menu di bawah container
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
+                        children: [
+                          _buildProfileMenuItem(
+                            context: context,
+                            icon: Icons.person_outline,
+                            text: 'Edit Profile',
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const EditProfilePage(),
+                              ));
+                            },
+                          ),
+                          _buildProfileMenuItem(
+                            context: context,
+                            icon: Icons.settings_outlined,
+                            text: 'Settings',
+                            onTap: () {
+                              // TODO: Implement navigation to Settings page
+                            },
+                          ),
+                          _buildProfileMenuItem(
+                            context: context,
+                            icon: Icons.help_outline,
+                            text: 'Help & Support',
+                            onTap: () {
+                              // TODO: Implement navigation to Help page
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildProfileMenuItem(
+                            context: context,
+                            icon: Icons.logout,
+                            text: 'Logout',
+                            textColor: Colors.red,
+                            iconColor: Colors.red,
+                            onTap: () {
+                              _showModernLogoutDialog(context);
+                            },
+                          ),
+                        ],
                       ),
-                      _buildProfileMenuItem(
-                        context: context,
-                        icon: Icons.settings_outlined,
-                        text: 'Settings',
-                        onTap: () {
-                          // TODO: Implement navigation to Settings page
-                        },
-                      ),
-                      _buildProfileMenuItem(
-                        context: context,
-                        icon: Icons.help_outline,
-                        text: 'Help & Support',
-                        onTap: () {
-                          // TODO: Implement navigation to Help page
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      _buildProfileMenuItem(
-                        context: context,
-                        icon: Icons.logout,
-                        text: 'Logout',
-                        textColor: Colors.red,
-                        iconColor: Colors.red,
-                        onTap: () {
-                          _showModernLogoutDialog(context);
-                        },
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
-                const SizedBox(height: 24),
-              ],
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -137,11 +165,9 @@ class ProfileTab extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
+                      // Panggil metode logout dari AuthCubit
+                      pageContext.read<AuthCubit>().logout();
                       Navigator.of(dialogContext).pop(); // Tutup dialog
-                      Navigator.of(pageContext).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
-                        (Route<dynamic> route) => false,
-                      );
                     },
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     child: const Text('Logout', style: TextStyle(fontSize: 16, color: Colors.white)),
@@ -165,7 +191,11 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context) {
+  Widget _buildProfileHeader(
+    BuildContext context, {
+    required String fullName,
+    required String email,
+  }) {
     return Container(
       width: double.infinity,
       height: 238,
@@ -188,9 +218,9 @@ class ProfileTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Parhan', // Contoh nama
-            style: TextStyle(
+          Text(
+            fullName, // Data dinamis
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -198,10 +228,10 @@ class ProfileTab extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'parhan@example.com', // Contoh email
+            email, // Data dinamis
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
-              fontSize: 16,
+              fontSize: 15,
             ),
           ),
         ],

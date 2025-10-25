@@ -13,4 +13,5 @@ abstract class AuthRepository {
   Future<Either<Failure, UserEntity>> register({required RegisterParams params});
   Future<Either<Failure, UserEntity>> verifyOtp(String userId, String otpCode);
   Future<Either<Failure, UserEntity>> getCurrentUser();
+  Future<Either<Failure, void>> logout(); // Tambahkan metode logout
 }

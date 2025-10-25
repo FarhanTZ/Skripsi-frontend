@@ -5,6 +5,7 @@ import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
 import 'package:glupulse/features/auth/presentation/pages/register_page.dart';
 import 'package:glupulse/home_page.dart';
+import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -70,6 +71,13 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.of(context).push(
             MaterialPageRoute(
                 builder: (context) => OtpVerificationPage(userId: state.user.id)),
+          );
+        } else if (state is AuthProfileIncomplete) {
+          // Jika profil tidak lengkap, arahkan ke EditProfilePage
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (context) => const EditProfilePage(isFromAuthFlow: true)),
+            (route) => false,
           );
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context)

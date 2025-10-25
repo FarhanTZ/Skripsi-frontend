@@ -1,37 +1,62 @@
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 
-/// UserModel adalah implementasi dari UserEntity di layer data.
-/// Ia bertanggung jawab untuk konversi data dari/ke format eksternal (JSON).
+/// Model untuk data pengguna yang datang dari API (data layer).
+/// Ini adalah implementasi dari UserEntity.
 class UserModel extends UserEntity {
   const UserModel({
-    required super.id,
-    required super.username,
-    required super.email,
-    required super.name,
-  });
+    required String id,
+    required String username,
+    required String email,
+    String? firstName,
+    String? lastName,
+    String? dob,
+    String? gender,
+    String? addressLine1,
+    String? city,
+  }) : super(
+          id: id,
+          username: username,
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+          dob: dob,
+          gender: gender,
+          addressLine1: addressLine1,
+          city: city,
+        );
 
-  /// Factory constructor untuk membuat instance UserModel dari Map (JSON).
-  factory UserModel.fromJson(Map<String, dynamic> json) {
+  /// Factory constructor untuk membuat instance UserModel dari JSON.
+  factory UserModel.fromJson(Map<String, dynamic> json, {String source = 'unknown'}) {
+    print('UserModel.fromJson (Source: $source): Menerima JSON: $json'); // DEBUG
+    final parsedUsername = json['username'] as String? ?? '';
+    final parsedEmail = json['email'] as String? ?? '';
+    print('UserModel.fromJson (Source: $source): Parsed Username: "$parsedUsername", Parsed Email: "$parsedEmail"'); // DEBUG
     return UserModel(
-      // Backend mengirim 'user_id' saat login, dan mungkin 'id' di konteks lain.
-      id: (json['user_id'] ?? json['id']) as String? ?? '',
+      // Backend mengembalikan 'user_id' saat login/register, dan 'id' saat get profile.
+      id: (json['user_id'] ?? json['id'] ?? '').toString(),
       username: json['username'] as String? ?? '',
       email: json['email'] as String? ?? '',
-      // Menggabungkan first_name dan last_name untuk field 'name'
-      name: [
-        json['first_name'] as String? ?? '',
-        json['last_name'] as String? ?? ''
-      ].where((e) => e.isNotEmpty).join(' ').trim(),
+      firstName: json['first_name'] as String?,
+      lastName: json['last_name'] as String?,
+      dob: json['dob'] as String?,
+      gender: json['gender'] as String?,
+      addressLine1: json['address_line1'] as String?,
+      city: json['city'] as String?,
     );
   }
 
-  /// Method untuk mengubah instance UserModel menjadi Map (JSON).
+  /// Method untuk mengubah instance UserModel menjadi JSON.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'username': username,
       'email': email,
-      'name': name,
+      'first_name': firstName,
+      'last_name': lastName,
+      'dob': dob,
+      'gender': gender,
+      'address_line1': addressLine1,
+      'city': city,
     };
   }
 }

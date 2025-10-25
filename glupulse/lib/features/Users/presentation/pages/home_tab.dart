@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/activity/activity_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
@@ -11,8 +13,28 @@ class HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        String fullName = 'Guest';
+
+        // Ambil nama dari state AuthCubit
+        if (state is AuthAuthenticated) {
+          final user = state.user;
+          // Gabungkan nama depan dan belakang, tangani jika salah satunya null
+          fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
+          // Jika nama lengkap masih kosong, gunakan username sebagai fallback
+          if (fullName.isEmpty) {
+            fullName = user.username;
+          }
+        } else if (state is AuthProfileIncomplete) {
+          final user = state.user;
+          fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
+          if (fullName.isEmpty) {
+            fullName = user.username;
+          }
+        }
+        return SingleChildScrollView(
+          child: Column(
         children: [
           Container(
             width: double.infinity,
@@ -83,9 +105,9 @@ class HomeTab extends StatelessWidget {
                               const SizedBox(width: 12),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Hi, Parhan',
+                                children: [ 
+                                  Text(
+                                    'Hi, $fullName', // Menggunakan nama dinamis
                                     style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 4),
@@ -315,7 +337,7 @@ class HomeTab extends StatelessWidget {
                   context: context,
                   category: 'BMI',
                   iconWidget: SvgPicture.asset(
-                    'assets/images/Health.svg', // Menggunakan SVG asset yang sama
+                    'assets/images/weight.svg', // Menggunakan SVG asset yang baru
                     colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
                     width: 24,
                   ),
@@ -345,7 +367,7 @@ class HomeTab extends StatelessWidget {
                   context: context,
                   category: 'Heart Rate',
                   iconWidget: SvgPicture.asset(
-                    'assets/images/Health.svg', // Menggunakan SVG asset yang sama
+                    'assets/images/health-rate.svg', // Menggunakan SVG asset yang sama
                     colorFilter: const ColorFilter.mode(Colors.orangeAccent, BlendMode.srcIn),
                     width: 24,
                   ),
@@ -374,8 +396,8 @@ class HomeTab extends StatelessWidget {
           ), // End of Smart Health Metrix ListView
           const SizedBox(height: 24),
 
-          // --- Recommendation Food Title ---
-          Padding(
+            // --- Recommendation Food Title ---
+            Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Align(
               alignment: Alignment.centerLeft,
@@ -388,9 +410,9 @@ class HomeTab extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // --- Recommendation Food Cards ---
+            // --- Recommendation Food Cards ---
           SizedBox(
             height: 191, // Menyamakan tinggi dengan Smart Health Metrix
             child: ListView(
@@ -423,9 +445,9 @@ class HomeTab extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // --- Recommendation Activity Title ---
+            // --- Recommendation Activity Title ---
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Align(
@@ -439,9 +461,9 @@ class HomeTab extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // --- Recommendation Activity Cards ---
+            // --- Recommendation Activity Cards ---
           SizedBox(
             height: 191, // Menyamakan tinggi dengan Smart Health Metrix
             child: ListView(
@@ -490,8 +512,10 @@ class HomeTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24), // Menambahkan spasi di bagian bawah
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -518,111 +542,51 @@ class HomeTab extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: InkWell(
           onTap: onTap,
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(category.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: iconColor.withOpacity(0.8))),
-                    if (statusText != null && statusColor != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6.0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: statusColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            statusText,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: statusTextColor ?? Colors.white,
-                              fontSize: 10,
+                    iconWidget,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(category.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: iconColor.withOpacity(0.8))),
+                          if (statusText != null && statusColor != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6.0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: statusColor,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  statusText,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: statusTextColor ?? Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                        ],
                       ),
-                    const Spacer(),
-                    Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Theme.of(context).colorScheme.primary)),
-                    Text('$unit - $status', style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                    ),
                   ],
                 ),
-              ),
-              Positioned(
-                top: 12,
-                right: 12,
-                child: iconWidget,
-              ),
-            ],
+                const Spacer(),
+                Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Theme.of(context).colorScheme.primary)),
+                Text('$unit - $status', style: const TextStyle(fontSize: 13, color: Colors.grey)),
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  // Widget helper untuk membuat card INFORMASI
-  Widget _buildInfoCard({
-    required BuildContext context,
-    required String category,
-    required String title,
-    required String description,
-    required IconData icon,
-    required Color color,
-    String? statusText,
-    Color? statusColor,
-    Color? statusTextColor,
-  }) {
-    return SizedBox(
-      width: 170,
-      child: Card(
-        elevation: 1,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(category.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: color.withOpacity(0.8))),
-                  if (statusText != null && statusColor != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6.0),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: statusColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          statusText,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: statusTextColor ?? Colors.white,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    const SizedBox(height: 4),
-                  const Spacer(),
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  const SizedBox(height: 4),
-                  Text(description, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                ],
-              ),
-            ),
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Icon(icon, color: color, size: 24),
-            ),
-          ],
         ),
       ),
     );

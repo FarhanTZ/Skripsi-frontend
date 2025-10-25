@@ -7,6 +7,7 @@ import 'package:glupulse/home_page.dart';
 import 'package:glupulse/injection_container.dart' as di;
 import 'package:glupulse/injection_container.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 
 import 'features/introduction/presentation/pages/introduction_screen.dart';
 
@@ -33,6 +34,9 @@ class MyApp extends StatelessWidget {
             } else if (state is AuthAuthenticated) {
               // Jika sudah terotentikasi, langsung ke HomePage
               return const HomePage(); // Pastikan HomePage sudah di-import
+            } else if (state is AuthProfileIncomplete) {
+              // Jika profil tidak lengkap, arahkan untuk melengkapi
+              return const EditProfilePage(isFromAuthFlow: true);
             } else if (state is AuthOtpRequired) {
               // Jika butuh verifikasi OTP, arahkan ke OtpVerificationPage
               return OtpVerificationPage(userId: state.user.id);

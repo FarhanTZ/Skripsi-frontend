@@ -4,8 +4,13 @@ import 'dart:async';
 
 import 'package:glupulse/core/error/exceptions.dart';
 import 'package:http/http.dart' as http;
+import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
+import 'package:glupulse/injection_container.dart';
 
 class ApiClient {
+  // Akses service locator untuk mendapatkan data source
+  final AuthLocalDataSource _localDataSource = sl<AuthLocalDataSource>();
+
   // URL base dari API ngrok Anda
   static const String _baseUrl =
       'https://noncereal-uncongenially-gloria.ngrok-free.dev';
@@ -16,6 +21,91 @@ class ApiClient {
     'X-Platform': 'mobile',
   };
 
+  Future<Map<String, dynamic>> _refreshToken() async {
+    final url = Uri.parse('$_baseUrl/auth/refresh');
+    try {
+      final refreshToken = await _localDataSource.getLastRefreshToken();
+      final response = await http.post(
+        url,
+        headers: {
+          ..._defaultHeaders,
+          'Authorization': 'Bearer $refreshToken',
+        },
+      ).timeout(const Duration(seconds: 15));
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        final newAccessToken = responseBody['access_token'] as String;
+        await _localDataSource.cacheToken(newAccessToken);
+        // Backend mungkin juga mengirim refresh token baru
+        if (responseBody['refresh_token'] != null) {
+          final newRefreshToken = responseBody['refresh_token'] as String;
+          await _localDataSource.cacheRefreshToken(newRefreshToken);
+        }
+        return responseBody;
+      } else {
+        // Jika refresh token juga gagal, paksa logout
+        await _localDataSource.clearToken();
+        await _localDataSource.clearRefreshToken();
+        await _localDataSource.clearUser();
+        throw ServerException('Sesi Anda telah berakhir. Silakan login kembali.');
+      }
+    } catch (e) {
+      // Tangani semua jenis error saat refresh token dengan memaksa logout
+      await _localDataSource.clearToken();
+      await _localDataSource.clearRefreshToken();
+      await _localDataSource.clearUser();
+      throw ServerException('Sesi Anda telah berakhir. Silakan login kembali.');
+    }
+  }
+
+  bool _isTokenExpired(http.Response response) {
+    // Backend Anda mungkin mengembalikan 401 untuk token expired
+    return response.statusCode == 401;
+  }
+
+  // Metode GET generik
+  Future<Map<String, dynamic>> get(String endpoint, {required String token}) async {
+    final url = Uri.parse('$_baseUrl$endpoint');
+    final headers = {
+      ..._defaultHeaders,
+      'Authorization': 'Bearer $token',
+    };
+
+    try {
+      final response = await http
+          .get(
+            url,
+            headers: headers,
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (_isTokenExpired(response)) {
+        await _refreshToken();
+        final newToken = await _localDataSource.getLastToken();
+        // Ulangi request dengan token baru
+        return await get(endpoint, token: newToken);
+      }
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return responseBody;
+      } else {
+        // Tangani error lain dari server
+        throw ServerException(responseBody['message'] ?? 'Terjadi kesalahan pada server');
+      }
+    } on SocketException {
+      throw ServerException('Tidak ada koneksi internet. Periksa jaringan Anda.');
+    } on TimeoutException {
+      throw ServerException('Server tidak merespons. Coba lagi nanti.');
+    } catch (e) {
+      // Jika error berasal dari _refreshToken, lempar kembali
+      if (e is ServerException) rethrow;
+      throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga.');
+    }
+  }
   // Metode POST generik
   Future<Map<String, dynamic>> post(String endpoint, {Map<String, dynamic>? body}) async {
     final url = Uri.parse('$_baseUrl$endpoint');
@@ -45,6 +135,49 @@ class ApiClient {
       throw ServerException('Server tidak merespons. Coba lagi nanti.');
     } catch (e) {
       // Error lainnya, termasuk parsing JSON jika response tidak valid
+      throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga.');
+    }
+  }
+
+  // Metode PUT generik
+  Future<Map<String, dynamic>> put(String endpoint, {required Map<String, dynamic> body, required String token}) async {
+    final url = Uri.parse('$_baseUrl$endpoint');
+    final headers = {
+      ..._defaultHeaders,
+      'Authorization': 'Bearer $token',
+    };
+
+    try {
+      final response = await http
+          .put(
+            url,
+            headers: headers,
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (_isTokenExpired(response)) {
+        await _refreshToken();
+        final newToken = await _localDataSource.getLastToken();
+        // Ulangi request dengan token baru
+        return await put(endpoint, body: body, token: newToken);
+      }
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return responseBody;
+      } else {
+        // Tangani error lain dari server
+        throw ServerException(responseBody['message'] ?? 'Terjadi kesalahan pada server');
+      }
+    } on SocketException {
+      throw ServerException('Tidak ada koneksi internet. Periksa jaringan Anda.');
+    } on TimeoutException {
+      throw ServerException('Server tidak merespons. Coba lagi nanti.');
+    } catch (e) {
+      // Jika error berasal dari _refreshToken, lempar kembali
+      if (e is ServerException) rethrow;
       throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga.');
     }
   }

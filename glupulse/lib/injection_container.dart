@@ -1,4 +1,7 @@
 import 'package:get_it/get_it.dart';
+import 'package:glupulse/features/profile/presentation/bloc/profile_cubit.dart';
+import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
+import 'package:glupulse/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:glupulse/core/api/api_client.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
@@ -10,6 +13,10 @@ import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_with_google_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_otp_usecase.dart';
+import 'package:glupulse/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:glupulse/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,6 +34,8 @@ Future<void> init() async {
       registerUseCase: sl(),
       loginWithGoogleUseCase: sl(),
       getCurrentUserUseCase: sl(),
+      authRepository: sl(), // Sudah ada
+      profileRepository: sl(), // Tambahkan ini
       googleSignIn: sl(),
     ),
   );
@@ -51,11 +60,44 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(
       apiClient: sl(),
+      localDataSource: sl(),
     ),
   );
   sl.registerLazySingleton<AuthLocalDataSource>(
     () => AuthLocalDataSourceImpl(
       sharedPreferences: sl(),
+    ),
+  );
+
+  // --- Features - Profile ---
+
+  // Cubit
+  sl.registerFactory(
+    () => ProfileCubit(
+      getProfileUseCase: sl(),
+      updateProfileUseCase: sl(),
+      updateUsernameUseCase: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateUsernameUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(
+      apiClient: sl(),
+      localDataSource: sl(),
     ),
   );
 
