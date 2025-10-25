@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
+
 
 class ActivityDetailPage extends StatelessWidget {
   final String activityName;

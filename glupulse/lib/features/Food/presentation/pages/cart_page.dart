@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/Food/presentation/pages/payment_order_page.dart';
 
 class CartPage extends StatefulWidget {
