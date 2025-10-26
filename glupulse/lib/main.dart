@@ -9,7 +9,6 @@ import 'package:glupulse/injection_container.dart' as di;
 import 'package:glupulse/injection_container.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
-
 import 'features/introduction/presentation/pages/introduction_screen.dart';
 
 Future<void> main() async {
