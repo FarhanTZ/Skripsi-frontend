@@ -131,6 +131,40 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  /// Metode untuk menautkan akun yang sudah ada dengan Google.
+  Future<void> linkGoogleAccount() async {
+    print('AuthCubit: Memulai proses penautan akun Google'); // DEBUG
+    emit(AuthLoading()); // Tampilkan loading indicator di UI
+
+    try {
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // Pengguna membatalkan proses
+        print('AuthCubit: Penautan Google dibatalkan oleh pengguna.'); // DEBUG
+        checkAuthenticationStatus(); // Kembali ke state sebelumnya dengan memuat ulang user
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        print('AuthCubit: Gagal mendapatkan idToken dari Google untuk penautan.'); // DEBUG
+        emit(const AuthError('Gagal mendapatkan token dari Google.'));
+        return;
+      }
+
+      // Panggil repository untuk menautkan akun
+      final result = await authRepository.linkGoogleAccount(idToken);
+      result.fold(
+        (failure) => emit(AuthError(_mapFailureToMessage(failure))), (user) => _fetchProfileAndEmitState(user),
+      );
+    } catch (e) {
+      print('AuthCubit: Terjadi error saat menautkan akun Google: $e'); // DEBUG
+      emit(AuthError(_mapFailureToMessage(ServerFailure('Gagal menautkan akun Google. Silakan coba lagi.'))));
+    }
+  }
+
   /// Metode untuk melakukan proses registrasi.
   Future<void> register(RegisterParams params) async {
     print('AuthCubit: Memulai proses registrasi untuk username: ${params.username}'); // DEBUG

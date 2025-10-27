@@ -8,6 +8,7 @@ import 'package:glupulse/features/HealthData/presentation/pages/input_health_dat
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/notification/presentation/pages/notification_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
+import 'package:intl/intl.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -18,18 +19,21 @@ class HomeTab extends StatelessWidget {
       builder: (context, state) {
         String fullName = 'Guest';
 
+        // Mengambil dan memformat tanggal saat ini
+        final String currentDate = DateFormat('E, dd MMM yyyy').format(DateTime.now());
+
         // Ambil nama dari state AuthCubit
         if (state is AuthAuthenticated) {
           final user = state.user;
-          // Gabungkan nama depan dan belakang, tangani jika salah satunya null
-          fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
-          // Jika nama lengkap masih kosong, gunakan username sebagai fallback
+          // Gunakan nama depan, tangani jika null
+          fullName = user.firstName ?? '';
+          // Jika nama depan kosong, gunakan username sebagai fallback
           if (fullName.isEmpty) {
             fullName = user.username;
           }
         } else if (state is AuthProfileIncomplete) {
           final user = state.user;
-          fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
+          fullName = user.firstName ?? '';
           if (fullName.isEmpty) {
             fullName = user.username;
           }
@@ -80,10 +84,10 @@ class HomeTab extends StatelessWidget {
                                     Colors.white, BlendMode.srcIn),
                                 width: 20,
                               ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Tue, 25 Jan 2025',
-                                style: TextStyle(color: Colors.white, fontSize: 16),
+                              const SizedBox(width: 8), 
+                              Text(
+                                currentDate, // Menggunakan tanggal dinamis
+                                style: const TextStyle(color: Colors.white, fontSize: 16),
                               ),
                             ],
                           ),
