@@ -65,3 +65,18 @@ class AuthError extends AuthState {
   @override
   List<Object> get props => [message];
 }
+
+/// State ketika permintaan reset password berhasil dan OTP diperlukan.
+class PasswordResetOtpRequired extends AuthState {
+  final String email; // Kita teruskan email untuk digunakan nanti
+  const PasswordResetOtpRequired(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}
+
+/// State ketika password berhasil direset.
+class PasswordResetCompleted extends AuthState {
+  @override
+  List<Object?> get props => [];
+}

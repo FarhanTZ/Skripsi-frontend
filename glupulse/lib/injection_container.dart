@@ -12,6 +12,8 @@ import 'package:glupulse/features/auth/domain/usecases/get_current_user_usecase.
 import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_with_google_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
+import 'package:glupulse/features/auth/domain/usecases/request_password_reset_usecase.dart';
+import 'package:glupulse/features/auth/domain/usecases/complete_password_reset_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_signup_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:glupulse/features/profile/data/datasources/profile_remote_data_source.dart';
@@ -36,6 +38,8 @@ Future<void> init() async {
       registerUseCase: sl(),
       loginWithGoogleUseCase: sl(),
       getCurrentUserUseCase: sl(),
+      requestPasswordResetUseCase: sl(),
+      completePasswordResetUseCase: sl(),
       authRepository: sl(), // Sudah ada
       profileRepository: sl(), // Tambahkan ini
       googleSignIn: sl(),
@@ -50,6 +54,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => VerifyOtpUseCase(sl()));
   sl.registerLazySingleton(() => VerifySignupOtpUseCase(sl())); // Tambahkan ini
   sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
+  sl.registerLazySingleton(() => RequestPasswordResetUseCase(sl()));
+  sl.registerLazySingleton(() => CompletePasswordResetUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(

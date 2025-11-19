@@ -5,15 +5,22 @@ import 'package:flutter/services.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
+import 'package:glupulse/features/auth/presentation/pages/complete_password_reset_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 
 class OtpVerificationPage extends StatefulWidget {
   final String? userId;
   final String? pendingId;
+  final String? emailForReset; // Untuk alur lupa password
+  final String? userIdForReset; // Untuk alur lupa password
 
-  const OtpVerificationPage({super.key, this.userId, this.pendingId})
+  const OtpVerificationPage(
+      {super.key,
+      this.userId,
+      this.pendingId,
+      this.emailForReset, this.userIdForReset})
       // Pastikan salah satu dari userId atau pendingId tidak null
-      : assert(userId != null || pendingId != null, 'userId atau pendingId harus disediakan');
+      : assert(userId != null || pendingId != null || emailForReset != null || userIdForReset != null, 'ID harus disediakan');
 
   @override
   State<OtpVerificationPage> createState() => _OtpVerificationPageState();
@@ -69,12 +76,24 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       );
       return;
     }
-    // Panggil metode verifyOtp dari AuthCubit
-    context.read<AuthCubit>().verifyOtp(
-      userId: widget.userId,
-      pendingId: widget.pendingId,
-      otpCode: otp,
-    );
+
+    // Cek apakah ini alur reset password
+    if (widget.userIdForReset != null) {
+      // Jika ya, navigasi ke halaman password baru dengan membawa data
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (_) => CompletePasswordResetPage(
+          userId: widget.userIdForReset!,
+          otpCode: otp,
+        ),
+      ));
+    } else {
+      // Jika tidak, ini adalah alur login/signup biasa
+      context.read<AuthCubit>().verifyOtp(
+            userId: widget.userId,
+            pendingId: widget.pendingId,
+            otpCode: otp,
+          );
+    }
   }
 
   Future<void> _resendOtp() async {
@@ -82,6 +101,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       context.read<AuthCubit>().resendOtp(
         userId: widget.userId,
         pendingId: widget.pendingId,
+        // TODO: Tambahkan logika resend OTP untuk reset password jika API-nya ada
       );
     }
   }
@@ -108,6 +128,20 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
+        // Listener untuk alur reset password
+        if (state is AuthOtpRequired && widget.emailForReset != null) {
+          // Setelah request reset, backend akan mengembalikan user_id
+          // Kita navigasi ke halaman OTP lagi, tapi kali ini dengan user_id
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (_) => OtpVerificationPage(
+              userIdForReset: state.userId, // Ambil userId dari state
+            ),
+          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Email ditemukan. Silakan masukkan OTP.')),
+          );
+        }
+
         print('OtpVerificationPage Listener: Menerima state -> ${state.runtimeType}'); // DEBUG
         if (state is AuthAuthenticated) {
           // Jika OTP benar, navigasi ke HomePage
@@ -157,7 +191,9 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Kami telah mengirimkan kode verifikasi ke email Anda.',
+                    widget.emailForReset != null
+                        ? 'Kami telah mengirimkan kode verifikasi ke ${widget.emailForReset}.'
+                        : 'Kami telah mengirimkan kode verifikasi ke email Anda.',
                     style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),

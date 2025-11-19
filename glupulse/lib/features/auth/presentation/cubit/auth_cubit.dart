@@ -6,6 +6,8 @@ import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.d
 import 'package:glupulse/features/auth/domain/repositories/auth_repository.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_with_google_usecase.dart';
+import 'package:glupulse/features/auth/domain/usecases/request_password_reset_usecase.dart';
+import 'package:glupulse/features/auth/domain/usecases/complete_password_reset_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
@@ -25,6 +27,8 @@ class AuthCubit extends Cubit<AuthState> {
   final RegisterUseCase registerUseCase;
   final LoginWithGoogleUseCase loginWithGoogleUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
+  final RequestPasswordResetUseCase requestPasswordResetUseCase;
+  final CompletePasswordResetUseCase completePasswordResetUseCase;
   final AuthRepository authRepository; // Tambahkan AuthRepository
   final ProfileRepository profileRepository; // Tambahkan ProfileRepository
   final GoogleSignIn googleSignIn;
@@ -36,6 +40,8 @@ class AuthCubit extends Cubit<AuthState> {
     required this.registerUseCase,
     required this.loginWithGoogleUseCase,
     required this.getCurrentUserUseCase,
+    required this.requestPasswordResetUseCase,
+    required this.completePasswordResetUseCase,
     required this.authRepository, // Injeksi AuthRepository
     required this.profileRepository, // Injeksi ProfileRepository
     required this.googleSignIn,
@@ -265,6 +271,49 @@ class AuthCubit extends Cubit<AuthState> {
         print('AuthCubit: Permintaan kirim ulang OTP berhasil.'); // DEBUG
         // Emit state baru untuk menandakan sukses dan menampilkan pesan di UI
         emit(const AuthOtpResent('Kode OTP baru telah dikirimkan.'));
+      },
+    );
+  }
+
+  /// Metode untuk meminta reset password.
+  Future<void> requestPasswordReset(String email) async {
+    emit(AuthLoading());
+    final result = await requestPasswordResetUseCase(RequestPasswordResetParams(email: email));
+
+    result.fold(
+      (failure) {
+        emit(AuthError(_mapFailureToMessage(failure)));
+      },
+      (response) {
+        // Setelah request reset, backend mengembalikan user_id.
+        // Kita emit state AuthOtpRequired dengan user_id tersebut.
+        final userId = response.user.id;
+        emit(AuthOtpRequired(userId: userId));
+      },
+    );
+  }
+
+  /// Metode untuk menyelesaikan reset password.
+  Future<void> completePasswordReset({
+    required String userId,
+    required String otpCode,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    emit(AuthLoading());
+    final result = await completePasswordResetUseCase(CompletePasswordResetParams(
+      userId: userId,
+      otpCode: otpCode,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
+    ));
+
+    result.fold(
+      (failure) {
+        emit(AuthError(_mapFailureToMessage(failure)));
+      },
+      (_) {
+        emit(PasswordResetCompleted());
       },
     );
   }

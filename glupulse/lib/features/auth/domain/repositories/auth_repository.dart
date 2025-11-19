@@ -18,4 +18,11 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> logout(); // Tambahkan metode logout
   Future<Either<Failure, UserEntity>> linkGoogleAccount(String idToken);
   Future<Either<Failure, void>> resendOtp({String? userId, String? pendingId});
+  Future<Either<Failure, LoginResponseModel>> requestPasswordReset(String email);
+  Future<Either<Failure, void>> completePasswordReset({
+    required String userId,
+    required String otpCode,
+    required String newPassword,
+    required String confirmPassword,
+  });
 }

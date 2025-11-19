@@ -14,6 +14,13 @@ abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> verifySignupOtp(String pendingId, String otpCode); // Metode baru
   Future<LoginResponseModel> linkGoogleAccount(String idToken);
   Future<void> resendOtp({String? userId, String? pendingId});
+  Future<LoginResponseModel> requestPasswordReset(String email);
+  Future<void> completePasswordReset({
+    required String userId,
+    required String otpCode,
+    required String newPassword,
+    required String confirmPassword,
+  });
 }
 
 /// Implementasi konkret dari AuthRemoteDataSource.
@@ -203,6 +210,48 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       rethrow;
     } catch (e) {
       throw ServerException('Gagal mengirim ulang OTP. Periksa koneksi Anda.');
+    }
+  }
+
+  @override
+  Future<LoginResponseModel> requestPasswordReset(String email) async {
+    try {
+      final response = await apiClient.post(
+        '/password/reset/request',
+        body: {
+          'email': email,
+        },
+      );
+      // Asumsikan backend mengembalikan data user (termasuk ID) setelah request berhasil
+      return LoginResponseModel.fromJson(response);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal meminta reset password. Periksa koneksi Anda.');
+    }
+  }
+
+  @override
+  Future<void> completePasswordReset({
+    required String userId,
+    required String otpCode,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      await apiClient.post(
+        '/password/reset/complete',
+        body: {
+          'user_id': userId,
+          'otp_code': otpCode,
+          'new_password': newPassword,
+          'confirm_password': confirmPassword,
+        },
+      );
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal menyelesaikan reset password. Periksa koneksi Anda.');
     }
   }
 }
