@@ -10,6 +10,7 @@ import 'package:glupulse/features/auth/domain/usecases/request_password_reset_us
 import 'package:glupulse/features/auth/domain/usecases/complete_password_reset_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/update_password_usecase.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_signup_otp_usecase.dart';
@@ -18,6 +19,12 @@ import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
 import 'package:dartz/dartz.dart';
 import 'package:glupulse/injection_container.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+/// A generic success state that can carry a message.
+class AuthSuccess extends AuthState {
+  final String message;
+  const AuthSuccess(this.message);
+}
 
 // --- AuthCubit ---
 /// Cubit yang mengelola state otentikasi.
@@ -31,6 +38,7 @@ class AuthCubit extends Cubit<AuthState> {
   final RequestPasswordResetUseCase requestPasswordResetUseCase;
   final CompletePasswordResetUseCase completePasswordResetUseCase;
   final UpdateUsernameUseCase updateUsernameUseCase;
+  final UpdatePasswordUseCase updatePasswordUseCase;
   final AuthRepository authRepository; // Tambahkan AuthRepository
   final ProfileRepository profileRepository; // Tambahkan ProfileRepository
   final GoogleSignIn googleSignIn;
@@ -45,6 +53,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.requestPasswordResetUseCase,
     required this.completePasswordResetUseCase,
     required this.updateUsernameUseCase,
+    required this.updatePasswordUseCase,
     required this.authRepository, // Injeksi AuthRepository
     required this.profileRepository, // Injeksi ProfileRepository
     required this.googleSignIn,
@@ -335,6 +344,29 @@ class AuthCubit extends Cubit<AuthState> {
         // kita mendapatkan data user yang paling baru dari server.
         // Kita gunakan 'updatedUser' sebagai data awal jika fetch gagal.
         _fetchProfileAndEmitState(updatedUser);
+      },
+    );
+  }
+
+  /// Metode untuk memperbarui password.
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    emit(AuthLoading());
+    final result = await updatePasswordUseCase(UpdatePasswordParams(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
+    ));
+
+    result.fold(
+      (failure) {
+        emit(AuthError(_mapFailureToMessage(failure)));
+      },
+      (_) {
+        emit(const AuthSuccess('Password berhasil diperbarui!'));
       },
     );
   }

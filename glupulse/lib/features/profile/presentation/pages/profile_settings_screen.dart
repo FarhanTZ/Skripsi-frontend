@@ -5,6 +5,7 @@ import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/profile/presentation/pages/change_username_page.dart';
+import 'package:glupulse/features/profile/presentation/pages/change_password_page.dart';
 
 class ProfileSettingsScreen extends StatelessWidget {
   const ProfileSettingsScreen({super.key});
@@ -31,17 +32,7 @@ class ProfileSettingsScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: BlocConsumer<AuthCubit, AuthState>(listener: (context, state) {
-        if (state is AuthError) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(state.message)));
-          // Muat ulang data user untuk kembali ke state sebelum error
-          context.read<AuthCubit>().checkAuthenticationStatus();
-        } else if (state is AuthAuthenticated) {
-          // Bisa tambahkan notifikasi sukses jika diperlukan
-        }
-      }, builder: (context, state) {
+      body: BlocBuilder<AuthCubit, AuthState>(builder: (context, state) {
         if (state is AuthLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -85,7 +76,9 @@ class ProfileSettingsScreen extends StatelessWidget {
                 icon: Icons.lock_outline,
                 text: 'Ganti Password',
                 onTap: () {
-                  print('Tombol Ganti Password diklik');
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const ChangePasswordPage(),
+                  ));
                 },
               ),
               const SizedBox(height: 16),

@@ -20,6 +20,7 @@ import 'package:glupulse/features/profile/data/datasources/profile_remote_data_s
 import 'package:glupulse/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/update_password_usecase.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,6 +42,7 @@ Future<void> init() async {
       requestPasswordResetUseCase: sl(),
       completePasswordResetUseCase: sl(),
       updateUsernameUseCase: sl(), // Tambahkan ini
+      updatePasswordUseCase: sl(),
       authRepository: sl(), // Sudah ada
       profileRepository: sl(), // Tambahkan ini
       googleSignIn: sl(),
@@ -94,6 +96,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateUsernameUseCase(sl()));
+  sl.registerLazySingleton(() => UpdatePasswordUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<ProfileRepository>(

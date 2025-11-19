@@ -8,6 +8,7 @@ abstract class ProfileRemoteDataSource {
   Future<UserModel> getUserProfile();
   Future<UserModel> updateUserProfile(UpdateProfileParams params);
   Future<UserModel> updateUsername(String newUsername);
+  Future<void> updatePassword(String currentPassword, String newPassword, String confirmPassword);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -91,6 +92,27 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       rethrow;
     } catch (e) {
       throw ServerException('Gagal memperbarui username.');
+    }
+  }
+
+  @override
+  Future<void> updatePassword(String currentPassword, String newPassword, String confirmPassword) async {
+    try {
+      final token = await localDataSource.getLastToken();
+      await apiClient.put(
+        '/profile/password',
+        body: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+          'confirm_password': confirmPassword,
+        },
+        token: token,
+      );
+      // Tidak ada return value, sukses ditandai dengan status 2xx
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal memperbarui password.');
     }
   }
 }

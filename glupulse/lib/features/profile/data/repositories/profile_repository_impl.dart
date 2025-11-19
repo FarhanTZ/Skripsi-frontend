@@ -7,6 +7,7 @@ import 'package:glupulse/features/profile/data/datasources/profile_remote_data_s
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/update_password_usecase.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
@@ -49,6 +50,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
       // Setelah update berhasil, simpan juga user baru ke local cache
       await localDataSource.cacheUser(updatedUser);
       return Right(updatedUser);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updatePassword(UpdatePasswordParams params) async {
+    try {
+      await remoteDataSource.updatePassword(
+        params.currentPassword,
+        params.newPassword,
+        params.confirmPassword,
+      );
+      return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     }
