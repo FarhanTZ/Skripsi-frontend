@@ -4,6 +4,7 @@ import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
+import 'package:glupulse/features/profile/presentation/pages/change_username_page.dart';
 
 class ProfileSettingsScreen extends StatelessWidget {
   const ProfileSettingsScreen({super.key});
@@ -61,7 +62,14 @@ class ProfileSettingsScreen extends StatelessWidget {
                 icon: Icons.person_outline,
                 text: 'Ganti Username',
                 onTap: () {
-                  print('Tombol Ganti Username diklik');
+                  if (user != null) {
+                    final currentUser = user; // Buat variabel non-nullable
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => ChangeUsernamePage(
+                        currentUsername: currentUser.username,
+                      ),
+                    ));
+                  }
                 },
               ),
               _buildProfileMenuItem(

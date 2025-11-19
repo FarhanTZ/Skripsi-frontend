@@ -43,10 +43,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> updateUsername(
-      UpdateUsernameParams params) async {
+  Future<Either<Failure, UserEntity>> updateUsername(UpdateUsernameParams params) async {
     try {
-      final updatedUser = await remoteDataSource.updateUsername(params.newUsername, params.password);
+      final updatedUser = await remoteDataSource.updateUsername(params.newUsername);
       // Setelah update berhasil, simpan juga user baru ke local cache
       await localDataSource.cacheUser(updatedUser);
       return Right(updatedUser);

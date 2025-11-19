@@ -7,7 +7,7 @@ import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase
 abstract class ProfileRemoteDataSource {
   Future<UserModel> getUserProfile();
   Future<UserModel> updateUserProfile(UpdateProfileParams params);
-  Future<UserModel> updateUsername(String newUsername, String password);
+  Future<UserModel> updateUsername(String newUsername);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -69,19 +69,24 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<UserModel> updateUsername(String newUsername, String password) async {
+  Future<UserModel> updateUsername(String newUsername) async {
     try {
       final token = await localDataSource.getLastToken();
       final response = await apiClient.put(
         '/profile/username', // Endpoint khusus untuk username
         body: {
           'new_username': newUsername,
-          'password': password,
         },
         token: token,
       );
-      // Asumsikan responsenya sama, mengembalikan data user yang diupdate di key 'data'
-      return UserModel.fromJson(response['data']);
+      // PERBAIKAN: Asumsikan jika request sukses (2xx), body respons adalah data user yang baru,
+      // baik itu di dalam key 'user' atau langsung di root.
+      if (response.containsKey('user') && response['user'] is Map<String, dynamic>) {
+        return UserModel.fromJson(response['user'], source: 'update_username');
+      } else {
+        // Jika tidak ada key 'user', coba parsing langsung dari root response.
+        return UserModel.fromJson(response, source: 'update_username_root');
+      }
     } on ServerException {
       rethrow;
     } catch (e) {

@@ -42,7 +42,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         emit(const ProfileError('Password diperlukan untuk mengubah username.'));
         return;
       }
-      final usernameResult = await updateUsernameUseCase(UpdateUsernameParams(newUsername: params.username!, password: params.password!));
+      final usernameResult = await updateUsernameUseCase(UpdateUsernameParams(newUsername: params.username!));
       usernameResult.fold(
         (failure) {
           firstFailure = failure;

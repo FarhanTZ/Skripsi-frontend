@@ -40,6 +40,7 @@ Future<void> init() async {
       getCurrentUserUseCase: sl(),
       requestPasswordResetUseCase: sl(),
       completePasswordResetUseCase: sl(),
+      updateUsernameUseCase: sl(), // Tambahkan ini
       authRepository: sl(), // Sudah ada
       profileRepository: sl(), // Tambahkan ini
       googleSignIn: sl(),
