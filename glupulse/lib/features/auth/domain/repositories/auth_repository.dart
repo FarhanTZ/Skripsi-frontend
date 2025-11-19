@@ -17,4 +17,5 @@ abstract class AuthRepository {
   Future<Either<Failure, UserEntity>> getCurrentUser();
   Future<Either<Failure, void>> logout(); // Tambahkan metode logout
   Future<Either<Failure, UserEntity>> linkGoogleAccount(String idToken);
+  Future<Either<Failure, void>> resendOtp({String? userId, String? pendingId});
 }

@@ -246,6 +246,29 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
+  /// Metode untuk mengirim ulang kode OTP.
+  Future<void> resendOtp({String? userId, String? pendingId}) async {
+    print('AuthCubit: Meminta pengiriman ulang OTP...'); // DEBUG
+    // Tidak mengubah state menjadi loading agar UI tidak terblokir total,
+    // hanya menampilkan snackbar.
+
+    final result = await authRepository.resendOtp(userId: userId, pendingId: pendingId);
+
+    result.fold(
+      (failure) {
+        final message = _mapFailureToMessage(failure);
+        print('AuthCubit: Gagal mengirim ulang OTP. Emitting AuthError: $message'); // DEBUG
+        // Emit error agar bisa ditangkap listener di UI untuk menampilkan snackbar
+        emit(AuthError(message));
+      },
+      (_) {
+        print('AuthCubit: Permintaan kirim ulang OTP berhasil.'); // DEBUG
+        // Emit state baru untuk menandakan sukses dan menampilkan pesan di UI
+        emit(const AuthOtpResent('Kode OTP baru telah dikirimkan.'));
+      },
+    );
+  }
+
   /// Metode untuk memperbarui data user di state saat ini.
   /// Ini berguna setelah update profil, agar UI di seluruh aplikasi konsisten.
   void updateUser(UserEntity user) {

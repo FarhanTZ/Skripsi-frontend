@@ -13,6 +13,7 @@ abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> verifyOtp(String userId, String otpCode);
   Future<LoginResponseModel> verifySignupOtp(String pendingId, String otpCode); // Metode baru
   Future<LoginResponseModel> linkGoogleAccount(String idToken);
+  Future<void> resendOtp({String? userId, String? pendingId});
 }
 
 /// Implementasi konkret dari AuthRemoteDataSource.
@@ -179,6 +180,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
     if (response.refreshToken.isNotEmpty) {
       await localDataSource.cacheRefreshToken(response.refreshToken);
+    }
+  }
+
+  @override
+  Future<void> resendOtp({String? userId, String? pendingId}) async {
+    try {
+      // Buat body request berdasarkan ID yang tersedia
+      final body = <String, String>{};
+      if (userId != null) {
+        body['user_id'] = userId;
+      } else if (pendingId != null) {
+        body['pending_id'] = pendingId;
+      } else {
+        // Seharusnya tidak terjadi jika logika di cubit benar
+        throw ServerException('User ID atau Pending ID dibutuhkan untuk mengirim ulang OTP.');
+      }
+
+      await apiClient.post('/resend-otp', body: body);
+      // Tidak ada return value, sukses jika tidak ada exception
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal mengirim ulang OTP. Periksa koneksi Anda.');
     }
   }
 }

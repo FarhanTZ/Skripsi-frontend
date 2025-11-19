@@ -44,6 +44,16 @@ class AuthOtpRequired extends AuthState {
   List<Object?> get props => [userId, pendingId];
 }
 
+/// State saat OTP berhasil dikirim ulang.
+class AuthOtpResent extends AuthState {
+  final String message;
+
+  const AuthOtpResent(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
 /// State saat pengguna tidak terotentikasi (misal: setelah logout, atau belum login).
 class AuthUnauthenticated extends AuthState {}
 

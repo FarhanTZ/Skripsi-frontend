@@ -117,4 +117,15 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> resendOtp(
+      {String? userId, String? pendingId}) async {
+    try {
+      await remoteDataSource.resendOtp(userId: userId, pendingId: pendingId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
+  }
 }

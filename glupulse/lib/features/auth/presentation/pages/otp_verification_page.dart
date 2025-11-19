@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
@@ -21,12 +22,29 @@ class OtpVerificationPage extends StatefulWidget {
 class _OtpVerificationPageState extends State<OtpVerificationPage> {
   late List<TextEditingController> _controllers;
   late List<FocusNode> _focusNodes;
+  Timer? _timer;
+  int _start = 60; // Durasi countdown dalam detik
+  bool _canResend = false;
 
   @override
   void initState() {
     super.initState();
     _controllers = List.generate(6, (_) => TextEditingController());
     _focusNodes = List.generate(6, (_) => FocusNode());
+    startTimer();
+  }
+
+  void startTimer() {
+    _canResend = false;
+    _start = 60;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_start == 0) {
+        setState(() => _canResend = true);
+        timer.cancel();
+      } else {
+        setState(() => _start--);
+      }
+    });
   }
 
   @override
@@ -37,6 +55,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     for (var focusNode in _focusNodes) {
       focusNode.dispose();
     }
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -56,6 +75,15 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       pendingId: widget.pendingId,
       otpCode: otp,
     );
+  }
+
+  Future<void> _resendOtp() async {
+    if (_canResend) {
+      context.read<AuthCubit>().resendOtp(
+        userId: widget.userId,
+        pendingId: widget.pendingId,
+      );
+    }
   }
 
   void _onOtpChanged(String value, int index) {
@@ -87,6 +115,13 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
             MaterialPageRoute(builder: (context) => const HomePage()),
             (route) => false,
           );
+        } else if (state is AuthOtpResent) {
+          // Tampilkan snackbar sukses dan mulai ulang timer
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(state.message)));
+          startTimer(); // Mulai ulang countdown
+          // Tidak perlu emit state baru, cukup reset timer di UI
         } else if (state is AuthError) {
           // Tampilkan error jika OTP salah atau ada masalah lain
           ScaffoldMessenger.of(context)
@@ -135,6 +170,31 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                     }),
                   ),
                   const SizedBox(height: 40),
+                  // --- Resend OTP ---
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _canResend
+                            ? "Tidak menerima kode? "
+                            : "Kirim ulang kode dalam ",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      if (!_canResend)
+                        Text(
+                          "0:${_start.toString().padLeft(2, '0')}",
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      if (_canResend)
+                        GestureDetector(
+                          onTap: _resendOtp,
+                          child: Text("Kirim Ulang", style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40.0),
                     child: ElevatedButton(
