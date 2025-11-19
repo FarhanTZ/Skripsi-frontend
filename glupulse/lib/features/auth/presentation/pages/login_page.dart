@@ -5,6 +5,7 @@ import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
 import 'package:glupulse/features/auth/presentation/pages/register_page.dart';
 import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
+import 'package:glupulse/features/auth/presentation/pages/request_password_reset_page.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:glupulse/features/auth/presentation/widgets/login_body.dart';
 
@@ -59,6 +60,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void _goToRequestPasswordReset() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const RequestPasswordResetPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthState>(
@@ -104,6 +111,7 @@ class _LoginPageState extends State<LoginPage> {
             onLogin: _login,
             onLoginWithGoogle: _loginWithGoogle,
             onGoToRegister: _goToRegister,
+            onForgotPassword: _goToRequestPasswordReset,
           ),
         );
       },

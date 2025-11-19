@@ -12,6 +12,7 @@ class LoginBody extends StatelessWidget {
   final VoidCallback onLogin;
   final VoidCallback onLoginWithGoogle;
   final VoidCallback onGoToRegister;
+  final VoidCallback onForgotPassword;
 
   const LoginBody({
     super.key,
@@ -23,6 +24,7 @@ class LoginBody extends StatelessWidget {
     required this.onLogin,
     required this.onLoginWithGoogle,
     required this.onGoToRegister,
+    required this.onForgotPassword,
   });
 
   @override
@@ -61,7 +63,15 @@ class LoginBody extends StatelessWidget {
                     isVisible: isPasswordVisible,
                     onToggleVisibility: onToggleVisibility,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: onForgotPassword,
+                    child: const Text('Lupa Password?'),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40.0), // Menambahkan padding horizontal
                   child: ElevatedButton(
