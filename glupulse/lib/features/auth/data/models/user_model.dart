@@ -26,16 +26,22 @@ class UserModel extends UserEntity {
         );
 
   /// Factory constructor untuk membuat instance UserModel dari JSON.
-  factory UserModel.fromJson(Map<String, dynamic> json, {String source = 'unknown'}) {
+  factory UserModel.fromJson(
+    Map<String, dynamic> json, {
+    String source = 'unknown',
+    String? fallbackUsername,
+    String? fallbackEmail,
+  }) {
     print('UserModel.fromJson (Source: $source): Menerima JSON: $json'); // DEBUG
-    final parsedUsername = json['username'] as String? ?? '';
-    final parsedEmail = json['email'] as String? ?? '';
+    // Gunakan fallback jika field tidak ada di JSON (kasus setelah register)
+    final parsedUsername = json['username'] as String? ?? fallbackUsername ?? '';
+    final parsedEmail = json['email'] as String? ?? fallbackEmail ?? '';
     print('UserModel.fromJson (Source: $source): Parsed Username: "$parsedUsername", Parsed Email: "$parsedEmail"'); // DEBUG
     return UserModel(
       // Backend mengembalikan 'user_id' saat login/register, dan 'id' saat get profile.
       id: (json['user_id'] ?? json['id'] ?? '').toString(),
-      username: json['username'] as String? ?? '',
-      email: json['email'] as String? ?? '',
+      username: parsedUsername,
+      email: parsedEmail,
       firstName: json['first_name'] as String?,
       lastName: json['last_name'] as String?,
       dob: json['dob'] as String?,

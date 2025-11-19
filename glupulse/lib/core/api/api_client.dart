@@ -110,22 +110,29 @@ class ApiClient {
   Future<Map<String, dynamic>> post(String endpoint, {Map<String, dynamic>? body}) async {
     final url = Uri.parse('$_baseUrl$endpoint');
 
+    http.Response response; // Deklarasikan di luar try-catch
     try {
-      final response = await http.post(
+      response = await http.post(
         url,
         headers: _defaultHeaders,
         body: body != null ? jsonEncode(body) : null,
       ).timeout(const Duration(seconds: 15));
 
-      final responseBody = jsonDecode(response.body);
-
       // Periksa apakah status code berada dalam rentang sukses (2xx)
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        final responseBody = jsonDecode(response.body);
         // Jika sukses, kembalikan body response
         return responseBody;
       } else {
+        // Coba parsing body sebagai JSON untuk mendapatkan pesan error dari backend
+        try {
+          final responseBody = jsonDecode(response.body);
+          throw ServerException(responseBody['message'] ?? 'Terjadi kesalahan pada server (Status: ${response.statusCode})');
+        } catch (_) {
+          // Jika body bukan JSON (misal: halaman error HTML), tampilkan body mentah
+          throw ServerException('Server memberikan respons tidak valid (Status: ${response.statusCode}). Respons: ${response.body}');
+        }
         // Jika gagal, lempar exception dengan pesan dari server.
-        throw ServerException(responseBody['message'] ?? 'Terjadi kesalahan pada server');
       }
     } on SocketException {
       // Error koneksi jaringan
@@ -133,9 +140,16 @@ class ApiClient {
     } on TimeoutException {
       // Error saat request memakan waktu terlalu lama
       throw ServerException('Server tidak merespons. Coba lagi nanti.');
+    } on FormatException {
+      // Error jika response.body bukan JSON yang valid
+      throw ServerException('Gagal memproses respons dari server. Format tidak valid.');
     } catch (e) {
+      // Jika error yang ditangkap sudah merupakan ServerException, lempar kembali agar tidak dibungkus ulang.
+      if (e is ServerException) {
+        rethrow;
+      }
       // Error lainnya, termasuk parsing JSON jika response tidak valid
-      throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga.');
+      throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga: ${e.toString()}');
     }
   }
 

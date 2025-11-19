@@ -83,7 +83,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           "dob": params.dob,
           "gender": params.gender,
           "address_line1": params.addressLine1,
-          "city": params.city,
+          "address_city": params.city,
         },
       );
       print('AuthRemoteDataSourceImpl: Respon API /signup: $response'); // DEBUG
@@ -91,10 +91,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final loginResponse = LoginResponseModel.fromJson(response);
       await _cacheTokens(loginResponse);
       return loginResponse;
-    } on ServerException {
+    } on ServerException catch (e) {
+      print('AuthRemoteDataSourceImpl: ServerException ditangkap di register: ${e.message}'); // DEBUG
       rethrow;
     } catch (e) {
-      throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+      print('AuthRemoteDataSourceImpl: Exception umum ditangkap di register: $e'); // DEBUG
+      throw ServerException('Gagal melakukan registrasi. Terjadi kesalahan tidak terduga.');
     }
   }
 
