@@ -71,7 +71,10 @@ class _LoginPageState extends State<LoginPage> {
         } else if (state is AuthOtpRequired) {
           Navigator.of(context).push(
             MaterialPageRoute(
-                builder: (context) => OtpVerificationPage(userId: state.user.id)),
+              // Kirim kedua ID, OtpVerificationPage akan menggunakan yang tidak null.
+              builder: (context) => OtpVerificationPage(
+                  userId: state.userId, pendingId: state.pendingId),
+            ),
           );
         } else if (state is AuthProfileIncomplete) {
           // Jika profil tidak lengkap, arahkan ke EditProfilePage

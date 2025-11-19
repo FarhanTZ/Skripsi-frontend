@@ -6,7 +6,7 @@ abstract class AuthState extends Equatable {
   const AuthState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 /// State awal sebelum ada interaksi.
@@ -33,13 +33,15 @@ class AuthProfileIncomplete extends AuthState {
   List<Object> get props => [user];
 }
 
-/// State saat pengguna perlu verifikasi OTP.
+/// State ketika OTP diperlukan (setelah login atau register).
 class AuthOtpRequired extends AuthState {
-  final UserEntity user;
-  const AuthOtpRequired(this.user);
+  final String? userId; // Nullable, untuk alur login
+  final String? pendingId; // Nullable, untuk alur signup
+
+  const AuthOtpRequired({this.userId, this.pendingId});
 
   @override
-  List<Object> get props => [user];
+  List<Object?> get props => [userId, pendingId];
 }
 
 /// State saat pengguna tidak terotentikasi (misal: setelah logout, atau belum login).

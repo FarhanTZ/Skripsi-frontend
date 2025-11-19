@@ -11,6 +11,7 @@ abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> loginWithGoogle(String idToken);
   Future<LoginResponseModel> register({required RegisterParams params});
   Future<LoginResponseModel> verifyOtp(String userId, String otpCode);
+  Future<LoginResponseModel> verifySignupOtp(String pendingId, String otpCode); // Metode baru
   Future<LoginResponseModel> linkGoogleAccount(String idToken);
 }
 
@@ -106,8 +107,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await apiClient.post(
         '/verify-otp', // Endpoint spesifik untuk verifikasi OTP
         body: {
-          'user_id': userId,
-          'otp_code': otpCode,
+          'user_id': userId,   // Sesuai dengan spesifikasi Anda
+          'otp_code': otpCode, // Sesuai dengan spesifikasi Anda
         },
       );
       print('AuthRemoteDataSourceImpl: Respon API /verify-otp: $response'); // DEBUG
@@ -120,6 +121,34 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       // Tangani error koneksi atau error tak terduga lainnya.
       throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+    }
+  }
+
+  @override
+  Future<LoginResponseModel> verifySignupOtp(String pendingId, String otpCode) async {
+    try {
+      // Endpoint ini mungkin memerlukan token yang didapat dari langkah sebelumnya
+      final response = await apiClient.post(
+        '/verify-otp', // Sesuai konfirmasi: endpoint sama dengan verifikasi login
+        body: {
+          'pending_id': pendingId,
+          'otp_code': otpCode,
+        },
+        // Tidak ada token yang dikirim di sini, yang mungkin menyebabkan 401.
+        // Namun, jika endpoint ini memang publik setelah signup, maka masalahnya ada di backend.
+        // Jika endpoint ini memerlukan otorisasi, Anda perlu menyediakan token.
+        // Untuk saat ini, kita biarkan tanpa token sesuai logika sebelumnya,
+        // karena respons signup tidak memberikan token.
+      );
+      print('AuthRemoteDataSourceImpl: Respon API /verify-signup-otp: $response'); // DEBUG
+      // Parsing response JSON menjadi LoginResponseModel
+      final loginResponse = LoginResponseModel.fromJson(response);
+      await _cacheTokens(loginResponse);
+      return loginResponse;
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal memverifikasi OTP pendaftaran. Periksa koneksi Anda.');
     }
   }
 

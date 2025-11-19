@@ -9,6 +9,7 @@ import 'package:glupulse/features/auth/domain/usecases/login_with_google_usecase
 import 'package:glupulse/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
+import 'package:glupulse/features/auth/domain/usecases/verify_signup_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
 import 'package:dartz/dartz.dart';
@@ -20,6 +21,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthCubit extends Cubit<AuthState> {
   final LoginUseCase loginUseCase;
   final VerifyOtpUseCase verifyOtpUseCase;
+  final VerifySignupOtpUseCase verifySignupOtpUseCase; // Tambahkan use case baru
   final RegisterUseCase registerUseCase;
   final LoginWithGoogleUseCase loginWithGoogleUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
@@ -30,6 +32,7 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required this.loginUseCase,
     required this.verifyOtpUseCase,
+    required this.verifySignupOtpUseCase,
     required this.registerUseCase,
     required this.loginWithGoogleUseCase,
     required this.getCurrentUserUseCase,
@@ -91,7 +94,7 @@ class AuthCubit extends Cubit<AuthState> {
         // Sesuai permintaan, selalu arahkan ke halaman OTP setelah login berhasil.
         print('AuthCubit: Login berhasil. Emitting AuthOtpRequired untuk user ID: ${user.id}'); // DEBUG
         print('AuthCubit: User dari login: username="${user.username}", email="${user.email}"'); // DEBUG
-        emit(AuthOtpRequired(user));
+        emit(AuthOtpRequired(userId: user.id));
       },
     );
   }
@@ -177,23 +180,39 @@ class AuthCubit extends Cubit<AuthState> {
       (failure) {
         emit(AuthError(_mapFailureToMessage(failure)));
       },
-      (user) {
-        // Setelah registrasi berhasil, arahkan ke halaman OTP.
-        print('AuthCubit: User dari register: username="${user.username}", email="${user.email}"'); // DEBUG
-        emit(AuthOtpRequired(user));
+      (responseModel) {
+        // Setelah registrasi, kita mendapatkan pending_id dari response model.
+        final pendingId = responseModel.pendingId;
+        if (pendingId != null) {
+          print('AuthCubit: Registrasi berhasil. Emitting AuthOtpRequired untuk pending ID: $pendingId'); // DEBUG
+          emit(AuthOtpRequired(pendingId: pendingId));
+        } else {
+          emit(const AuthError('Gagal mendapatkan ID registrasi dari server.'));
+        }
       },
     );
   }
 
   /// Metode untuk verifikasi OTP.
-  Future<void> verifyOtp(String userId, String otpCode) async {
-    print('AuthCubit: Memulai verifikasi OTP untuk user ID: $userId'); // DEBUG
+  Future<void> verifyOtp({String? userId, String? pendingId, required String otpCode}) async {
+    print('AuthCubit: Memulai verifikasi OTP...'); // DEBUG
     emit(AuthLoading());
     print('AuthCubit: Emitting AuthLoading...'); // DEBUG
 
-    final result = await verifyOtpUseCase(VerifyOtpParams(userId: userId, otpCode: otpCode));
+    late final Future<Either<Failure, UserEntity>> result;
 
-    result.fold(
+    if (pendingId != null) {
+      print('AuthCubit: Verifikasi OTP untuk pendaftaran dengan pending ID: $pendingId'); // DEBUG
+      result = verifySignupOtpUseCase(VerifySignupOtpParams(pendingId: pendingId, otpCode: otpCode));
+    } else if (userId != null) {
+      print('AuthCubit: Verifikasi OTP untuk login dengan user ID: $userId'); // DEBUG
+      result = verifyOtpUseCase(VerifyOtpParams(userId: userId, otpCode: otpCode));
+    } else {
+      emit(const AuthError("ID untuk verifikasi OTP tidak ditemukan."));
+      return;
+    }
+
+    (await result).fold(
       (failure) {
         final message = _mapFailureToMessage(failure);
         print('AuthCubit: Verifikasi OTP gagal. Emitting AuthError: $message'); // DEBUG

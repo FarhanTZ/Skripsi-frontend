@@ -40,7 +40,10 @@ class MyApp extends StatelessWidget {
               return const EditProfilePage(isFromAuthFlow: true);
             } else if (state is AuthOtpRequired) {
               // Jika butuh verifikasi OTP, arahkan ke OtpVerificationPage
-              return OtpVerificationPage(userId: state.user.id);
+              return OtpVerificationPage(
+                userId: state.userId,
+                pendingId: state.pendingId,
+              );
             }
             // Jika tidak (AuthUnauthenticated, AuthError), tampilkan IntroductionScreen
             // yang akan mengarahkan ke LoginPage

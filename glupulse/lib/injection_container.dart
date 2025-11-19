@@ -12,6 +12,7 @@ import 'package:glupulse/features/auth/domain/usecases/get_current_user_usecase.
 import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_with_google_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
+import 'package:glupulse/features/auth/domain/usecases/verify_signup_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:glupulse/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:glupulse/features/profile/domain/usecases/get_profile_usecase.dart';
@@ -31,6 +32,7 @@ Future<void> init() async {
     () => AuthCubit(
       loginUseCase: sl(),
       verifyOtpUseCase: sl(),
+      verifySignupOtpUseCase: sl(), // Tambahkan ini
       registerUseCase: sl(),
       loginWithGoogleUseCase: sl(),
       getCurrentUserUseCase: sl(),
@@ -46,6 +48,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LoginWithGoogleUseCase(sl()));
   sl.registerLazySingleton(() => VerifyOtpUseCase(sl()));
+  sl.registerLazySingleton(() => VerifySignupOtpUseCase(sl())); // Tambahkan ini
   sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
 
   // Repository

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:glupulse/core/error/exceptions.dart';
 import 'package:glupulse/core/error/failures.dart';
+import 'package:glupulse/features/auth/data/models/login_response_model.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
@@ -44,13 +45,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> register(
+  Future<Either<Failure, LoginResponseModel>> register(
       {required RegisterParams params}) async {
     try {
       final registerResponse = await remoteDataSource.register(params: params);
-      // Sama seperti login, setelah registrasi kita hanya butuh UserEntity
-      // untuk melanjutkan ke tahap verifikasi OTP.
-      return Right(registerResponse.user);
+      // Kembalikan seluruh response model agar cubit bisa mengakses pendingId
+      return Right(registerResponse);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     }
@@ -62,6 +62,20 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final otpResponse = await remoteDataSource.verifyOtp(userId, otpCode);
       // Setelah verifikasi OTP berhasil, kita mendapatkan token. Simpan token dan user.
+      await localDataSource.cacheToken(otpResponse.token);
+      await localDataSource.cacheUser(otpResponse.user);
+      return Right(otpResponse.user);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> verifySignupOtp(
+      String pendingId, String otpCode) async {
+    try {
+      final otpResponse =
+          await remoteDataSource.verifySignupOtp(pendingId, otpCode);
       await localDataSource.cacheToken(otpResponse.token);
       await localDataSource.cacheUser(otpResponse.user);
       return Right(otpResponse.user);

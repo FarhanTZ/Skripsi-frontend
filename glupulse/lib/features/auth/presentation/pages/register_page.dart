@@ -100,7 +100,10 @@ class _RegisterPageState extends State<RegisterPage> {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthOtpRequired) {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) => OtpVerificationPage(userId: state.user.id)));
+          // Setelah registrasi, kita mendapatkan pendingId, bukan userId.
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) =>
+                  OtpVerificationPage(pendingId: state.pendingId)));
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text(state.message)));
         }

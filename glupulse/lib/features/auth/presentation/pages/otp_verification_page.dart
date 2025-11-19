@@ -7,9 +7,12 @@ import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.da
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 
 class OtpVerificationPage extends StatefulWidget {
-  final String userId;
+  final String? userId;
+  final String? pendingId;
 
-  const OtpVerificationPage({super.key, required this.userId});
+  const OtpVerificationPage({super.key, this.userId, this.pendingId})
+      // Pastikan salah satu dari userId atau pendingId tidak null
+      : assert(userId != null || pendingId != null, 'userId atau pendingId harus disediakan');
 
   @override
   State<OtpVerificationPage> createState() => _OtpVerificationPageState();
@@ -48,7 +51,11 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       return;
     }
     // Panggil metode verifyOtp dari AuthCubit
-    context.read<AuthCubit>().verifyOtp(widget.userId, otp);
+    context.read<AuthCubit>().verifyOtp(
+      userId: widget.userId,
+      pendingId: widget.pendingId,
+      otpCode: otp,
+    );
   }
 
   void _onOtpChanged(String value, int index) {

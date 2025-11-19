@@ -107,14 +107,19 @@ class ApiClient {
     }
   }
   // Metode POST generik
-  Future<Map<String, dynamic>> post(String endpoint, {Map<String, dynamic>? body}) async {
+  Future<Map<String, dynamic>> post(String endpoint,
+      {Map<String, dynamic>? body, String? token}) async {
     final url = Uri.parse('$_baseUrl$endpoint');
+    final headers = {
+      ..._defaultHeaders,
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
 
     http.Response response; // Deklarasikan di luar try-catch
     try {
       response = await http.post(
         url,
-        headers: _defaultHeaders,
+        headers: headers,
         body: body != null ? jsonEncode(body) : null,
       ).timeout(const Duration(seconds: 15));
 
@@ -127,7 +132,8 @@ class ApiClient {
         // Coba parsing body sebagai JSON untuk mendapatkan pesan error dari backend
         try {
           final responseBody = jsonDecode(response.body);
-          throw ServerException(responseBody['message'] ?? 'Terjadi kesalahan pada server (Status: ${response.statusCode})');
+          final errorMessage = responseBody['message'] ?? responseBody['error'] ?? 'Terjadi kesalahan pada server (Status: ${response.statusCode})';
+          throw ServerException(errorMessage);
         } catch (_) {
           // Jika body bukan JSON (misal: halaman error HTML), tampilkan body mentah
           throw ServerException('Server memberikan respons tidak valid (Status: ${response.statusCode}). Respons: ${response.body}');
