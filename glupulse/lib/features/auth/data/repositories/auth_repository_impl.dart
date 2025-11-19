@@ -90,4 +90,17 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(CacheFailure()); // Or a more specific logout failure
     }
   }
+
+  @override
+  Future<Either<Failure, UserEntity>> linkGoogleAccount(String idToken) async {
+    try {
+      final loginResponse = await remoteDataSource.linkGoogleAccount(idToken);
+      // Setelah berhasil link, backend akan memberikan token baru, jadi kita simpan.
+      await localDataSource.cacheToken(loginResponse.token);
+      await localDataSource.cacheUser(loginResponse.user);
+      return Right(loginResponse.user);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
+  }
 }

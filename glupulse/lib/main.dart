@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
             }
             // Jika tidak (AuthUnauthenticated, AuthError), tampilkan IntroductionScreen
             // yang akan mengarahkan ke LoginPage
-            return const IntroductionScreen();
+            return const HomePage();
           },
         ),
       ),

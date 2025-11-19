@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
+import 'package:glupulse/features/profile/presentation/pages/profile_settings_screen.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 
 class ProfileTab extends StatelessWidget {
@@ -17,9 +19,9 @@ class ProfileTab extends StatelessWidget {
 
         if (state is AuthAuthenticated) {
           final user = state.user;
-          // Gabungkan nama depan dan belakang, tangani jika salah satunya null
-          fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
-          // Jika nama lengkap masih kosong (misal, baru login Google), gunakan username
+          // Gunakan nama depan, tangani jika null
+          fullName = user.firstName ?? '';
+          // Jika nama depan kosong (misal, baru login Google), gunakan username
           if (fullName.isEmpty) {
             fullName = user.username;
           }
@@ -27,7 +29,7 @@ class ProfileTab extends StatelessWidget {
         } else if (state is AuthProfileIncomplete) {
           // Lakukan hal yang sama untuk state AuthProfileIncomplete
           final user = state.user;
-          fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
+          fullName = user.firstName ?? '';
           if (fullName.isEmpty) {
             fullName = user.username;
           }
@@ -51,26 +53,46 @@ class ProfileTab extends StatelessWidget {
                       child: Column(
                         children: [
                           _buildProfileMenuItem(
+                              context: context,
+                              iconWidget: SvgPicture.asset(
+                                'assets/images/Profile_glupulsesvg.svg',
+                                width: 24,
+                                height: 24,
+                                colorFilter: const ColorFilter.mode(
+                                    AppTheme.inputLabelColor, BlendMode.srcIn),
+                              ),
+                              text: 'Edit Profile',
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => const EditProfilePage(),
+                                ));
+                              }),
+                          _buildProfileMenuItem(
                             context: context,
-                            icon: Icons.person_outline,
-                            text: 'Edit Profile',
+                            iconWidget: SvgPicture.asset(
+                              'assets/images/Setting.svg',
+                              width: 24,
+                              height: 24,
+                              colorFilter: const ColorFilter.mode(
+                                  AppTheme.inputLabelColor, BlendMode.srcIn),
+                            ),
+                            text: 'Settings',
                             onTap: () {
                               Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => const EditProfilePage(),
+                                builder: (context) =>
+                                    const ProfileSettingsScreen(),
                               ));
                             },
                           ),
                           _buildProfileMenuItem(
                             context: context,
-                            icon: Icons.settings_outlined,
-                            text: 'Settings',
-                            onTap: () {
-                              // TODO: Implement navigation to Settings page
-                            },
-                          ),
-                          _buildProfileMenuItem(
-                            context: context,
-                            icon: Icons.help_outline,
+                            iconWidget: SvgPicture.asset(
+                              'assets/images/Help&support.svg',
+                              width: 24,
+                              height: 24,
+                              colorFilter: const ColorFilter.mode(
+                                  AppTheme.inputLabelColor, BlendMode.srcIn),
+                            ),
                             text: 'Help & Support',
                             onTap: () {
                               // TODO: Implement navigation to Help page
@@ -79,7 +101,13 @@ class ProfileTab extends StatelessWidget {
                           const SizedBox(height: 16),
                           _buildProfileMenuItem(
                             context: context,
-                            icon: Icons.logout,
+                            iconWidget: SvgPicture.asset(
+                              'assets/images/Logout.svg',
+                              width: 24,
+                              height: 24,
+                              colorFilter:
+                                  const ColorFilter.mode(Colors.red, BlendMode.srcIn),
+                            ),
                             text: 'Logout',
                             textColor: Colors.red,
                             iconColor: Colors.red,
@@ -242,11 +270,11 @@ class ProfileTab extends StatelessWidget {
   // Helper widget untuk membuat item menu profil dengan gaya modern
   Widget _buildProfileMenuItem({
     required BuildContext context,
-    required IconData icon,
+    required Widget iconWidget,
     required String text,
     required VoidCallback onTap,
     Color textColor = Colors.black87,
-    Color iconColor = AppTheme.inputLabelColor,
+    Color? iconColor, // Dibuat opsional karena warna sudah diatur di SvgPicture
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0), // Memberi jarak antar item
@@ -266,10 +294,12 @@ class ProfileTab extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(            
-            color: (iconColor == Colors.red ? iconColor.withOpacity(0.1) : AppTheme.inputFieldColor.withOpacity(0.7)),
+            color: (textColor == Colors.red
+                ? const Color(0xFFFFA6AE)
+                : AppTheme.inputFieldColor.withOpacity(0.7)),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: iconColor),
+          child: iconWidget,
         ),
         title: Text(text, style: TextStyle(fontWeight: FontWeight.w600, color: textColor)),
         trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),

@@ -11,6 +11,7 @@ abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> loginWithGoogle(String idToken);
   Future<LoginResponseModel> register({required RegisterParams params});
   Future<LoginResponseModel> verifyOtp(String userId, String otpCode);
+  Future<LoginResponseModel> linkGoogleAccount(String idToken);
 }
 
 /// Implementasi konkret dari AuthRemoteDataSource.
@@ -117,6 +118,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       // Tangani error koneksi atau error tak terduga lainnya.
       throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+    }
+  }
+
+  @override
+  Future<LoginResponseModel> linkGoogleAccount(String idToken) async {
+    try {
+      final response = await apiClient.post(
+        '/auth/mobile/google/link', // Endpoint spesifik untuk link Google
+        body: {
+          'id_token': idToken,
+        },
+      );
+      print('AuthRemoteDataSourceImpl: Respon API /auth/mobile/google/link: $response'); // DEBUG
+      // Parsing response JSON menjadi LoginResponseModel
+      final loginResponse = LoginResponseModel.fromJson(response);
+      await _cacheTokens(loginResponse);
+      return loginResponse;
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal menautkan akun Google. Periksa koneksi internet Anda.');
     }
   }
 

@@ -2,10 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
 
-class AnalyticTab extends StatelessWidget {
+enum DateFilter { weekly, monthly, yearly }
+
+class AnalyticTab extends StatefulWidget {
   const AnalyticTab({super.key});
+
+  @override
+  State<AnalyticTab> createState() => _AnalyticTabState();
+}
+
+class _AnalyticTabState extends State<AnalyticTab> {
+  DateFilter _selectedFilter = DateFilter.weekly; // Default filter
+  String _displayDateText = 'Mingguan'; // Default text
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +42,7 @@ class AnalyticTab extends StatelessWidget {
               ),
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(50),
-              ),
+              ),  
               boxShadow: [
                 BoxShadow(
                   color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
@@ -109,6 +120,40 @@ class AnalyticTab extends StatelessWidget {
                       style: TextStyle(
                         color: Color(0xFF02A916), // Warna teks sesuai permintaan
                         fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                // Widget untuk ikon kalender di pojok kiri atas
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  child: GestureDetector(
+                    onTap: () => _showDateFilterPicker(context),
+                    child: Container( // Mengubah container menjadi persegi panjang membulat
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9), // Latar belakang putih semi-transparan
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row( // Menggunakan Row untuk menyejajarkan ikon dan teks
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/calender.svg', // Path diperbaiki
+                            width: 20,
+                            height: 20,
+                            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn), // Ikon berwarna biru
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _displayDateText, // Teks dinamis dipindahkan ke sini
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -292,7 +337,7 @@ class AnalyticTab extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     // Data dummy, nantinya akan diganti dengan data dinamis
-    String title, value, unit, iconType;
+    String title, value, unit;
     if (iconWidget is SvgPicture && iconWidget.bytesLoader is SvgAssetLoader && (iconWidget.bytesLoader as SvgAssetLoader).assetName.contains('Health.svg')) {
       title = 'Blood Sugar';
       value = '110';
@@ -410,5 +455,76 @@ class AnalyticTab extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showDateFilterPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (builder) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Pilih Rentang Waktu',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.calendar_view_week),
+                title: const Text('Mingguan'),
+                trailing: _selectedFilter == DateFilter.weekly ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () {
+                  _updateFilter(DateFilter.weekly);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.calendar_view_month),
+                title: const Text('Bulanan'),
+                trailing: _selectedFilter == DateFilter.monthly ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () {
+                  _updateFilter(DateFilter.monthly);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Tahunan'),
+                trailing: _selectedFilter == DateFilter.yearly ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () {
+                  _updateFilter(DateFilter.yearly);
+                  Navigator.pop(context);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _updateFilter(DateFilter filter) {
+    setState(() {
+      _selectedFilter = filter;
+      final now = DateTime.now();
+      switch (filter) {
+        case DateFilter.weekly:
+          _displayDateText = 'Mingguan';
+          break;
+        case DateFilter.monthly:
+          _displayDateText = DateFormat('MMMM yyyy').format(now);
+          break;
+        case DateFilter.yearly:
+          _displayDateText = DateFormat('yyyy').format(now);
+          break;
+      }
+    });
   }
 }

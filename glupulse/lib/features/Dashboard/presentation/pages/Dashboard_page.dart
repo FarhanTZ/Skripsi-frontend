@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:glupulse/features/Users/presentation/pages/analytic_tab.dart';
+import 'package:glupulse/features/activity/presentation/pages/analytic_tab.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/Users/presentation/pages/home_tab.dart';
 import 'package:glupulse/features/Users/presentation/pages/menu_tab.dart';
