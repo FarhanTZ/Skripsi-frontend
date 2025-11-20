@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/Address/presentation/pages/region_selection_page.dart';
+import 'package:glupulse/features/Address/presentation/pages/street_selection_page.dart';
 
 class EditAddressPage extends StatefulWidget {
-  final Map<String, String> addressToEdit;
+  final Map<String, dynamic> addressToEdit;
 
   const EditAddressPage({super.key, required this.addressToEdit});
 
@@ -11,24 +13,30 @@ class EditAddressPage extends StatefulWidget {
 }
 
 class _EditAddressPageState extends State<EditAddressPage> {
-  final _labelController = TextEditingController(text: 'Home');
-  final _streetController = TextEditingController(text: 'Jl. Telekomunikasi No. 1');
-  final _postalCodeController = TextEditingController(text: '40257');
+  final _labelController = TextEditingController();
+  final _recipientNameController = TextEditingController();
+  final _recipientPhoneController = TextEditingController();
+  final _streetController = TextEditingController();
+  final _addressLine2Controller = TextEditingController();
+  final _postalCodeController = TextEditingController();
+  final _deliveryNotesController = TextEditingController();
 
-  // Data dan state untuk dropdown kota
-  // TODO: Sebaiknya data ini diambil dari API atau sumber data terpusat
-  final List<String> _cities = ['Bandung', 'Jakarta', 'Surabaya', 'Medan', 'Yogyakarta'];
+  // State untuk menyimpan data wilayah yang dipilih
+  String? _selectedProvince;
   String? _selectedCity;
-
-  // Data dan state untuk dropdown provinsi
-  final List<String> _states = ['Jawa Barat', 'DKI Jakarta', 'Jawa Timur', 'Sumatera Utara', 'DI Yogyakarta'];
-  String? _selectedState;
+  String? _selectedDistrict;
+  String? _selectedPostalCode;
+  bool _isDefault = false;
 
   @override
   void dispose() {
     _labelController.dispose();
+    _recipientNameController.dispose();
+    _recipientPhoneController.dispose();
     _streetController.dispose();
+    _addressLine2Controller.dispose();
     _postalCodeController.dispose();
+    _deliveryNotesController.dispose();
     super.dispose();
   }
 
@@ -36,12 +44,21 @@ class _EditAddressPageState extends State<EditAddressPage> {
   void initState() {
     super.initState();
     // Mode Edit: Isi form dengan data yang ada
-    final addressParts = widget.addressToEdit['address']!.split(', ');
-    _labelController.text = widget.addressToEdit['label']!;
-    _streetController.text = addressParts.length > 0 ? addressParts[0] : '';
-    _selectedCity = addressParts.length > 1 && _cities.contains(addressParts[1]) ? addressParts[1] : _cities[0];
-    _selectedState = addressParts.length > 2 && _states.contains(addressParts[2]) ? addressParts[2] : _states[0];
-    // Anda mungkin perlu logika yang lebih baik untuk postal code jika ada di string
+    _labelController.text = widget.addressToEdit['address_label']?.toString() ?? '';
+    _recipientNameController.text = widget.addressToEdit['recipient_name']?.toString() ?? '';
+    _recipientPhoneController.text = widget.addressToEdit['recipient_phone']?.toString() ?? '';
+    _streetController.text = widget.addressToEdit['address_line1']?.toString() ?? '';
+    _addressLine2Controller.text = widget.addressToEdit['address_line2']?.toString() ?? '';
+    _postalCodeController.text = widget.addressToEdit['address_postalcode']?.toString() ?? '';
+    _deliveryNotesController.text = widget.addressToEdit['delivery_notes']?.toString() ?? '';
+
+    _selectedProvince = widget.addressToEdit['address_province']?.toString();
+    _selectedCity = widget.addressToEdit['address_city']?.toString();
+    _selectedDistrict = widget.addressToEdit['address_district']?.toString();
+    _selectedPostalCode = widget.addressToEdit['address_postalcode']?.toString();
+
+    // Konversi string 'true' atau bool ke bool
+    _isDefault = widget.addressToEdit['is_default'] == true || widget.addressToEdit['is_default'] == 'true';
   }
 
   @override
@@ -66,110 +83,272 @@ class _EditAddressPageState extends State<EditAddressPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildTextField(
-                controller: _labelController,
-                label: 'Address Label',
-                hint: 'e.g., Home, Office'),
-            const SizedBox(height: 24),
-            _buildTextField(
-                controller: _streetController,
-                label: 'Street',
-                hint: 'Enter your street address'),
-            const SizedBox(height: 24),
-            _buildCityDropdown(),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStateDropdown(),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                      controller: _postalCodeController,
-                      label: 'Postal Code',
-                      hint: 'Enter postal code',
-                      keyboardType: TextInputType.number),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                // Gabungkan data dari form
-                final fullAddress = '${_streetController.text}, $_selectedCity, $_selectedState';
-                final addressData = {
-                  'label': _labelController.text,
-                  'address': fullAddress,
-                };
-
-                // Kembalikan data ke halaman sebelumnya
-                Navigator.of(context).pop(addressData);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 55),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          controller: _labelController,
+                          label: 'Label Alamat',
+                          hint: 'Contoh: Rumah',
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildTextField(
+                          controller: _recipientNameController,
+                          label: 'Nama Penerima',
+                          hint: 'Nama lengkap',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _buildTextField(
+                    controller: _recipientPhoneController,
+                    label: 'No. Telepon Penerima',
+                    hint: 'Masukkan nomor telepon aktif',
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildRegionSelector(context),
+                  const SizedBox(height: 24),
+                  _buildStreetSelector(context),
+                  const SizedBox(height: 24),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          controller: _addressLine2Controller,
+                          label: 'Detail Alamat',
+                          hint: 'Blok C1 No. 2',
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildTextField(
+                            controller: _postalCodeController,
+                            label: 'Kode Pos',
+                            hint: 'Kode pos',
+                            keyboardType: TextInputType.number),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _buildTextField(
+                      controller: _deliveryNotesController,
+                      label: 'Catatan Pengiriman (Opsional)',
+                      hint: 'Contoh: Titip di resepsionis'),
+                  const SizedBox(height: 24), // Spasi sebelum area bawah
+                ],
               ),
-              child: const Text('Save Address',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
-          ],
-        ),
+          ),
+          _buildBottomActionBar(),
+        ],
       ),
     );
   }
 
-  Widget _buildCityDropdown() {
+  Widget _buildDefaultAddressSwitch() {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Jadikan Alamat Utama',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Switch(
+            value: _isDefault,
+            onChanged: (value) {
+              setState(() {
+                _isDefault = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildRegionSelector(BuildContext context) {
+    // ... (kode tidak berubah)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'City',
+          'Provinsi, Kota, Kecamatan',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
         ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15.0),
-            border: Border.all(color: Colors.grey.shade300),
+        const SizedBox(height: 8.0),
+        GestureDetector(
+          onTap: () async => _navigateToRegionSelection(),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15.0),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: _selectedProvince == null
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Pilih wilayah Anda',
+                        style: TextStyle(color: AppTheme.inputLabelColor, fontSize: 16),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildAddressLine('Provinsi', _selectedProvince),
+                            _buildAddressLine('Kota/Kab.', _selectedCity),
+                            _buildAddressLine('Kecamatan', _selectedDistrict),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18),
+                    ],
+                  ),
           ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedCity,
-              isExpanded: true,
-              icon: Icon(Icons.arrow_drop_down,
-                  color: Theme.of(context).colorScheme.primary),
-              items: _cities.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedCity = newValue;
-                });
-              },
-              dropdownColor: Colors.white,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 16,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomActionBar() {
+    return Container(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, -5),
               ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDefaultAddressSwitch(),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  // Validasi sederhana
+                  if (_labelController.text.isEmpty ||
+                      _streetController.text.isEmpty ||
+                      _selectedProvince == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Harap lengkapi semua field.')),
+                    );
+                    return;
+                  }
+
+                  final addressData = {
+                    'address_label': _labelController.text,
+                    'is_default': _isDefault,
+                    'recipient_name': _recipientNameController.text,
+                    'recipient_phone': _recipientPhoneController.text,
+                    'address_line1': _streetController.text,
+                    'address_line2': _addressLine2Controller.text,
+                    'address_city': _selectedCity ?? '',
+                    'address_postalcode': _postalCodeController.text,
+                    'address_province': _selectedProvince ?? '',
+                    'address_district': _selectedDistrict ?? '',
+                    'delivery_notes': _deliveryNotesController.text,
+                    'address_latitude': widget.addressToEdit['address_latitude'] ?? 0.0,
+                    'address_longitude': widget.addressToEdit['address_longitude'] ?? 0.0,
+                  };
+
+                  // Kembalikan data ke halaman sebelumnya
+                  Navigator.of(context).pop(addressData);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 55),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                ),
+                child: const Text('Save Address', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
+  }
+
+  Widget _buildStreetSelector(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Jalan, Gedung, atau No. Rumah',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8.0),
+        GestureDetector(
+          onTap: () async {
+            final result = await Navigator.of(context).push<String>(
+              MaterialPageRoute(builder: (context) => const StreetSelectionPage()),
+            );
+            if (result != null) {
+              setState(() {
+                _streetController.text = result;
+              });
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15.0),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    _streetController.text.isEmpty ? 'Cari alamat jalan Anda' : _streetController.text,
+                    style: TextStyle(color: _streetController.text.isEmpty ? AppTheme.inputLabelColor : Colors.black87, fontSize: 16),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Icon(Icons.search, color: Colors.grey),
+              ],
             ),
           ),
         ),
@@ -177,53 +356,40 @@ class _EditAddressPageState extends State<EditAddressPage> {
     );
   }
 
-  Widget _buildStateDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'State/Province',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15.0),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedState,
-              isExpanded: true,
-              icon: Icon(Icons.arrow_drop_down,
-                  color: Theme.of(context).colorScheme.primary),
-              items: _states.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedState = newValue;
-                });
-              },
-              dropdownColor: Colors.white,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
-      ],
+  // Widget untuk menampilkan baris alamat
+  Widget _buildAddressLine(String label, String? value) {
+    if (value == null || value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Text(
+        '$label: $value',
+        style: const TextStyle(fontSize: 16, color: Colors.black87),
+      ),
     );
+  }
+
+  // Fungsi untuk navigasi dan handle hasil
+  Future<void> _navigateToRegionSelection() async {
+    final result = await Navigator.of(context).push<Map<String, String>>(
+      MaterialPageRoute(builder: (context) => const RegionSelectionPage()),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedProvince = result['province'];
+        _selectedCity = result['city'];
+        _selectedDistrict = result['district'];
+        _selectedPostalCode = result['postalCode']; // Mungkin null
+
+        // Jika "Gunakan Lokasi Saat Ini" memberikan data, isi otomatis
+        if (result.containsKey('street') && result['street']!.isNotEmpty) {
+          _streetController.text = result['street']!;
+        }
+        if (_selectedPostalCode != null) {
+          _postalCodeController.text = _selectedPostalCode!;
+        }
+      });
+    }
   }
 
   Widget _buildTextField(

@@ -366,7 +366,10 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthError(_mapFailureToMessage(failure)));
       },
       (_) {
-        emit(const AuthSuccess('Password berhasil diperbarui!'));
+        // Setelah password berhasil diperbarui, praktik terbaik adalah memaksa pengguna untuk login kembali.
+        // Kita emit state sukses agar UI bisa menampilkan pesan, lalu langsung panggil logout.
+        emit(const AuthSuccess('Password berhasil diperbarui! Silakan login kembali.'));
+        logout(); // Memanggil logout untuk membersihkan sesi dan mengarahkan ke halaman login/intro.
       },
     );
   }
