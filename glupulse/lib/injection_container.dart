@@ -22,6 +22,14 @@ import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase
 import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_password_usecase.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:glupulse/features/Address/data/datasources/address_remote_data_source.dart';
+import 'package:glupulse/features/Address/data/repositories/address_repository_impl.dart';
+import 'package:glupulse/features/Address/domain/repositories/address_repository.dart';
+import 'package:glupulse/features/Address/domain/usecases/add_address_usecase.dart';
+import 'package:glupulse/features/Address/domain/usecases/update_address_usecase.dart';
+import 'package:glupulse/features/Address/domain/usecases/delete_address_usecase.dart';
+import 'package:glupulse/features/Address/domain/usecases/set_default_address_usecase.dart';
+import 'package:glupulse/features/Address/presentation/cubit/address_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance; // sl = Service Locator
@@ -109,6 +117,37 @@ Future<void> init() async {
   // Data Sources
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(
+      apiClient: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // --- Features - Address ---
+
+  // Cubit
+  sl.registerFactory(
+    () => AddressCubit(
+      addAddressUseCase: sl(),
+      updateAddressUseCase: sl(),
+      deleteAddressUseCase: sl(),
+      setDefaultAddressUseCase: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => AddAddressUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateAddressUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteAddressUseCase(sl()));
+  sl.registerLazySingleton(() => SetDefaultAddressUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<AddressRepository>(
+    () => AddressRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<AddressRemoteDataSource>(
+    () => AddressRemoteDataSourceImpl(
       apiClient: sl(),
       localDataSource: sl(),
     ),

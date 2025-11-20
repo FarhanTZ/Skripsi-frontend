@@ -25,14 +25,14 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       final token = await localDataSource.getLastToken();
       final response = await apiClient.get('/profile', token: token);
-      print('ProfileRemoteDataSourceImpl: Respon API /profile: $response'); // DEBUG - Tetap ada
-      // PERBAIKAN: Backend mengembalikan data user di dalam key 'profile' saat login Google.
-      // Kita cek apakah 'profile' ada, jika tidak, kita fallback ke 'user' untuk endpoint lain.
-      final userData = response['profile'] ?? response['user'];
-      if (userData == null || userData is! Map<String, dynamic>) {
+      print(
+          'ProfileRemoteDataSourceImpl: Respon API /profile: $response'); // DEBUG - Tetap ada
+
+      if (response['profile'] == null || response['profile'] is! Map<String, dynamic>) {
         throw ServerException('Struktur data profil dari server tidak valid.');
       }
-      return UserModel.fromJson(userData, source: 'profile_get');
+      // Mengirim seluruh response ke fromJson agar bisa memproses 'profile' dan 'addresses'
+      return UserModel.fromJson(response, source: 'profile_get');
     } on ServerException {
       rethrow;
     } on CacheException {

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/Address/presentation/pages/address_list_page.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/Food/presentation/pages/order_tracking_page.dart';
+import 'package:glupulse/features/profile/data/models/address_model.dart';
 import 'package:intl/intl.dart';
 import 'package:glupulse/features/Food/presentation/pages/order_history_page.dart';
-import 'package:glupulse/features/Address/domain/entities/address.dart';
-import 'package:glupulse/features/Address/presentation/pages/address_list_page.dart';
 
 class PaymentOrderPage extends StatefulWidget {
   final List<Map<String, dynamic>> orderItems;
@@ -26,12 +29,13 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
   String _appliedDiscountCode = '';
 
   // State untuk alamat pengiriman
-  Address _shippingAddress = const Address(
-    label: 'Home',
-    addressDetail: 'Jl. Telekomunikasi No. 1, Bandung, Jawa Barat',
-    latitude: -6.9740,
-    longitude: 107.6304,
-  );
+  AddressModel? _shippingAddress;
+  // Address _shippingAddress = const Address(
+  //   label: 'Home',
+  //   addressDetail: 'Jl. Telekomunikasi No. 1, Bandung, Jawa Barat',
+  //   latitude: -6.9740,
+  //   longitude: 107.6304,
+  // );
 
   // Data dummy untuk pilihan diskon
   final List<Map<String, dynamic>> _availableDiscounts = [
@@ -56,6 +60,20 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
   final currencyFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   double get _finalTotal => widget.totalPrice - _discountAmount;
+
+  @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthCubit>().state;
+    if (authState is AuthAuthenticated) {
+      if (authState.user.addresses != null &&
+          authState.user.addresses!.isNotEmpty) {
+        _shippingAddress = authState.user.addresses!
+            .firstWhere((addr) => addr.isDefault, orElse: () => authState.user.addresses!.first);
+      }
+    }
+  }
+
 
   @override
   void dispose() {
@@ -122,11 +140,22 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
 
   Widget _buildAddressCard() {
     return InkWell(
-      onTap: () async { // Perubahan di sini
-        final selectedAddress = await Navigator.of(context).push<Address>(
+      onTap: () async {
+        final authState = context.read<AuthCubit>().state;
+        List<AddressModel> userAddresses = [];
+        if (authState is AuthAuthenticated) {
+          userAddresses = authState.user.addresses ?? [];
+        }
+
+        if (userAddresses.isEmpty) {
+          // Handle case where there are no addresses, maybe show a message
+          return;
+        }
+
+        final selectedAddress =
+            await Navigator.of(context).push<AddressModel>(
           MaterialPageRoute(
-            builder: (context) => AddressListPage(currentAddress: _shippingAddress),
-          ),
+              builder: (context) => AddressListPage(addresses: userAddresses, currentSelectedAddress: _shippingAddress)),
         );
 
         if (selectedAddress != null) {
@@ -150,13 +179,13 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text( // Perubahan di sini
-                      _shippingAddress.label,
+                    Text(
+                      _shippingAddress?.addressLabel ?? 'No Address Selected',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     const SizedBox(height: 4),
-                    Text( // Perubahan di sini
-                      _shippingAddress.addressDetail,
+                    Text(
+                      '${_shippingAddress?.addressLine1 ?? ''}, ${_shippingAddress?.addressCity ?? ''}',
                       style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                   ],

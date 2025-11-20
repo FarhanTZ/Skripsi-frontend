@@ -201,4 +201,45 @@ class ApiClient {
       throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga.');
     }
   }
+
+  // Metode DELETE generik
+  Future<Map<String, dynamic>> delete(String endpoint, {required String token}) async {
+    final url = Uri.parse('$_baseUrl$endpoint');
+    final headers = {
+      ..._defaultHeaders,
+      'Authorization': 'Bearer $token',
+    };
+
+    try {
+      final response = await http
+          .delete(
+            url,
+            headers: headers,
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (_isTokenExpired(response)) {
+        await _refreshToken();
+        final newToken = await _localDataSource.getLastToken();
+        // Ulangi request dengan token baru
+        return await delete(endpoint, token: newToken);
+      }
+
+      // Untuk DELETE, sukses seringkali ditandai dengan status 204 No Content
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        // Jika ada body, parse. Jika tidak (seperti 204), kembalikan map kosong.
+        return response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      } else {
+        final responseBody = jsonDecode(response.body);
+        throw ServerException(responseBody['message'] ?? 'Gagal menghapus data');
+      }
+    } on SocketException {
+      throw ServerException('Tidak ada koneksi internet. Periksa jaringan Anda.');
+    } on TimeoutException {
+      throw ServerException('Server tidak merespons. Coba lagi nanti.');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException('Gagal menghapus data. Terjadi kesalahan tak terduga.');
+    }
+  }
 }

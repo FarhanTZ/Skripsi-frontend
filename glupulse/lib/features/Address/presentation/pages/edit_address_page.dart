@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/Address/domain/usecases/update_address_usecase.dart';
+import 'package:glupulse/features/Address/presentation/cubit/address_cubit.dart';
+import 'package:glupulse/features/Address/presentation/cubit/address_state.dart';
 import 'package:glupulse/features/Address/presentation/pages/region_selection_page.dart';
 import 'package:glupulse/features/Address/presentation/pages/street_selection_page.dart';
+import 'package:glupulse/features/profile/data/models/address_model.dart';
 
 class EditAddressPage extends StatefulWidget {
-  final Map<String, dynamic> addressToEdit;
-
+  final AddressModel addressToEdit;
   const EditAddressPage({super.key, required this.addressToEdit});
 
   @override
@@ -43,27 +47,30 @@ class _EditAddressPageState extends State<EditAddressPage> {
   @override
   void initState() {
     super.initState();
-    // Mode Edit: Isi form dengan data yang ada
-    _labelController.text = widget.addressToEdit['address_label']?.toString() ?? '';
-    _recipientNameController.text = widget.addressToEdit['recipient_name']?.toString() ?? '';
-    _recipientPhoneController.text = widget.addressToEdit['recipient_phone']?.toString() ?? '';
-    _streetController.text = widget.addressToEdit['address_line1']?.toString() ?? '';
-    _addressLine2Controller.text = widget.addressToEdit['address_line2']?.toString() ?? '';
-    _postalCodeController.text = widget.addressToEdit['address_postalcode']?.toString() ?? '';
-    _deliveryNotesController.text = widget.addressToEdit['delivery_notes']?.toString() ?? '';
+    // Isi form dengan data dari AddressModel
+    _labelController.text = widget.addressToEdit.addressLabel ?? '';
+    _recipientNameController.text = widget.addressToEdit.recipientName ?? '';
+    _recipientPhoneController.text = widget.addressToEdit.recipientPhone ?? '';
+    _streetController.text = widget.addressToEdit.addressLine1 ?? '';
+    _addressLine2Controller.text = widget.addressToEdit.addressLine2 ?? '';
+    _postalCodeController.text = widget.addressToEdit.addressPostalcode ?? '';
+    _deliveryNotesController.text = widget.addressToEdit.deliveryNotes ?? '';
 
-    _selectedProvince = widget.addressToEdit['address_province']?.toString();
-    _selectedCity = widget.addressToEdit['address_city']?.toString();
-    _selectedDistrict = widget.addressToEdit['address_district']?.toString();
-    _selectedPostalCode = widget.addressToEdit['address_postalcode']?.toString();
+    _selectedProvince = widget.addressToEdit.addressProvince;
+    _selectedCity = widget.addressToEdit.addressCity;
+    _selectedDistrict = widget.addressToEdit.addressDistrict;
+    _selectedPostalCode = widget.addressToEdit.addressPostalcode;
 
-    // Konversi string 'true' atau bool ke bool
-    _isDefault = widget.addressToEdit['is_default'] == true || widget.addressToEdit['is_default'] == 'true';
+    _isDefault = widget.addressToEdit.isDefault ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<AddressCubit, AddressState>(
+      listener: (context, state) {
+        _handleStateChanges(context, state);
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFF2F5F9),
       appBar: AppBar(
         toolbarHeight: 80,
@@ -156,7 +163,54 @@ class _EditAddressPageState extends State<EditAddressPage> {
           _buildBottomActionBar(),
         ],
       ),
+    ),
     );
+  }
+
+  void _updateAddress() {
+    if (_labelController.text.isEmpty ||
+        _recipientNameController.text.isEmpty ||
+        _recipientPhoneController.text.isEmpty ||
+        _streetController.text.isEmpty ||
+        _selectedProvince == null ||
+        _selectedCity == null ||
+        _selectedDistrict == null ||
+        _postalCodeController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Harap lengkapi semua field yang wajib diisi.')),
+      );
+      return;
+    }
+
+    final params = UpdateAddressParams(
+      addressId: widget.addressToEdit.addressId, // ID dari alamat yang diedit
+      addressLabel: _labelController.text,
+      isDefault: _isDefault,
+      recipientName: _recipientNameController.text,
+      recipientPhone: _recipientPhoneController.text,
+      addressLine1: _streetController.text,
+      addressLine2: _addressLine2Controller.text.isNotEmpty ? _addressLine2Controller.text : null,
+      addressCity: _selectedCity!,
+      addressPostalcode: _postalCodeController.text,
+      addressDistrict: _selectedDistrict!,
+      addressProvince: _selectedProvince!,
+      deliveryNotes: _deliveryNotesController.text.isNotEmpty ? _deliveryNotesController.text : null,
+    );
+
+    context.read<AddressCubit>().updateAddress(params);
+  }
+
+  void _handleStateChanges(BuildContext context, AddressState state) {
+    if (state is AddressLoading) {
+      showDialog(context: context, barrierDismissible: false, builder: (context) => const Center(child: CircularProgressIndicator()));
+    } else if (state is AddressActionSuccess) {
+      Navigator.of(context).pop(); // Tutup dialog loading
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Alamat berhasil diperbarui!')));
+      Navigator.of(context).pop(true); // Kembali dan kirim sinyal sukses
+    } else if (state is AddressError) {
+      Navigator.of(context).pop(); // Tutup dialog loading
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+    }
   }
 
   Widget _buildDefaultAddressSwitch() {
@@ -262,36 +316,7 @@ class _EditAddressPageState extends State<EditAddressPage> {
               _buildDefaultAddressSwitch(),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                  // Validasi sederhana
-                  if (_labelController.text.isEmpty ||
-                      _streetController.text.isEmpty ||
-                      _selectedProvince == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Harap lengkapi semua field.')),
-                    );
-                    return;
-                  }
-
-                  final addressData = {
-                    'address_label': _labelController.text,
-                    'is_default': _isDefault,
-                    'recipient_name': _recipientNameController.text,
-                    'recipient_phone': _recipientPhoneController.text,
-                    'address_line1': _streetController.text,
-                    'address_line2': _addressLine2Controller.text,
-                    'address_city': _selectedCity ?? '',
-                    'address_postalcode': _postalCodeController.text,
-                    'address_province': _selectedProvince ?? '',
-                    'address_district': _selectedDistrict ?? '',
-                    'delivery_notes': _deliveryNotesController.text,
-                    'address_latitude': widget.addressToEdit['address_latitude'] ?? 0.0,
-                    'address_longitude': widget.addressToEdit['address_longitude'] ?? 0.0,
-                  };
-
-                  // Kembalikan data ke halaman sebelumnya
-                  Navigator.of(context).pop(addressData);
-                },
+                onPressed: _updateAddress,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,

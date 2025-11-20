@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glupulse/features/Address/presentation/cubit/address_cubit.dart';
 import 'package:glupulse/features/Address/presentation/pages/address_detail_page.dart';
-import 'package:glupulse/features/Address/domain/entities/address.dart';
+import 'package:glupulse/features/profile/data/models/address_model.dart';
 import 'package:glupulse/features/Address/presentation/pages/address_list_page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:glupulse/injection_container.dart';
 
 import '../../../Food/presentation/pages/order_history_page.dart';
 import '../widgets/food_menu_section.dart';
@@ -49,11 +53,13 @@ class _MenuTabState extends State<MenuTab> {
   ];
 
   // State untuk alamat yang sedang aktif
-  Address _currentAddress = const Address(
-    label: 'Loading...',
-    addressDetail: 'Mencari lokasi...',
-    latitude: -6.9740, // Default location
-    longitude: 107.6304,
+  AddressModel _currentAddress = const AddressModel(
+    addressId: '',
+    userId: '',
+    addressLabel: 'Loading...',
+    addressLine1: 'Mencari lokasi...',
+    isDefault: false,
+    isActive: false,
   );
   bool _isFetchingAddress = true;
 
@@ -84,8 +90,8 @@ class _MenuTabState extends State<MenuTab> {
           // Pengguna menolak izin
           setState(() {
             _currentAddress = _currentAddress.copyWith(
-              label: 'Lokasi tidak diizinkan',
-              addressDetail: 'Ketuk untuk mengubah',
+              addressLabel: 'Lokasi tidak diizinkan',
+              addressLine1: 'Ketuk untuk mengubah',
             );
             _isFetchingAddress = false;
           });
@@ -97,8 +103,8 @@ class _MenuTabState extends State<MenuTab> {
         // Izin ditolak permanen
         setState(() {
           _currentAddress = _currentAddress.copyWith(
-            label: 'Izin lokasi ditolak',
-            addressDetail: 'Buka pengaturan untuk mengizinkan',
+            addressLabel: 'Izin lokasi ditolak',
+            addressLine1: 'Buka pengaturan untuk mengizinkan',
           );
           _isFetchingAddress = false;
         });
@@ -123,19 +129,21 @@ class _MenuTabState extends State<MenuTab> {
         ].where((part) => part != null).join(', ');
 
         setState(() {
-          _currentAddress = Address(
-            label: 'Lokasi Saat Ini',
-            addressDetail: address,
-            latitude: position.latitude,
-            longitude: position.longitude,
+          _currentAddress = _currentAddress.copyWith(
+            addressLabel: 'Lokasi Saat Ini',
+            addressLine1: address,
+            addressLatitude: position.latitude,
+            addressLongitude: position.longitude,
           );
         });
       }
     } catch (e) {
       // Tangani error
       setState(() => _currentAddress = _currentAddress.copyWith(
-        label: 'Error',
-        addressDetail: 'Gagal mendapatkan lokasi',
+            addressId: _currentAddress.addressId,
+            userId: _currentAddress.userId,
+            addressLabel: 'Error',
+            addressLine1: 'Gagal mendapatkan lokasi',
       ));
     } finally {
       if (mounted) setState(() => _isFetchingAddress = false);
@@ -180,11 +188,18 @@ class _MenuTabState extends State<MenuTab> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         GestureDetector(
-                          onTap: () async {
-                            final selectedAddress = await Navigator.of(context).push<Address>(
+                          onTap: () async { // TODO: Fetch real addresses
+                            final AddressModel? selectedAddress = await Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    AddressListPage(currentAddress: _currentAddress),
+                                // Bungkus dengan MultiBlocProvider untuk menyediakan ProfileCubit dan AddressCubit
+                                builder: (context) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(create: (_) => sl<ProfileCubit>()),
+                                    BlocProvider(create: (_) => sl<AddressCubit>()),
+                                  ],
+                                  child: AddressListPage(
+                                      addresses: const [], currentSelectedAddress: _currentAddress),
+                                ),
                               ),
                             );
                             if (selectedAddress != null) {
@@ -237,14 +252,14 @@ class _MenuTabState extends State<MenuTab> {
                           )
                         : GestureDetector(
                             onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => AddressDetailPage(address: _currentAddress),
-                              ));
+                              // Navigator.of(context).push(MaterialPageRoute(
+                              //   builder: (context) => AddressDetailPage(address: _currentAddress),
+                              // ));
                             },
                             child: Row(
                               children: [
                                 Flexible(
-                                  child: Text(_currentAddress.addressDetail,
+                                  child: Text(_currentAddress.addressLine1 ?? 'Alamat tidak tersedia',
                                       style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis),

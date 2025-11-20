@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/Address/domain/usecases/add_address_usecase.dart';
+import 'package:glupulse/features/Address/presentation/cubit/address_cubit.dart';
+import 'package:glupulse/features/Address/presentation/cubit/address_state.dart';
 import 'package:glupulse/features/Address/presentation/pages/region_selection_page.dart';
 import 'package:glupulse/features/Address/presentation/pages/street_selection_page.dart';
 
 class AddAddressPage extends StatefulWidget {
-  const AddAddressPage({super.key});
 
   @override
   State<AddAddressPage> createState() => _AddAddressPageState();
@@ -39,7 +42,12 @@ class _AddAddressPageState extends State<AddAddressPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    // Bungkus Scaffold dengan BlocListener untuk menangani navigasi/snackbar setelah state berubah
+    return BlocListener<AddressCubit, AddressState>(
+      listener: (context, state) {
+        _handleStateChanges(context, state);
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFF2F5F9),
       appBar: AppBar(
         toolbarHeight: 80,
@@ -132,6 +140,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
           _buildBottomActionBar(),
         ],
       ),
+    ),
     );
   }
 
@@ -155,39 +164,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
           _buildDefaultAddressSwitch(),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () {
-              // Validasi sederhana
-              if (_labelController.text.isEmpty ||
-                  _streetController.text.isEmpty ||
-                  _selectedProvince == null) { // Cukup cek provinsinya saja
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Harap lengkapi semua field.')),
-                );
-                return;
-              }
-
-              // Gabungkan data dari form
-              final addressData = {
-                'address_label': _labelController.text,
-                'is_default': _isDefault.toString(),
-                'recipient_name': _recipientNameController.text,
-                'recipient_phone': _recipientPhoneController.text,
-                'address_line1': _streetController.text,
-                'address_line2': _addressLine2Controller.text,
-                'address_city': _selectedCity ?? '',
-                'address_postalcode': _postalCodeController.text,
-                'address_province': _selectedProvince ?? '',
-                'address_district': _selectedDistrict ?? '', // Menambahkan district
-                'delivery_notes': _deliveryNotesController.text,
-                // Latitude & Longitude akan didapat dari proses lain (misal: saat memilih jalan)
-                'address_latitude': '0.0', // Placeholder
-                'address_longitude': '0.0', // Placeholder
-              };
-
-              // Kembalikan data ke halaman sebelumnya
-              Navigator.of(context).pop(addressData);
-            },
+            onPressed: _saveAddress,
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
@@ -202,6 +179,61 @@ class _AddAddressPageState extends State<AddAddressPage> {
         ],
       ),
     );
+  }
+
+  void _saveAddress() {
+    // Validasi sederhana
+    if (_labelController.text.isEmpty ||
+        _recipientNameController.text.isEmpty ||
+        _recipientPhoneController.text.isEmpty ||
+        _streetController.text.isEmpty ||
+        _selectedProvince == null ||
+        _selectedCity == null ||
+        _postalCodeController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Harap lengkapi semua field yang wajib diisi.')),
+      );
+      return;
+    }
+
+    // Buat params untuk use case
+    final params = AddAddressParams(
+      addressLabel: _labelController.text,
+      isDefault: _isDefault,
+      recipientName: _recipientNameController.text,
+      recipientPhone: _recipientPhoneController.text,
+      addressLine1: _streetController.text,
+      addressLine2: _addressLine2Controller.text.isNotEmpty ? _addressLine2Controller.text : null,
+      addressCity: _selectedCity!,
+      addressPostalcode: _postalCodeController.text,
+      addressDistrict: _selectedDistrict!,
+      addressProvince: _selectedProvince!,
+      deliveryNotes: _deliveryNotesController.text.isNotEmpty ? _deliveryNotesController.text : null,
+      // Placeholder untuk lat/long, sesuaikan jika Anda sudah memilikinya
+      addressLatitude: -6.1069,
+      addressLongitude: 106.7465,
+    );
+
+    // Panggil cubit untuk menambahkan alamat
+    context.read<AddressCubit>().addAddress(params);
+  }
+
+  void _handleStateChanges(BuildContext context, AddressState state) {
+    if (state is AddressLoading) {
+      // Tampilkan loading indicator jika diperlukan
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+    } else if (state is AddressActionSuccess) {
+      Navigator.of(context).pop(); // Tutup dialog loading
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Alamat berhasil disimpan!')));
+      Navigator.of(context).pop(true); // Kembali ke halaman sebelumnya dan kirim sinyal sukses
+    } else if (state is AddressError) {
+      Navigator.of(context).pop(); // Tutup dialog loading
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+    }
   }
 
   Widget _buildDefaultAddressSwitch() {
