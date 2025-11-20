@@ -48,19 +48,7 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
       final token = await localDataSource.getLastToken();
       await apiClient.put(
         '/addresses/${params.addressId}',
-        body: {
-          "address_label": params.addressLabel,
-          "is_default": params.isDefault,
-          "recipient_name": params.recipientName,
-          "recipient_phone": params.recipientPhone,
-          "address_line1": params.addressLine1,
-          "address_line2": params.addressLine2,
-          "address_city": params.addressCity,
-          "address_postalcode": params.addressPostalcode,
-          "address_district": params.addressDistrict,
-          "address_province": params.addressProvince,
-          "delivery_notes": params.deliveryNotes,
-        },
+        body: params.toJson(),
         token: token,
       );
     } on ServerException {

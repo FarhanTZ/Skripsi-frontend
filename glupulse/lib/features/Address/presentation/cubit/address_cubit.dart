@@ -35,11 +35,26 @@ class AddressCubit extends Cubit<AddressState> {
 
   Future<void> updateAddress(UpdateAddressParams params) async {
     emit(AddressLoading());
-    final result = await updateAddressUseCase(params);
-    result.fold(
-      (failure) => emit(AddressError(_mapFailureToMessage(failure))),
-      (_) => emit(AddressActionSuccess()),
-    );
+
+    // **LOGIKA BARU**
+    // Jika kita mencoba menjadikan alamat ini sebagai default, gunakan use case khusus.
+    // Ini kemungkinan besar akan menangani logika di backend untuk menonaktifkan
+    // default lama secara otomatis.
+    if (params.isDefault) {
+      final result = await setDefaultAddressUseCase(params.addressId);
+      result.fold(
+        (failure) => emit(AddressError(_mapFailureToMessage(failure))),
+        (_) => emit(AddressActionSuccess()),
+      );
+    } else {
+      // Jika kita hanya mengupdate field lain (atau menonaktifkan default),
+      // gunakan use case update biasa.
+      final result = await updateAddressUseCase(params);
+      result.fold(
+        (failure) => emit(AddressError(_mapFailureToMessage(failure))),
+        (_) => emit(AddressActionSuccess()),
+      );
+    }
   }
 
   Future<void> deleteAddress(String addressId) async {

@@ -47,6 +47,18 @@ class UpdateAddressParams extends Equatable {
   @override
   List<Object?> get props => [addressId, addressLabel, isDefault, recipientName, recipientPhone, addressLine1, addressLine2, addressCity, addressPostalcode, addressDistrict, addressProvince, deliveryNotes];
 
-  // Method toJson tidak diperlukan di sini karena akan ditangani di data source,
-  // tapi bisa ditambahkan untuk konsistensi jika diinginkan.
+  Map<String, dynamic> toJson() => {
+        "address_label": addressLabel,
+        "is_default": isDefault,
+        "recipient_name": recipientName,
+        "recipient_phone": recipientPhone,
+        "address_line1": addressLine1,
+        "address_line2": addressLine2,
+        "address_city": addressCity,
+        "address_postalcode": addressPostalcode,
+        "address_district": addressDistrict,
+        "address_province": addressProvince,
+        "delivery_notes": deliveryNotes,
+        // ID tidak perlu dimasukkan ke body, karena sudah ada di URL
+      };
 }
