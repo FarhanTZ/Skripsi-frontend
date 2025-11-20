@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/Address/presentation/cubit/address_cubit.dart';
 import 'package:glupulse/features/Address/presentation/pages/address_list_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
@@ -8,6 +9,8 @@ import 'package:glupulse/features/Food/presentation/pages/order_tracking_page.da
 import 'package:glupulse/features/profile/data/models/address_model.dart';
 import 'package:intl/intl.dart';
 import 'package:glupulse/features/Food/presentation/pages/order_history_page.dart';
+import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:glupulse/injection_container.dart';
 
 class PaymentOrderPage extends StatefulWidget {
   final List<Map<String, dynamic>> orderItems;
@@ -30,12 +33,6 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
 
   // State untuk alamat pengiriman
   AddressModel? _shippingAddress;
-  // Address _shippingAddress = const Address(
-  //   label: 'Home',
-  //   addressDetail: 'Jl. Telekomunikasi No. 1, Bandung, Jawa Barat',
-  //   latitude: -6.9740,
-  //   longitude: 107.6304,
-  // );
 
   // Data dummy untuk pilihan diskon
   final List<Map<String, dynamic>> _availableDiscounts = [
@@ -64,10 +61,15 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
   @override
   void initState() {
     super.initState();
+    // Mengambil state otentikasi saat ini dari AuthCubit.
     final authState = context.read<AuthCubit>().state;
+    // Memeriksa apakah pengguna sudah terotentikasi.
     if (authState is AuthAuthenticated) {
+      // Memeriksa apakah daftar alamat pengguna tidak null dan tidak kosong.
       if (authState.user.addresses != null &&
           authState.user.addresses!.isNotEmpty) {
+        // Mencari alamat yang ditandai sebagai 'isDefault'.
+        // Jika tidak ada, maka akan menggunakan alamat pertama dalam daftar sebagai fallback.
         _shippingAddress = authState.user.addresses!
             .firstWhere((addr) => addr.isDefault, orElse: () => authState.user.addresses!.first);
       }
@@ -155,7 +157,20 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
         final selectedAddress =
             await Navigator.of(context).push<AddressModel>(
           MaterialPageRoute(
-              builder: (context) => AddressListPage(addresses: userAddresses, currentSelectedAddress: _shippingAddress)),
+            // Menggunakan builder untuk mendapatkan context baru yang tepat untuk rute ini.
+            builder: (routeContext) => MultiBlocProvider(
+              providers: [
+                // Menggunakan BlocProvider.value untuk meneruskan instance AuthCubit yang sudah ada.
+                // `context` di sini merujuk ke context dari PaymentOrderPage.
+                BlocProvider.value(value: BlocProvider.of<AuthCubit>(context)),
+                // Membuat instance baru untuk ProfileCubit dan AddressCubit yang akan digunakan
+                // secara eksklusif oleh AddressListPage.
+                BlocProvider(create: (context) => sl<ProfileCubit>()),
+                BlocProvider(create: (context) => sl<AddressCubit>()),
+              ],
+              child: AddressListPage(addresses: userAddresses, currentSelectedAddress: _shippingAddress),
+            ),
+          ),
         );
 
         if (selectedAddress != null) {

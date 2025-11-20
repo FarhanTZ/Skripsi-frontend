@@ -130,6 +130,9 @@ class UserModel extends UserEntity {
       'avatar_url': avatarUrl,
       'is_google_linked': isGoogleLinked,
       // toJson untuk addresses bisa ditambahkan jika diperlukan
+      'addresses': addresses != null
+          ? addresses!.map((address) => address.toJson()).toList()
+          : null,
     };
   }
 }

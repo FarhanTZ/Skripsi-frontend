@@ -71,6 +71,30 @@ class AddressModel extends Equatable {
     );
   }
 
+  /// Method untuk mengubah instance AddressModel menjadi JSON.
+  Map<String, dynamic> toJson() {
+    return {
+      'address_id': addressId,
+      'user_id': userId,
+      'address_line1': addressLine1,
+      'address_line2': addressLine2,
+      'address_city': addressCity,
+      'address_province': addressProvince,
+      'address_district': addressDistrict,
+      'address_postalcode': addressPostalcode,
+      'address_latitude': addressLatitude,
+      'address_longitude': addressLongitude,
+      'address_label': addressLabel,
+      'recipient_name': recipientName,
+      'recipient_phone': recipientPhone,
+      'delivery_notes': deliveryNotes,
+      'is_default': isDefault,
+      'is_active': isActive,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+    };
+  }
+
   AddressModel copyWith({
     String? addressId,
     String? userId,
