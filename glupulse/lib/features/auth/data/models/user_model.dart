@@ -71,13 +71,31 @@ class UserModel extends UserEntity {
 
     // Parsing daftar alamat
     List<AddressModel> parsedAddresses = [];
+    bool defaultAddressFound = false;
     if (json['addresses'] is List) {
-      parsedAddresses = (json['addresses'] as List)
-          .map((addressJson) =>
-              AddressModel.fromJson(addressJson as Map<String, dynamic>))
-          .toList();
-      print(
-          'UserModel.fromJson (Source: $source): Berhasil mem-parsing ${parsedAddresses.length} alamat.'); // DEBUG
+      List<dynamic> addressList = json['addresses'] as List;
+      for (var addressJson in addressList) {
+        if (addressJson is Map<String, dynamic>) {
+          // Buat salinan yang bisa diubah dari JSON alamat
+          final mutableAddressJson = Map<String, dynamic>.from(addressJson);
+
+          // Cek apakah alamat ini adalah default dari API
+          bool isApiDefault = mutableAddressJson['is_default'] == true;
+
+          // Jika alamat ini default DAN kita belum menemukan alamat default lain
+          if (isApiDefault && !defaultAddressFound) {
+            // Alamat ini adalah alamat default pertama yang sah.
+            defaultAddressFound = true; // Tandai bahwa kita sudah menemukan alamat default
+            // Tidak perlu mengubah JSON, langsung tambahkan.
+            parsedAddresses.add(AddressModel.fromJson(mutableAddressJson));
+          } else {
+            // Jika ini bukan alamat default, ATAU jika kita sudah menemukan alamat default, paksa is_default menjadi false.
+            mutableAddressJson['is_default'] = false;
+            parsedAddresses.add(AddressModel.fromJson(mutableAddressJson));
+          }
+        }
+      }
+      print('UserModel.fromJson (Source: $source): Berhasil mem-parsing dan membersihkan ${parsedAddresses.length} alamat.'); // DEBUG
     }
 
     return UserModel(
