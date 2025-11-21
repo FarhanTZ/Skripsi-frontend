@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/Food/domain/entities/food.dart';
+import 'package:intl/intl.dart';
 
 class FoodDetailPage extends StatefulWidget {
-  final String foodName;
+  final Food food;
 
-  const FoodDetailPage({super.key, required this.foodName});
+  const FoodDetailPage({super.key, required this.food});
 
   @override
   State<FoodDetailPage> createState() => _FoodDetailPageState();
@@ -30,6 +32,11 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
     return Scaffold(
       extendBodyBehindAppBar: true, // Memungkinkan body untuk berada di belakang AppBar
       appBar: AppBar(
@@ -74,15 +81,21 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                       child: Card(
                         elevation: 8,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        child: Container(
+                        clipBehavior: Clip.antiAlias,
+                        child: SizedBox(
                           height: 180,
                           width: MediaQuery.of(context).size.width - 48, // Lebar kartu disesuaikan
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            // Placeholder untuk gambar makanan
-                            color: Colors.grey.shade300,
-                          ),
-                          child: const Center(child: Icon(Icons.image, size: 60, color: Colors.grey)),
+                          child: (widget.food.photoUrl != null && widget.food.photoUrl!.isNotEmpty)
+                              ? Image.network(
+                                  widget.food.photoUrl!,
+                                  headers: const {'ngrok-skip-browser-warning': 'true'},
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, size: 60, color: Colors.grey)),
+                                )
+                              : Container(
+                                  color: Colors.grey.shade300,
+                                  child: const Center(child: Icon(Icons.image, size: 60, color: Colors.grey)),
+                                ),
                         ),
                       ),
                     ),
@@ -97,7 +110,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                     children: [
                       // Menampilkan nama makanan sebagai judul utama konten
                       Text(
-                        widget.foodName,
+                        widget.food.foodName,
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -140,9 +153,9 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                       ),
                       const SizedBox(height: 16),
                       // Placeholder untuk detail nutrisi
-                      const Text(
-                        'Calories: 150 kcal\nProtein: 5g\nCarbs: 30g\nFat: 1g',
-                        style: TextStyle(fontSize: 16, height: 1.5),
+                      Text(
+                        'Calories: ${widget.food.calories ?? 'N/A'} kcal\nProtein: ${widget.food.proteinG ?? 'N/A'} g\nCarbs: ${widget.food.carbohydrateG ?? 'N/A'} g\nFat: ${widget.food.fatG ?? 'N/A'} g',
+                        style: const TextStyle(fontSize: 16, height: 1.5),
                       ),
                       const Divider(color: Colors.grey, thickness: 1, height: 32), // Garis di bawah nutrisi
                       const SizedBox(height: 24),
@@ -156,8 +169,8 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Ini adalah detail untuk ${widget.foodName}. Makanan ini merupakan pilihan yang baik untuk diet sehat Anda, kaya akan nutrisi penting untuk membantu menjaga kadar gula darah dan kesehatan tubuh secara keseluruhan.',
-                        style: TextStyle(fontSize: 16, color: Colors.black54, height: 1.5),
+                        widget.food.description,
+                        style: const TextStyle(fontSize: 16, color: Colors.black54, height: 1.5),
                       ),
                       const SizedBox(height: 24), // Spasi sebelum quantity selector
                       // Widget untuk menambah/mengurangi jumlah pesanan
@@ -184,7 +197,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                               onPressed: () {
                                 // TODO: Implementasi logika checkout di sini
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('$_quantity ${widget.foodName} ditambahkan ke keranjang!')),
+                                  SnackBar(content: Text('$_quantity ${widget.food.foodName} ditambahkan ke keranjang!')),
                                 );
                               },
                               style: ElevatedButton.styleFrom(

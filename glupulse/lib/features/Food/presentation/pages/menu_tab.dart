@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/features/Address/presentation/cubit/address_cubit.dart';
-import 'package:glupulse/features/Address/presentation/pages/address_detail_page.dart';
 import 'package:glupulse/features/profile/data/models/address_model.dart';
 import 'package:glupulse/features/Address/presentation/pages/address_list_page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
+import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
+import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:glupulse/injection_container.dart';
 
-import '../../../Food/presentation/pages/order_history_page.dart';
-import '../widgets/food_menu_section.dart';
+import 'order_history_page.dart';
 
 class MenuTab extends StatefulWidget {
-  const MenuTab({super.key});
+  const MenuTab({Key? key}) : super(key: key);
 
   @override
   State<MenuTab> createState() => _MenuTabState();
@@ -33,25 +34,6 @@ class _MenuTabState extends State<MenuTab> {
     'Drink'
   ];
 
-  // Data dummy untuk menu
-  final List<Map<String, dynamic>> recommendationItems = const [
-    {'title': 'Oatmeal Sehat', 'price': 'Rp 25.000', 'icon': Icons.breakfast_dining_outlined, 'color': Colors.brown},
-    {'title': 'Salmon Panggang', 'price': 'Rp 75.000', 'icon': Icons.set_meal_outlined, 'color': Colors.pink},
-    {'title': 'Salad Sayur', 'price': 'Rp 35.000', 'icon': Icons.spa_outlined, 'color': Colors.green},
-  ];
-
-  final List<Map<String, dynamic>> foodMenuItems = const [
-    {'title': 'Nasi Goreng Merah', 'price': 'Rp 30.000', 'icon': Icons.breakfast_dining_outlined, 'color': Colors.brown},
-    {'title': 'Ayam Bakar Madu', 'price': 'Rp 45.000', 'icon': Icons.set_meal_outlined, 'color': Colors.pink},
-    {'title': 'Gado-gado Spesial', 'price': 'Rp 28.000', 'icon': Icons.spa_outlined, 'color': Colors.green},
-  ];
-
-  final List<Map<String, dynamic>> drinkMenuItems = const [
-    {'title': 'Air Mineral', 'price': 'Rp 5.000', 'icon': Icons.water_drop, 'color': Colors.blue},
-    {'title': 'Jus Jeruk', 'price': 'Rp 15.000', 'icon': Icons.local_drink, 'color': Colors.orange},
-    {'title': 'Smoothie Hijau', 'price': 'Rp 20.000', 'icon': Icons.blender, 'color': Colors.teal},
-  ];
-
   // State untuk alamat yang sedang aktif
   AddressModel _currentAddress = const AddressModel(
     addressId: '',
@@ -67,6 +49,7 @@ class _MenuTabState extends State<MenuTab> {
   void initState() {
     super.initState();
     _getCurrentLocationAndAddress();
+    context.read<FoodCubit>().fetchFoods();
   }
 
   @override
@@ -188,7 +171,7 @@ class _MenuTabState extends State<MenuTab> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         GestureDetector(
-                          onTap: () async { // TODO: Fetch real addresses
+                          onTap: () async {
                             final AddressModel? selectedAddress = await Navigator.of(context).push(
                               MaterialPageRoute(
                                 // Bungkus dengan MultiBlocProvider untuk menyediakan ProfileCubit dan AddressCubit
@@ -387,19 +370,67 @@ class _MenuTabState extends State<MenuTab> {
             const SizedBox(
                 height: 20), // Additional space below the category list
             
-            // --- Recommendation Food (Refactored) ---
-            FoodMenuSection(title: 'Recommendation Food', items: recommendationItems),
-            const SizedBox(height: 24),
-            
-            // --- Food Menu (Refactored) ---
-            FoodMenuSection(title: 'Food Menu', items: foodMenuItems),
-            const SizedBox(height: 24),
+            // --- Food Menu from API ---
+            BlocBuilder<FoodCubit, FoodState>(
+              builder: (context, state) {
+                if (state is FoodLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is FoodLoaded) {
+                  // Pisahkan makanan dan minuman berdasarkan tags
+                  final foods = state.foods.where((f) => f.tags?.contains('drink') == false).toList();
+                  final drinks = state.foods.where((f) => f.tags?.contains('drink') == true).toList();
 
-            // --- Drink Menu (Refactored) ---
-            FoodMenuSection(title: 'Drink Menu', items: drinkMenuItems),
+                  return Column(
+                    children: [
+                      _buildFoodSection(context, 'Recommendation Food', foods.take(5).toList()),
+                      const SizedBox(height: 24),
+                      _buildFoodSection(context, 'Food Menu', foods),
+                      const SizedBox(height: 24),
+                      _buildFoodSection(context, 'Drink Menu', drinks),
+                    ],
+                  );
+                } else if (state is FoodError) {
+                  return Center(child: Text(state.message));
+                }
+                return const SizedBox.shrink(); // Initial state
+              },
+            ),
             const SizedBox(height: 24), // Space below
           ],
         ),
+    );
+  }
+
+  // Widget baru untuk membangun setiap seksi menu
+  Widget _buildFoodSection(BuildContext context, String title, List<dynamic> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 180, // Sesuaikan tinggi sesuai kebutuhan FoodCard
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final food = items[index];
+              return FoodCard(
+                food: food,
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => FoodDetailPage(food: food),
+                  ));
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 

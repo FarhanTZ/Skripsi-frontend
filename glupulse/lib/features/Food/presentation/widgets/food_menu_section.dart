@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glupulse/features/Users/presentation/widgets/recommendation_card.dart';
+import 'package:glupulse/features/Food/presentation/widgets/recommendation_card.dart';
 
 class FoodMenuSection extends StatelessWidget {
   final String title;

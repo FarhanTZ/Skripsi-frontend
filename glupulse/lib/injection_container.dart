@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:glupulse/core/api/api_client.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
@@ -30,7 +31,13 @@ import 'package:glupulse/features/Address/domain/usecases/update_address_usecase
 import 'package:glupulse/features/Address/domain/usecases/delete_address_usecase.dart';
 import 'package:glupulse/features/Address/domain/usecases/set_default_address_usecase.dart';
 import 'package:glupulse/features/Address/presentation/cubit/address_cubit.dart';
+import 'package:glupulse/features/Food/data/datasources/food_remote_data_source.dart';
+import 'package:glupulse/features/Food/data/repositories/food_repository_impl.dart';
+import 'package:glupulse/features/Food/domain/repositories/food_repository.dart';
+import 'package:glupulse/features/Food/domain/usecases/get_foods.dart';
+import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 final sl = GetIt.instance; // sl = Service Locator
 
@@ -153,6 +160,27 @@ Future<void> init() async {
     ),
   );
 
+  // --- Features - Food ---
+
+  // Cubit
+  sl.registerFactory(() => FoodCubit(getFoodsUseCase: sl()));
+
+  // Use cases
+  sl.registerLazySingleton(() => GetFoods(sl()));
+
+  // Repository
+  sl.registerLazySingleton<FoodRepository>(() => FoodRepositoryImpl(
+        remoteDataSource: sl(),
+      ));
+
+  // Data sources
+  sl.registerLazySingleton<FoodRemoteDataSource>(
+      () => FoodRemoteDataSourceImpl(
+        apiClient: sl(),
+        localDataSource: sl()
+      ));
+
+
   // --- Core ---
   sl.registerLazySingleton(() => ApiClient());
 
@@ -160,6 +188,9 @@ Future<void> init() async {
   // Daftarkan SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
+
+  // Daftarkan http.Client
+  sl.registerLazySingleton(() => http.Client());
 
   // Daftarkan GoogleSignIn sebagai lazy singleton
   sl.registerLazySingleton(() => GoogleSignIn());

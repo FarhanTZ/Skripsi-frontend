@@ -106,6 +106,53 @@ class ApiClient {
       throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga.');
     }
   }
+
+  // Metode GET generik untuk List
+  Future<List<dynamic>> getList(String endpoint, {required String token}) async {
+    final url = Uri.parse('$_baseUrl$endpoint');
+    final headers = {
+      ..._defaultHeaders,
+      'Authorization': 'Bearer $token',
+    };
+
+    try {
+      final response = await http
+          .get(
+            url,
+            headers: headers,
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (_isTokenExpired(response)) {
+        await _refreshToken();
+        final newToken = await _localDataSource.getLastToken();
+        // Ulangi request dengan token baru
+        return await getList(endpoint, token: newToken);
+      }
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (responseBody is List) {
+          return responseBody;
+        } else {
+          throw ServerException('Respons dari server bukan format yang diharapkan (diharapkan List).');
+        }
+      } else {
+        if (responseBody is Map<String, dynamic>) {
+            throw ServerException(responseBody['message'] ?? 'Terjadi kesalahan pada server');
+        }
+        throw ServerException('Terjadi kesalahan pada server');
+      }
+    } on SocketException {
+      throw ServerException('Tidak ada koneksi internet. Periksa jaringan Anda.');
+    } on TimeoutException {
+      throw ServerException('Server tidak merespons. Coba lagi nanti.');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga.');
+    }
+  }
   // Metode POST generik
   Future<Map<String, dynamic>> post(String endpoint,
       {Map<String, dynamic>? body, String? token}) async {
@@ -240,6 +287,36 @@ class ApiClient {
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException('Gagal menghapus data. Terjadi kesalahan tak terduga.');
+    }
+  }
+
+  // Metode untuk mengambil gambar dengan header khusus ngrok
+  Future<http.Response> getImage(String imageUrl) async {
+    final url = Uri.parse(imageUrl);
+    final headers = {
+      'ngrok-skip-browser-warning': 'true',
+    };
+
+    try {
+      final response = await http
+          .get(
+            url,
+            headers: headers,
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return response;
+      } else {
+        throw ServerException('Gagal memuat gambar (Status: ${response.statusCode})');
+      }
+    } on SocketException {
+      throw ServerException('Tidak ada koneksi internet untuk memuat gambar.');
+    } on TimeoutException {
+      throw ServerException('Server tidak merespons saat memuat gambar.');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException('Terjadi kesalahan tak terduga saat memuat gambar.');
     }
   }
 }

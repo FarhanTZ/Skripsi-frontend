@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glupulse/features/Food/domain/entities/food.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
 
 class RecommendationCard extends StatelessWidget {
@@ -27,8 +28,22 @@ class RecommendationCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias, // Ensures InkWell ripple effect is clipped
         child: InkWell(
           onTap: () {
+            // Dummy food object creation
+            final Food dummyFood = Food(
+              foodId: 'dummy_${title.replaceAll(' ', '_')}',
+              sellerId: 'dummy_seller',
+              foodName: title,
+              description: 'A recommended healthy food option.',
+              price:
+                  int.tryParse(price?.replaceAll(RegExp(r'[^0-9]'), '') ?? '0') ??
+                      0,
+              currency: 'IDR',
+              isAvailable: true,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
             Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => FoodDetailPage(foodName: title),
+              builder: (context) => FoodDetailPage(food: dummyFood),
             ));
           },
           child: Column(

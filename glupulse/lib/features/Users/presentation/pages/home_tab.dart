@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
+import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/activity/presentation/pages/activity_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
@@ -10,8 +12,21 @@ import 'package:glupulse/features/notification/presentation/pages/notification_p
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 import 'package:intl/intl.dart';
 
-class HomeTab extends StatelessWidget {
+
+class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
+
+  @override
+  State<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> {
+  @override
+  void initState() {
+    super.initState();
+    // Memuat data makanan saat halaman pertama kali dibuka
+    context.read<FoodCubit>().fetchFoods();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -419,36 +434,8 @@ class HomeTab extends StatelessWidget {
 
             // --- Recommendation Food Cards ---
           SizedBox(
-            height: 191, // Menyamakan tinggi dengan Smart Health Metrix
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24.0), // Menggunakan padding horizontal
-              children: [
-                _buildRecommendationCard(
-                  context: context,
-                  title: 'Oatmeal Sehat',
-                  price: 'Rp 25.000',
-                  icon: Icons.breakfast_dining_outlined,
-                  color: Colors.brown,
-                ),
-                const SizedBox(width: 12),
-                _buildRecommendationCard(
-                  context: context,
-                  title: 'Salmon',
-                  price: 'Rp 75.000',
-                  icon: Icons.set_meal_outlined,  
-                  color: Colors.pink,
-                ),
-                const SizedBox(width: 12),
-                _buildRecommendationCard(
-                  context: context,
-                  title: 'Salad Sayur',
-                  price: 'Rp 35.000',
-                  icon: Icons.spa_outlined, // Mungkin bisa diganti dengan Icons.restaurant
-                  color: Colors.green,
-                ),
-              ],
-            ),
+            height: 191,
+            child: _buildRecommendationFoodList(),
           ),
             const SizedBox(height: 24),
 
@@ -519,6 +506,47 @@ class HomeTab extends StatelessWidget {
           const SizedBox(height: 24), // Menambahkan spasi di bagian bawah
             ],
           ),
+        );
+      },
+    );
+  }
+
+  // Widget baru untuk membangun daftar rekomendasi makanan dari API
+  Widget _buildRecommendationFoodList() {
+    return BlocBuilder<FoodCubit, FoodState>(
+      builder: (context, state) {
+        if (state is FoodLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is FoodLoaded) {
+          // Ambil hanya makanan (bukan minuman) dan batasi 5 item untuk rekomendasi
+          final recommendedFoods = state.foods
+              .where((f) => f.tags?.contains('drink') == false)
+              .take(5)
+              .toList();
+
+          return ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            itemCount: recommendedFoods.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final food = recommendedFoods[index];
+              // Gunakan FoodCard yang sudah ada
+              return FoodCard(
+                food: food,
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => FoodDetailPage(food: food)));
+                },
+              );
+            },
+          );
+        } else if (state is FoodError) {
+          return Center(child: Text('Error: ${state.message}'));
+        }
+        // State awal atau jika tidak ada data
+        return const Center(
+          child: Text('No food recommendations available.'),
         );
       },
     );
@@ -600,8 +628,8 @@ class HomeTab extends StatelessWidget {
   // Widget helper untuk membuat card rekomendasi (makanan & aktivitas)
   Widget _buildRecommendationCard({
     required BuildContext context,
-    required String title,
-    required String price,
+    required String title, // Kembalikan parameter title
+    required String price, // Kembalikan parameter price
     required IconData icon,
     required Color color,
     VoidCallback? onTap, // Menambahkan parameter onTap opsional
@@ -610,23 +638,18 @@ class HomeTab extends StatelessWidget {
       width: 170, // Menyamakan lebar dengan card lain
       child: Card(
         elevation: 1,
-        margin: EdgeInsets.zero, // Menghapus margin default Card untuk mencegah overflow
+        margin: EdgeInsets.zero,
         color: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         clipBehavior: Clip.antiAlias, // Ensures InkWell ripple effect is clipped
         child: InkWell(
-          onTap: onTap ?? () { // Jika onTap tidak disediakan, gunakan navigasi default ke FoodDetailPage
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => FoodDetailPage(foodName: title), // Default ke FoodDetailPage
-            ));
-          },
+          onTap: onTap, // Gunakan onTap yang diberikan dari pemanggil
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Bagian Gambar
-              SizedBox(
-                height: 100, // Memberikan tinggi tetap untuk area gambar
-                child:SizedBox.expand(child: Container(
+              // Bagian Gambar/Ikon
+              Expanded(
+                child: Container(
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.15),
                   ),
@@ -634,29 +657,26 @@ class HomeTab extends StatelessWidget {
                     child: Icon(icon, color: color, size: 40),
                   ),
                 ),
-              )),
-              // Bagian Teks (Judul dan Deskripsi)
-              SizedBox(
-                height: 91, // Tinggi tetap untuk area teks
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
+              ),
+              // Bagian Teks (Judul dan Harga)
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                         title,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         maxLines: 2, // Batasi judul hingga 2 baris
                         overflow: TextOverflow.ellipsis, // Tampilkan '...' jika lebih dari 2 baris
                       ),
-                      const SizedBox(height: 4),
-                      Text(price, style: TextStyle(
+                    const SizedBox(height: 4),
+                    Text(price, style: TextStyle(
                         fontSize: 14, 
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold
-                      )),
-                    ],
-                  ),
+                    )),
+                  ],
                 ),
               ),
             ],
@@ -666,3 +686,5 @@ class HomeTab extends StatelessWidget {
     );
   }
 }
+
+// Hapus extension AppThemeRandomColor karena tidak lagi digunakan di sini
