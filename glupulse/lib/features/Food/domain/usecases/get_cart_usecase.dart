@@ -2,11 +2,11 @@ import 'package:dartz/dartz.dart';
 import 'package:glupulse/core/error/failures.dart';
 import 'package:glupulse/core/usecases/usecase.dart';
 import 'package:glupulse/features/Food/domain/entities/cart.dart';
-import 'package:glupulse/features/Food/domain/repositories/cart_repository.dart';
+import 'package:glupulse/features/Food/domain/repositories/food_repository.dart';
 
 
 class GetCartUseCase implements UseCase<Cart, NoParams> {
-  final CartRepository repository;
+  final FoodRepository repository;
 
   GetCartUseCase(this.repository);
 

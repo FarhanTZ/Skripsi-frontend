@@ -157,25 +157,18 @@ class _CartPageState extends State<CartPage> {
   }
 
   void _incrementQuantity(CartItem item) {
-    setState(() {
-      // TODO: Panggil API untuk update kuantitas
-      // item.quantity++;
-    });
+    // Panggil cubit untuk update kuantitas
+    context.read<CartCubit>().updateItemQuantity(item.foodId, item.quantity + 1);
   }
 
   void _decrementQuantity(CartItem item) {
-    setState(() {
-      if (item.quantity > 1) {
-        // TODO: Panggil API untuk update kuantitas
-        // item.quantity--;
-      } else {
-        // TODO: Panggil API untuk hapus item
-        _cartItems.removeWhere((i) => i.cartItemId == item.cartItemId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${item.foodName} dihapus dari keranjang.')),
-        );
-      }
-    });
+    if (item.quantity > 1) {
+      // Panggil cubit untuk update kuantitas
+      context.read<CartCubit>().updateItemQuantity(item.foodId, item.quantity - 1);
+    } else {
+      // Panggil cubit untuk hapus item jika kuantitas akan menjadi 0
+      context.read<CartCubit>().removeItemFromCart(item.foodId);
+    }
   }
 
   // Helper widget untuk tombol kuantitas
@@ -214,7 +207,7 @@ class _CartPageState extends State<CartPage> {
                 child: item.photoUrl != null && item.photoUrl!.isNotEmpty
                     ? Image.network(
                         item.photoUrl!,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.cover,                        
                         headers: const {'ngrok-skip-browser-warning': 'true'},
                         errorBuilder: (context, error, stackTrace) =>
                             const Icon(Icons.broken_image,

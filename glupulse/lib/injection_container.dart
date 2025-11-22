@@ -1,10 +1,4 @@
 import 'package:get_it/get_it.dart';
-import 'package:glupulse/features/Food/data/datasources/cart_remote_data_source.dart';
-import 'package:glupulse/features/Food/data/repositories/add_to_cart_usecase.dart';
-import 'package:glupulse/features/Food/data/repositories/cart_repository_impl.dart';
-import 'package:glupulse/features/Food/domain/repositories/cart_repository.dart';
-import 'package:glupulse/features/Food/domain/usecases/get_cart_usecase.dart';
-import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/profile/data/repositories/profile_repository_impl.dart';
@@ -41,7 +35,12 @@ import 'package:glupulse/features/Food/data/datasources/food_remote_data_source.
 import 'package:glupulse/features/Food/data/repositories/food_repository_impl.dart';
 import 'package:glupulse/features/Food/domain/repositories/food_repository.dart';
 import 'package:glupulse/features/Food/domain/usecases/get_foods.dart';
+import 'package:glupulse/features/Food/domain/usecases/get_cart_usecase.dart';
+import 'package:glupulse/features/Food/domain/usecases/add_to_cart_usecase.dart';
+import 'package:glupulse/features/Food/domain/usecases/update_cart_item_usecase.dart';
+import 'package:glupulse/features/Food/domain/usecases/remove_cart_item_usecase.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
+import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance; // sl = Service Locator
@@ -189,23 +188,22 @@ Future<void> init() async {
 
   // Cubit
   sl.registerFactory(
-      () => CartCubit(getCartUseCase: sl(), addToCartUseCase: sl()));
+    () => CartCubit(
+      getCartUseCase: sl(),
+      addToCartUseCase: sl(),
+      updateCartItemUseCase: sl(),
+      removeCartItemUseCase: sl(),
+    ),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => GetCartUseCase(sl()));
   sl.registerLazySingleton(() => AddToCartUseCase(sl()));
-
-  // Repository
-  sl.registerLazySingleton<CartRepository>(
-      () => CartRepositoryImpl(remoteDataSource: sl()));
-
-  // Data sources
-  sl.registerLazySingleton<CartRemoteDataSource>(
-      () => CartRemoteDataSourceImpl(apiClient: sl(), localDataSource: sl()));
-
+  sl.registerLazySingleton(() => UpdateCartItemUseCase(sl()));
+  sl.registerLazySingleton(() => RemoveCartItemUseCase(sl()));
 
   // --- Core ---
-  sl.registerLazySingleton(() => ApiClient());  
+  sl.registerLazySingleton(() => ApiClient());
 
   // --- External ---
   // Daftarkan SharedPreferences

@@ -1,10 +1,15 @@
 import 'package:glupulse/core/api/api_client.dart';
 import 'package:glupulse/core/error/exceptions.dart';
+import 'package:glupulse/features/Food/data/models/cart_model.dart';
 import 'package:glupulse/features/Food/data/models/food_model.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
 
 abstract class FoodRemoteDataSource {
   Future<List<FoodModel>> getFoods();
+  Future<CartModel> getCart();
+  Future<void> addToCart(String foodId, int quantity);
+  Future<void> updateCartItem(String foodId, int quantity);
+  Future<void> removeCartItem(String foodId);
 }
 
 class FoodRemoteDataSourceImpl implements FoodRemoteDataSource {
@@ -24,6 +29,57 @@ class FoodRemoteDataSourceImpl implements FoodRemoteDataSource {
       return jsonList.map((json) => FoodModel.fromJson(json)).toList();
     } on ServerException {
       rethrow; // Lempar kembali ServerException yang sudah ditangani oleh ApiClient
+    }
+  }
+
+  @override
+  Future<CartModel> getCart() async {
+    try {
+      final token = await localDataSource.getLastToken();
+      final response = await apiClient.get('/cart', token: token);
+      return CartModel.fromJson(response);
+    } on ServerException {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> addToCart(String foodId, int quantity) async {
+    try {
+      final token = await localDataSource.getLastToken();
+      await apiClient.post(
+        '/cart/add',
+        body: {'food_id': foodId, 'quantity': quantity},
+        token: token,
+      );
+    } on ServerException {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateCartItem(String foodId, int quantity) async {
+    try {
+      final token = await localDataSource.getLastToken();
+      await apiClient.put(
+        '/cart/update',
+        body: {'food_id': foodId, 'quantity': quantity},
+        token: token,
+      );
+    } on ServerException {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> removeCartItem(String foodId) async {
+    try {
+      final token = await localDataSource.getLastToken();
+      // API Anda menggunakan POST untuk remove, jadi kita gunakan post di sini.
+      await apiClient.post('/cart/remove',
+          body: {'food_id': foodId}, token: token);
+    } on ServerException {
+      rethrow;
     }
   }
 }

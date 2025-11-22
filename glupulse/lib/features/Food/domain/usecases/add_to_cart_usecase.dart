@@ -2,10 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:glupulse/core/error/failures.dart';
 import 'package:glupulse/core/usecases/usecase.dart';
-import 'package:glupulse/features/Food/domain/repositories/cart_repository.dart';
+import 'package:glupulse/features/Food/domain/repositories/food_repository.dart';
 
 class AddToCartUseCase implements UseCase<void, AddToCartParams> {
-  final CartRepository repository;
+  final FoodRepository repository;
 
   AddToCartUseCase(this.repository);
 
