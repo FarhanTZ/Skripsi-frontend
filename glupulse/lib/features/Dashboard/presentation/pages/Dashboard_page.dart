@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/login_page.dart';
@@ -11,6 +12,7 @@ import 'package:glupulse/features/Users/presentation/pages/home_tab.dart';
 import 'package:glupulse/features/Food/presentation/pages/menu_tab.dart';
 import 'package:glupulse/features/profile/presentation/pages/profile_tab.dart';
 import 'package:glupulse/features/Food/presentation/pages/cart_page.dart';
+import 'package:glupulse/injection_container.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -67,8 +69,11 @@ class _HomePageState extends State<HomePage> {
                 right: 24.0,
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const CartPage()),
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => BlocProvider(
+                        create: (_) => sl<CartCubit>(),
+                        child: const CartPage(),
+                      )),
                     );
                   },
                   child: Container(

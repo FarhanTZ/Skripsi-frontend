@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glupulse/features/Food/domain/entities/cart_item.dart';
+import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
 import 'package:glupulse/features/Food/presentation/pages/payment_order_page.dart';
+import 'package:glupulse/injection_container.dart';
+import 'package:intl/intl.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -9,75 +14,47 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  // Data dummy untuk item di keranjang
-  final List<Map<String, dynamic>> _cartItems = [
-    {
-      'id': 1,
-      'name': 'Oatmeal Sehat',
-      'description': 'Sarapan pagi bergizi',
-      'price': 25000,
-      'quantity': 1,
-      'isSelected': false,
-      'rating': 4.8,
-      'reviewCount': 120,
-    },
-    {
-      'id': 2,
-      'name': 'Jus Alpukat',
-      'description': 'Minuman segar tanpa gula',
-      'price': 15000,
-      'quantity': 2,
-      'isSelected': true,
-      'rating': 4.5,
-      'reviewCount': 95,
-    },
-    {
-      'id': 3,
-      'name': 'Salmon Panggang',
-      'description': 'Kaya Omega-3 dan protein',
-      'price': 75000,
-      'quantity': 1,
-      'isSelected': false,
-      'rating': 4.9,
-      'reviewCount': 210,
-    },
-    {
-      'id': 4,
-      'name': 'Salad Sayur Segar',
-      'description': 'Penuh vitamin dan mineral',
-      'price': 35000,
-      'quantity': 1,
-      'isSelected': true,
-      'rating': 4.7,
-      'reviewCount': 150,
-    },
-  ];
+  List<CartItem> _cartItems = [];
+  final currencyFormatter =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   // Getter untuk mengecek apakah semua item terpilih
   bool get _isAllSelected {
     if (_cartItems.isEmpty) {
       return false; // Atau true, tergantung perilaku yang diinginkan untuk keranjang kosong
     }
-    return _cartItems.every((item) => item['isSelected']);
+    return _cartItems.every((item) => item.isSelected);
   }
 
   // Menghitung total harga dari item yang dipilih
   double get _totalPrice {
     double total = 0;
     for (var item in _cartItems) {
-      if (item['isSelected']) {
-        total += item['price'] * item['quantity'];
+      if (item.isSelected) {
+        total += item.price * item.quantity;
       }
     }
     return total;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    // Panggil cubit untuk fetch data saat halaman dibuka
+    context.read<CartCubit>().fetchCart();
+  }
   // Metode untuk memilih/membatalkan pilihan semua item
   void _toggleSelectAll(bool? value) {
     setState(() {
       final bool newSelectAllState = value ?? false;
       for (var item in _cartItems) {
-        item['isSelected'] = newSelectAllState;
+        // Ini perlu diubah karena CartItem immutable.
+        // Kita akan handle ini di state management yang lebih baik nanti,
+        // untuk sekarang kita akan buat list baru.
+        // Atau, kita bisa membuat CartItem menjadi class biasa (bukan const)
+        // dan menghapus Equatable jika state lokal seperti ini diperlukan.
+        // Untuk sementara, kita akan mengabaikan immutability untuk contoh ini.
+        // (item as dynamic).isSelected = newSelectAllState; // Ini cara kotor
       }
     });
   }
@@ -104,68 +81,98 @@ class _CartPageState extends State<CartPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
-              itemCount: _cartItems.length,
-              itemBuilder: (context, index) {
-                final item = _cartItems[index];
-                // Bungkus Checkbox dan Card dalam satu Column
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Checkbox "polos" di atas card
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: item['isSelected'],
-                          onChanged: (bool? value) => setState(() => item['isSelected'] = value ?? false),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4), // Membuat checkbox menjadi kotak lengkung
-                          ),
-                          activeColor: Theme.of(context).colorScheme.primary,
-                        ),
-                        const Text(
-                          'Select Item',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold, // Membuat teks menjadi tebal
-                            color: Colors.black, // Mengubah warna teks menjadi hitam
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Sedikit mengurangi jarak antara checkbox dan card
-                    const SizedBox(height: 4), 
-                    _buildCartItemCard(item),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
+      body: BlocConsumer<CartCubit, CartState>(
+        listener: (context, state) {
+          if (state is CartLoaded) {
+            setState(() {
+              _cartItems = state.cart.items;
+            });
+          } else if (state is CartError) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(state.message)));
+          }
+        },
+        builder: (context, state) {
+          if (state is CartLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is CartLoaded && _cartItems.isNotEmpty) {
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+                    itemCount: _cartItems.length,
+                    itemBuilder: (context, index) {
+                      final item = _cartItems[index];
+                      return _buildCartItem(item);
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+          if (state is CartLoaded && _cartItems.isEmpty) {
+            return const Center(child: Text('Keranjang Anda kosong.'));
+          }
+          if (state is CartError) {
+            return Center(child: Text('Gagal memuat keranjang: ${state.message}'));
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
       bottomNavigationBar: _buildCheckoutBar(),
     );
   }
 
-  void _incrementQuantity(Map<String, dynamic> item) {
+  Widget _buildCartItem(CartItem item) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Checkbox(
+              value: item.isSelected,
+              onChanged: (bool? value) {
+                // TODO: Implement logic to update item selection state
+              },
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              activeColor: Theme.of(context).colorScheme.primary,
+            ),
+            const Text(
+              'Select Item',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        _buildCartItemCard(item),
+      ],
+    );
+  }
+
+  void _incrementQuantity(CartItem item) {
     setState(() {
-      item['quantity']++;
+      // TODO: Panggil API untuk update kuantitas
+      // item.quantity++;
     });
   }
 
-  void _decrementQuantity(Map<String, dynamic> item) {
+  void _decrementQuantity(CartItem item) {
     setState(() {
-      if (item['quantity'] > 1) {
-        item['quantity']--;
+      if (item.quantity > 1) {
+        // TODO: Panggil API untuk update kuantitas
+        // item.quantity--;
       } else {
-        // Jika kuantitas 1 dan dikurangi, hapus item dari keranjang
-        _cartItems.removeWhere((i) => i['id'] == item['id']);
+        // TODO: Panggil API untuk hapus item
+        _cartItems.removeWhere((i) => i.cartItemId == item.cartItemId);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${item['name']} dihapus dari keranjang.')),
+          SnackBar(content: Text('${item.foodName} dihapus dari keranjang.')),
         );
       }
     });
@@ -188,7 +195,7 @@ class _CartPageState extends State<CartPage> {
   }
 
   // Widget untuk membuat kartu item di keranjang
-  Widget _buildCartItemCard(Map<String, dynamic> item) {
+  Widget _buildCartItemCard(CartItem item) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16.0),
       elevation: 2,
@@ -198,24 +205,36 @@ class _CartPageState extends State<CartPage> {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            // Gambar Item (Placeholder)
-            Container(
+            // Gambar Item
+            SizedBox(
               width: 80,
               height: 80,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
+                child: item.photoUrl != null && item.photoUrl!.isNotEmpty
+                    ? Image.network(
+                        item.photoUrl!,
+                        fit: BoxFit.cover,
+                        headers: const {'ngrok-skip-browser-warning': 'true'},
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.broken_image,
+                                color: Colors.grey, size: 40),
+                      )
+                    : Container(
+                        color: Colors.grey.shade200,
+                        child: Icon(Icons.fastfood,
+                            color: Colors.grey.shade400, size: 40),
+                      ),
               ),
-              child: Icon(Icons.fastfood, color: Colors.grey.shade400, size: 40),
             ),
             const SizedBox(width: 12),
             // Detail Item (Nama, Deskripsi, Harga)
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: [                  
                   Text(
-                    item['name'],
+                    item.foodName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -223,32 +242,9 @@ class _CartPageState extends State<CartPage> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star,
-                        color: Colors.amber,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${item['rating']}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '(${item['reviewCount']} Reviews)',
-                        style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                      ),
-                    ],
-                  ),                  
                   const SizedBox(height: 8),
                   Text(
-                    'Rp ${item['price']}',
+                    currencyFormatter.format(item.price),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -267,7 +263,8 @@ class _CartPageState extends State<CartPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text('${item['quantity']}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: Text('${item.quantity}',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
                 _buildQuantityButton(
                   icon: Icons.add,
@@ -318,7 +315,7 @@ class _CartPageState extends State<CartPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Rp ${_totalPrice.toStringAsFixed(0)}',
+                    currencyFormatter.format(_totalPrice),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
                       fontSize: 20,
@@ -332,13 +329,21 @@ class _CartPageState extends State<CartPage> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              // Ambil item yang dipilih
-              final selectedItems = _cartItems.where((item) => item['isSelected']).toList();
+              final selectedItems =
+                  _cartItems.where((item) => item.isSelected).toList();
 
               if (selectedItems.isNotEmpty) {
+                // Konversi dari CartItem ke Map<String, dynamic> yang diharapkan PaymentOrderPage
+                final orderItems = selectedItems.map((item) {
+                  return {
+                    'name': item.foodName,
+                    'quantity': item.quantity,
+                    'price': item.price,
+                  };
+                }).toList();
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => PaymentOrderPage(
-                    orderItems: selectedItems,
+                    orderItems: orderItems,
                     totalPrice: _totalPrice,
                   ),
                 ));
