@@ -101,8 +101,8 @@ class _HomePageState extends State<HomePage> {
             _buildNavItem(unselectedAsset: 'assets/images/Menu.svg', selectedAsset: 'assets/images/Menu_On.svg', index: 2, label: 'Menu'),
             _buildNavItem(unselectedAsset: 'assets/images/Profile.svg', selectedAsset: 'assets/images/Profile_On.svg', index: 3, label: 'Profile'),
           ],
-          color: Theme.of(context).colorScheme.primary,
-          buttonBackgroundColor: AppTheme.inputLabelColor,
+          color: Colors.white, // Latar belakang navbar menjadi putih
+          buttonBackgroundColor: const Color(0xFF4043FD).withOpacity(0.1), // Latar belakang tombol aktif menjadi biru transparan
           backgroundColor: Colors.transparent,
           animationCurve: Curves.easeInOut,
           animationDuration: const Duration(milliseconds: 400),
@@ -116,7 +116,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildNavItem({required String unselectedAsset, required String selectedAsset, required int index, required String label}) {
     final bool isSelected = _selectedIndex == index;
     final String assetName = isSelected ? selectedAsset : unselectedAsset;
-    final Color itemColor = Colors.white;
+    final Color itemColor = isSelected ? const Color(0xFF4043FD) : AppTheme.inputLabelColor; // Warna ikon
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(color: itemColor, fontSize: 10),
+            style: TextStyle(color: AppTheme.inputLabelColor, fontSize: 10), // Warna teks label
           ),
         ],
       ],
