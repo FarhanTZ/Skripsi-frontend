@@ -4,8 +4,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
 import 'package:glupulse/features/auth/presentation/pages/complete_password_reset_page.dart';
+import 'package:glupulse/features/HealthData/presentation/pages/health_profile_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 
 class OtpVerificationPage extends StatefulWidget {
@@ -144,9 +144,9 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
         print('OtpVerificationPage Listener: Menerima state -> ${state.runtimeType}'); // DEBUG
         if (state is AuthAuthenticated) {
-          // Jika OTP benar, navigasi ke HomePage
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const HomePage()),
+            // Setelah OTP benar, arahkan ke halaman pengisian profil kesehatan
+            MaterialPageRoute(builder: (context) => const HealthProfilePage()),
             (route) => false,
           );
         } else if (state is AuthOtpResent) {

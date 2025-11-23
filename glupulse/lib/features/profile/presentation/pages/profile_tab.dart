@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/HealthData/presentation/pages/edit_health_profile_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:glupulse/features/HealthData/presentation/pages/health_profile_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/profile/presentation/pages/profile_settings_screen.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
@@ -79,8 +79,7 @@ class ProfileTab extends StatelessWidget {
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        const HealthProfilePage(),
+                                    builder: (context) => const EditHealthProfilePage(),
                                   ),
                                 );
                               }),

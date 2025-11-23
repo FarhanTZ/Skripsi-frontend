@@ -230,20 +230,27 @@ class ApiClient {
         return await put(endpoint, body: body, token: newToken);
       }
 
-      final responseBody = jsonDecode(response.body);
-
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        // Jika body kosong (misal status 204), kembalikan map kosong
+        if (response.body.isEmpty) {
+          return {};
+        }
+        final responseBody = jsonDecode(response.body);
         return responseBody;
       } else {
-        // Tangani error lain dari server
-        throw ServerException(responseBody['message'] ?? 'Terjadi kesalahan pada server');
+        try {
+          final responseBody = jsonDecode(response.body);
+          final errorMessage = responseBody['message'] ?? responseBody['error'] ?? 'Terjadi kesalahan pada server (Status: ${response.statusCode})';
+          throw ServerException(errorMessage);
+        } catch (_) {
+          throw ServerException('Server memberikan respons tidak valid (Status: ${response.statusCode}).');
+        }
       }
     } on SocketException {
       throw ServerException('Tidak ada koneksi internet. Periksa jaringan Anda.');
     } on TimeoutException {
       throw ServerException('Server tidak merespons. Coba lagi nanti.');
     } catch (e) {
-      // Jika error berasal dari _refreshToken, lempar kembali
       if (e is ServerException) rethrow;
       throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga.');
     }

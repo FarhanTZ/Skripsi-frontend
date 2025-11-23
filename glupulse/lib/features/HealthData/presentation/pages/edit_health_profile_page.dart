@@ -1,32 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
 import 'package:glupulse/features/HealthData/domain/entities/health_profile.dart';
-import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart'; // Changed from bloc to cubit
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/injection_container.dart';
 
-enum AppExperience { none, simple, advanced }
-
-class HealthProfilePage extends StatefulWidget {
-  const HealthProfilePage({super.key});
+/// Wrapper widget untuk menyediakan Cubit ke halaman edit.
+class EditHealthProfilePage extends StatelessWidget {
+  const EditHealthProfilePage({super.key});
 
   @override
-  State<HealthProfilePage> createState() => _HealthProfilePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => sl<HealthProfileCubit>()..fetchHealthProfile(),
+      child: const EditHealthProfileScreen(),
+    );
+  }
 }
 
-class _HealthProfilePageState extends State<HealthProfilePage> {
-  AppExperience _experience = AppExperience.none;
-  AppExperience _selectedExperience = AppExperience.simple; // Default ke Simple
-  int _currentPage = 0;
-  final _pageController = PageController();
+/// Widget utama yang menampilkan layar edit profil kesehatan.
+class EditHealthProfileScreen extends StatefulWidget {
+  const EditHealthProfileScreen({super.key});
+
+  @override
+  State<EditHealthProfileScreen> createState() => _EditHealthProfileScreenState();
+}
+
+class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
+  // Semua controller dan state dari HealthProfilePage disalin ke sini.
   int? _selectedConditionId;
 
-  // Data untuk pilihan kondisi kesehatan
   final Map<int, String> _healthConditions = {
     1: 'Type 2 Diabetes',
     2: 'Prediabetes',
@@ -34,7 +40,6 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
     4: 'General Wellness',
   };
 
-  // Data for treatment options (Display Name -> Backend Value)
   final Map<String, String> _treatmentOptions = {
     'Insulin': 'insulin',
     'Metformin': 'metformin',
@@ -54,10 +59,8 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
     'Prandial glucose regulators': 'prandial_glucose_regulators',
   };
 
-  // State untuk menyimpan pilihan perawatan yang dipilih
   Map<String, bool> _selectedTreatments = {};
 
-  // Health Data Controllers
   final _diagnosisDateController = TextEditingController();
   final _lastHba1cDateController = TextEditingController();
   final _heightController = TextEditingController();
@@ -99,7 +102,6 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
   final _sleepQualityController = TextEditingController();
   final _expectedDueDateController = TextEditingController();
 
-  // Health Data Booleans
   bool _usesCgm = false;
   bool _hasHypertension = false;
   bool _hasKidneyDisease = false;
@@ -111,48 +113,31 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
   bool _isPregnant = false;
   bool _isBreastfeeding = false;
 
-  // App Settings State
   String? _selectedPreferredUnit = 'metric';
-  String? _selectedGlucoseUnit = 'mg/dL';
+  String? _selectedGlucoseUnit = 'mg_dl';
   String? _selectedTimezone;
   String? _selectedLanguage = 'id';
-
-  // State untuk Activity Level
   String? _selectedActivityLevel = 'lightly_active';
+
   final List<String> _activityLevelOptions = [
-    'sedentary',
-    'lightly_active',
-    'moderately_active',
-    'very_active',
-    'extremely_active' // Disesuaikan dengan constraint backend
+    'sedentary', 'lightly_active', 'moderately_active', 'very_active', 'extremely_active'
   ];
-
   final List<String> _preferredUnitOptions = ['metric', 'imperial'];
-  // Map untuk memisahkan nilai backend dan tampilan
-  final Map<String, String> _glucoseUnitOptions = {
-    'mg_dl': 'mg/dL',
-    'mmol_l': 'mmol/L',
-  };
+  final Map<String, String> _glucoseUnitOptions = {'mg_dl': 'mg/dL', 'mmol_l': 'mmol/L'};
   final List<String> _timezoneOptions = [
-    'Asia/Jakarta',
-    'Asia/Singapore',
-    'America/New_York',
-    'Europe/London',
-    'Australia/Sydney'
+    'Asia/Jakarta', 'Asia/Singapore', 'America/New_York', 'Europe/London', 'Australia/Sydney'
   ];
-  final Map<String, String> _languageOptions = {
-    'id': 'Indonesia',
-    // Anda bisa menambahkan bahasa lain di sini nanti
-    // 'en': 'English',
-  };
+  final Map<String, String> _languageOptions = {'id': 'Indonesia'};
 
-  // App Settings Booleans
   bool _enableGlucoseAlerts = true;
   bool _enableMealReminders = true;
   bool _enableActivityReminders = true;
   bool _enableMedicationReminders = true;
   bool _shareDataForResearch = false;
   bool _shareAnonymizedData = false;
+
+  // State untuk menentukan apakah data berasal dari mode 'advanced'
+  bool _isAdvancedMode = false;
 
   @override
   void initState() {
@@ -162,19 +147,14 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       key: (item) => item as String,
       value: (item) => false,
     );
-
-    // Dispatch event to get health profile
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HealthProfileCubit>().fetchHealthProfile(); // Changed from add event to direct method call
-    });
+    // Data akan di-fetch oleh BlocProvider di atas
   }
 
   @override
   void dispose() {
-    // Dispose all controllers
-    _pageController.dispose();
+    // Dispose semua controller
     _diagnosisDateController.dispose();
-    _lastHba1cDateController.dispose();    
+    _lastHba1cDateController.dispose();
     _heightController.dispose();
     _currentWeightController.dispose();
     _targetWeightController.dispose();
@@ -216,15 +196,11 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
     super.dispose();
   }
 
-  // Function to populate UI with HealthProfile data
   void _populateUI(HealthProfile healthProfile) {
     setState(() {
-      _experience =
-          healthProfile.appExperience == 'simple' ? AppExperience.simple : AppExperience.advanced;
-      _selectedExperience = _experience;
+      _isAdvancedMode = healthProfile.appExperience == 'advanced';
       _selectedConditionId = healthProfile.conditionId;
       _diagnosisDateController.text = healthProfile.diagnosisDate?.toIso8601String().split('T').first ?? '';
-      //_yearsWithConditionController.text = healthProfile.yearsWithCondition?.toString() ?? ''; // Removed as per API spec
       _heightController.text = healthProfile.heightCm?.toString() ?? '';
       _currentWeightController.text = healthProfile.currentWeightKg?.toString() ?? '';
       _targetWeightController.text = healthProfile.targetWeightKg?.toString() ?? '';
@@ -236,8 +212,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       _targetGlucoseFastingController.text = healthProfile.targetGlucoseFasting?.toString() ?? '';
       _targetGlucosePostprandialController.text = healthProfile.targetGlucosePostprandial?.toString() ?? '';
 
-      // Treatment Types
-      _selectedTreatments.updateAll((key, value) => false); // Reset all
+      _selectedTreatments.updateAll((key, value) => false);
       healthProfile.treatmentTypes?.forEach((type) {
         if (_selectedTreatments.containsKey(type)) {
           _selectedTreatments[type] = true;
@@ -251,7 +226,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       _selectedActivityLevel = healthProfile.activityLevel;
       _dailyStepsGoalController.text = healthProfile.dailyStepsGoal?.toString() ?? '';
       _weeklyExerciseGoalController.text = healthProfile.weeklyExerciseGoalMinutes?.toString() ?? '';
-      _preferredActivityController.text = healthProfile.preferredActivityTypeIds?.join(', ') ?? ''; // Assuming string representation
+      _preferredActivityController.text = healthProfile.preferredActivityTypeIds?.join(', ') ?? '';
       _dietaryPatternController.text = healthProfile.dietaryPattern ?? '';
       _dailyCarbTargetController.text = healthProfile.dailyCarbTargetGrams?.toString() ?? '';
       _dailyCalorieTargetController.text = healthProfile.dailyCalorieTarget?.toString() ?? '';
@@ -290,7 +265,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       _expectedDueDateController.text = healthProfile.expectedDueDate?.toIso8601String().split('T').first ?? '';
 
       _selectedPreferredUnit = healthProfile.preferredUnits;
-      _selectedGlucoseUnit = healthProfile.glucoseUnit; // Ini akan menjadi 'mg_dl' atau 'mmol_l'
+      _selectedGlucoseUnit = healthProfile.glucoseUnit;
       _selectedTimezone = healthProfile.timezone;
       _selectedLanguage = healthProfile.languageCode;
       _enableGlucoseAlerts = healthProfile.enableGlucoseAlerts ?? true;
@@ -302,14 +277,11 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
     });
   }
 
-  // Function to collect data from UI and create HealthProfile object
   HealthProfile _collectHealthProfileData() {
     return HealthProfile(
-      appExperience: _experience == AppExperience.simple ? 'simple' : 'advanced',
+      appExperience: _isAdvancedMode ? 'advanced' : 'simple',
       conditionId: _selectedConditionId,
       diagnosisDate: DateTime.tryParse(_diagnosisDateController.text),
-      // 'years_with_condition' is calculated by backend, not sent from frontend
-
       heightCm: double.tryParse(_heightController.text),
       currentWeightKg: double.tryParse(_currentWeightController.text),
       targetWeightKg: double.tryParse(_targetWeightController.text),
@@ -320,15 +292,10 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       lastHba1cDate: DateTime.tryParse(_lastHba1cDateController.text),
       targetGlucoseFasting: int.tryParse(_targetGlucoseFastingController.text),
       targetGlucosePostprandial: int.tryParse(_targetGlucosePostprandialController.text),
-
-      treatmentTypes: _selectedTreatments.entries
-          .where((entry) => entry.value)
-          .map((entry) => entry.key)
-          .toList(),
+      treatmentTypes: _selectedTreatments.entries.where((e) => e.value).map((e) => e.key).toList(),
       insulinRegimen: _insulinRegimenController.text.isNotEmpty ? _insulinRegimenController.text : null,
       usesCgm: _usesCgm,
       cgmDevice: _cgmDeviceController.text.isNotEmpty ? _cgmDeviceController.text : null,
-
       activityLevel: _selectedActivityLevel,
       dailyStepsGoal: int.tryParse(_dailyStepsGoalController.text),
       weeklyExerciseGoalMinutes: int.tryParse(_weeklyExerciseGoalController.text),
@@ -342,23 +309,11 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       dailyFatTargetGrams: int.tryParse(_dailyFatTargetController.text),
       mealsPerDay: int.tryParse(_mealsPerDayController.text),
       snacksPerDay: int.tryParse(_snacksPerDayController.text),
-
-      foodAllergies: _foodAllergiesController.text.isNotEmpty
-          ? _foodAllergiesController.text.split(',').map((e) => e.trim()).toList()
-          : null,
-      foodIntolerances: _foodIntolerancesController.text.isNotEmpty
-          ? _foodIntolerancesController.text.split(',').map((e) => e.trim()).toList()
-          : null,
-      foodsToAvoid: _foodsToAvoidController.text.isNotEmpty
-          ? _foodsToAvoidController.text.split(',').map((e) => e.trim()).toList()
-          : null,
-      culturalCuisines: _culturalCuisinesController.text.isNotEmpty
-          ? _culturalCuisinesController.text.split(',').map((e) => e.trim()).toList()
-          : null,
-      dietaryRestrictions: _dietaryRestrictionsController.text.isNotEmpty
-          ? _dietaryRestrictionsController.text.split(',').map((e) => e.trim()).toList()
-          : null,
-
+      foodAllergies: _foodAllergiesController.text.isNotEmpty ? _foodAllergiesController.text.split(',').map((e) => e.trim()).toList() : null,
+      foodIntolerances: _foodIntolerancesController.text.isNotEmpty ? _foodIntolerancesController.text.split(',').map((e) => e.trim()).toList() : null,
+      foodsToAvoid: _foodsToAvoidController.text.isNotEmpty ? _foodsToAvoidController.text.split(',').map((e) => e.trim()).toList() : null,
+      culturalCuisines: _culturalCuisinesController.text.isNotEmpty ? _culturalCuisinesController.text.split(',').map((e) => e.trim()).toList() : null,
+      dietaryRestrictions: _dietaryRestrictionsController.text.isNotEmpty ? _dietaryRestrictionsController.text.split(',').map((e) => e.trim()).toList() : null,
       hasHypertension: _hasHypertension,
       hypertensionMedication: _hypertensionMedicationController.text.isNotEmpty ? _hypertensionMedicationController.text : null,
       hasKidneyDisease: _hasKidneyDisease,
@@ -369,10 +324,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       hasRetinopathy: _hasRetinopathy,
       hasGastroparesis: _hasGastroparesis,
       hasHypoglycemiaUnawareness: _hasHypoglycemiaUnawareness,
-      otherConditions: _otherConditionsController.text.isNotEmpty
-          ? _otherConditionsController.text.split(',').map((e) => e.trim()).toList()
-          : null,
-
+      otherConditions: _otherConditionsController.text.isNotEmpty ? _otherConditionsController.text.split(',').map((e) => e.trim()).toList() : null,
       smokingStatus: _smokingStatusController.text.isNotEmpty ? _smokingStatusController.text : null,
       smokingYears: int.tryParse(_smokingYearsController.text),
       alcoholFrequency: _alcoholFrequencyController.text.isNotEmpty ? _alcoholFrequencyController.text : null,
@@ -383,7 +335,6 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       isPregnant: _isPregnant,
       isBreastfeeding: _isBreastfeeding,
       expectedDueDate: DateTime.tryParse(_expectedDueDateController.text),
-
       preferredUnits: _selectedPreferredUnit,
       glucoseUnit: _selectedGlucoseUnit,
       timezone: _selectedTimezone,
@@ -397,346 +348,155 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
     );
   }
 
+  void _saveChanges() {
+    context.read<HealthProfileCubit>().saveHealthProfile(_collectHealthProfileData());
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<HealthProfileCubit>( // Changed from HealthProfileBloc to HealthProfileCubit
-      create: (_) => sl<HealthProfileCubit>(), // Changed from HealthProfileBloc to HealthProfileCubit
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: BlocConsumer<HealthProfileCubit, HealthProfileState>( // Changed from HealthProfileBloc to HealthProfileCubit
-            listener: (context, state) {
-              if (state is HealthProfileLoaded) {
-                _populateUI(state.healthProfile);
-                // After loading, if experience is not none, directly show the page view
-                if (state.healthProfile.appExperience != null) {
-                  setState(() {
-                    _experience = state.healthProfile.appExperience == 'simple' ? AppExperience.simple : AppExperience.advanced;
-                    _selectedExperience = _experience;
-                  });
-                }
-              } else if (state is HealthProfileError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.message)),
-                );
-              } else if (state is HealthProfileSaved) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Profil kesehatan berhasil disimpan!')),
-                );
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                  (route) => false,
-                );
-              } else if (state is HealthProfileSaveError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Gagal menyimpan profil: ${state.message}')),
-                );
-              }
-            },
-            builder: (context, state) {
-              if (state is HealthProfileLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return _experience == AppExperience.none
-                  ? _buildExperienceSelector()
-                  : _buildPageViewLayout(context);
-            },
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 80, // Menyamakan tinggi AppBar
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
           ),
         ),
+        title: const Text(
+          'Edit Profil Kesehatan',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+      ),
+      body: BlocConsumer<HealthProfileCubit, HealthProfileState>(
+        listener: (context, state) {
+          if (state is HealthProfileLoaded) {
+            _populateUI(state.healthProfile);
+          } else if (state is HealthProfileError) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is HealthProfileSaved) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil kesehatan berhasil diperbarui!')));
+            Navigator.of(context).pop();
+          } else if (state is HealthProfileSaveError) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menyimpan profil: ${state.message}')));
+          }
+        },
+        builder: (context, state) {
+          if (state is HealthProfileLoading && _heightController.text.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Selalu tampilkan form, loading indicator akan muncul di tombol simpan
+          return _buildEditForm(state);
+        },
       ),
     );
   }
 
-  Widget _buildExperienceSelector() {
-    return Stack(
+  Widget _buildEditForm(HealthProfileState state) {
+    // Menggabungkan semua section builder menjadi satu list widget
+    final sections = _getAllSections();
+
+    return Column(
       children: [
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Image.asset(
-            'assets/images/doctor1.png',
-            width: double.infinity,
-            fit: BoxFit.cover,
-            alignment: Alignment.bottomCenter,
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: sections,
+            ),
           ),
         ),
+        // Tombol Simpan di bagian bawah
         Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'Pilih Pengalaman\nAplikasi Anda',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    _buildExperienceToggle('Simple', AppExperience.simple,
-                        'assets/images/simple.svg'),
-                    _buildExperienceToggle('Advanced', AppExperience.advanced,
-                        'assets/images/advanced.svg'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder: (child, animation) {
-                          return FadeTransition(opacity: animation, child: child);
-                        },
-                        layoutBuilder: (currentChild, previousChildren) {
-                          return Stack(
-                            alignment: Alignment.topLeft,
-                            children: <Widget>[...previousChildren, if (currentChild != null) currentChild],
-                          );
-                        },
-                        child: _buildDescriptionText(
-                          key: ValueKey<AppExperience>(_selectedExperience),
-                          isSimple: _selectedExperience == AppExperience.simple,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _experience = _selectedExperience;
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        ),
-                        child: const Text('Pilih Pengalaman', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          child: ElevatedButton(
+            onPressed: state is HealthProfileSaving ? null : _saveChanges,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 55),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+              elevation: 5,
+            ),
+            child: state is HealthProfileSaving
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text('Simpan Perubahan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ),
       ],
     );
   }
-  Widget _buildExperienceToggle(
-      String title, AppExperience experience, String iconAsset) {
-    bool isSelected = _selectedExperience == experience;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedExperience = experience),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                iconAsset,
-                colorFilter: ColorFilter.mode(isSelected ? Colors.white : Colors.grey.shade600, BlendMode.srcIn),
-                width: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : Colors.grey.shade800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+
+  List<Widget> _getAllSections() {
+    bool isT2dOrPrediabetes = _selectedConditionId == 1 || _selectedConditionId == 2;
+    bool isT2d = _selectedConditionId == 1;
+
+    return [
+      _buildSectionContainer('Informasi Dasar', _buildCoreIdentitySection(_isAdvancedMode)),
+      _buildSectionContainer('Biometrik & Target', _buildBiometricsAndTargetsSection(_isAdvancedMode)),
+      if (isT2dOrPrediabetes)
+        _buildSectionContainer('Perawatan', _buildTreatmentsSection(_isAdvancedMode)),
+      if (_isAdvancedMode && isT2d)
+        _buildSectionContainer('Medikasi & CGM Lanjutan', _buildAdvancedMedicationSection(_isAdvancedMode)),
+      _buildSectionContainer('Aktivitas & Gaya Hidup', _buildActivityLifestyleSection(_isAdvancedMode)),
+      if (_isAdvancedMode)
+        _buildSectionContainer('Target Diet Lanjutan', _buildAdvancedDietarySection(_isAdvancedMode)),
+      _buildSectionContainer('Preferensi & Pantangan', _buildPreferencesSection(_isAdvancedMode)),
+      _buildSectionContainer('Kondisi Penyerta & Kehamilan', _buildComorbiditiesSection(_isAdvancedMode)),
+      if (_isAdvancedMode)
+        _buildSectionContainer('Faktor Gaya Hidup Lain', _buildLifestyleFactorsSection(_isAdvancedMode)),
+      _buildSectionContainer('Pengaturan Aplikasi', _buildAppSettingsSection(_isAdvancedMode)),
+    ];
   }
 
-  Widget _buildDescriptionText({required bool isSimple, required Key key}) {
-    final combinedText = isSimple
-        ? 'Fokus pada Keamanan dan Dasar-dasar. Kami hanya meminta data minimum yang diperlukan (Tinggi, Berat, Kondisi Utama, dan Target Gula Darah). Rekomendasi AI akan berfokus pada saran makanan aman dengan Karbohidrat terkontrol. Cepat dimulai, ideal untuk pengguna yang baru mulai melacak kesehatan atau tidak menggunakan insulin. Anda hanya akan melihat log yang paling penting.'
-        : 'Personalisasi Maksimal dan Pembelajaran AI. Anda akan membuka semua fitur logging (Aktivitas, Tidur, Obat-obatan, dll.). Rekomendasi AI akan menjadi lebih akurat karena belajar dari pola tidur dan riwayat olahraga Anda. Pengalaman penuh. Ideal bagi pengguna yang ingin mengontrol gula darah dengan presisi tinggi dan ingin AI memberikan rekomendasi yang sangat spesifik.';
-
+  // Helper untuk membungkus setiap section dengan judul
+  Widget _buildSectionContainer(String title, Widget content) {
     return Column(
-      key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          combinedText,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Colors.black54,
-            height: 1.5,
-          ),
+          title,
+          style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary),
         ),
         const SizedBox(height: 16),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                isSimple ? 'Data Requirements (10 Data)' : 'Data Requirements (60 Data)',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                isSimple
-                    ? 'Hanya perlu mengisi data untuk: Tinggi, Berat, Kondisi (Diabetes/Obesitas), Target HbA1c & Gula Darah, dan Alergi Makanan.'
-                    : 'Perlu mengisi semua data: Termasuk Lingkar Pinggang, Persentase Lemak Tubuh, Jadwal Tidur, Riwayat Penyakit Penyerta (Ginjal/Jantung), dan Target Makro Nutrisi.',
-                textAlign: TextAlign.right,
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4),
-              ),
-            ],
-          ),
-        ),
+        content,
+        const SizedBox(height: 32), // Spasi antar section
       ],
     );
   }
 
-  Widget _buildPageViewLayout(BuildContext context) {
-    final pages = _getPages();
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () {
-                  if (_currentPage > 0) {
-                    _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeIn);
-                  } else {
-                    setState(() => _experience = AppExperience.none);
-                  }
-                },
-                child: const Text('Kembali'),
-              ),
-              SmoothPageIndicator(
-                controller: _pageController,
-                count: pages.length,
-                effect: ExpandingDotsEffect(
-                  dotHeight: 10,
-                  dotWidth: 10,
-                  activeDotColor: Theme.of(context).colorScheme.primary,
-                  dotColor: Colors.grey.shade300,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (_currentPage < pages.length - 1) {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeIn,
-                    );
-                  } else {
-                    // Dispatch UpdateHealthProfileEvent
-                    context.read<HealthProfileCubit>().saveHealthProfile( // Changed from add event to direct method call
-                          _collectHealthProfileData(),
-                        );
-                  }
-                },
-                child: Text(_currentPage == pages.length - 1 ? 'Simpan' : 'Lanjut',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) => setState(() => _currentPage = index),
-              children: pages,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _getPages() {
-    bool isAdvanced = _experience == AppExperience.advanced;
-    bool isT2dOrPrediabetes = _selectedConditionId == 1 || _selectedConditionId == 2;
-
-        bool isT2d = _selectedConditionId == 1;
-
-    final List<Map<String, dynamic>> sectionData = [
-      {'title': 'Informasi Dasar', 'builder': _buildCoreIdentitySection},
-      {'title': 'Biometrik & Target', 'builder': _buildBiometricsAndTargetsSection},
-      if (isT2dOrPrediabetes)
-        {'title': 'Perawatan', 'builder': _buildTreatmentsSection},
-      if (isAdvanced && isT2d)
-        {'title': 'Medikasi & CGM Lanjutan', 'builder': _buildAdvancedMedicationSection},
-      {'title': 'Aktivitas & Gaya Hidup', 'builder': _buildActivityLifestyleSection},
-      if (isAdvanced)
-        {'title': 'Target Diet Lanjutan', 'builder': _buildAdvancedDietarySection},
-      {'title': 'Preferensi & Pantangan', 'builder': _buildPreferencesSection},
-      {'title': 'Kondisi Penyerta & Kehamilan', 'builder': _buildComorbiditiesSection},
-      if (isAdvanced)
-        {'title': 'Faktor Gaya Hidup Lain', 'builder': _buildLifestyleFactorsSection},
-      {'title': 'Pengaturan Aplikasi', 'builder': _buildAppSettingsSection},
-    ];
-
-    return sectionData.map((section) {
-      Widget content = (section['builder'] as Function)(isAdvanced);
-      return SingleChildScrollView(
-        key: PageStorageKey(section['title']), // Keep scroll position
-        padding: const EdgeInsets.only(bottom: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              section['title'],
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary),
-            ),
-            const SizedBox(height: 16),
-            content,
-          ],
-        ),
-      );
-    }).toList();
-  }
-
-  // --- BUILDER UNTUK SETIAP SECTION ---
+  // --- SEMUA WIDGET BUILDER DARI HealthProfilePage DISALIN KE SINI ---
+  // (buildCoreIdentitySection, buildBiometricsAndTargetsSection, dst.)
 
   Widget _buildCoreIdentitySection(bool isAdvanced) {
     bool isT2dOrPrediabetes = _selectedConditionId == 1 || _selectedConditionId == 2;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildSectionTitle('Pengalaman Aplikasi'),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              _buildExperienceToggle(
+                  'Simple', false, 'assets/images/simple.svg'),
+              _buildExperienceToggle(
+                  'Advanced', true, 'assets/images/advanced.svg'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
         _buildSectionTitle('Kondisi Utama', isMandatory: true),
         Wrap(
           spacing: 8.0,
@@ -773,7 +533,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
                 decoration: _inputDecoration(hintText: 'Pilih Tanggal'),
                 onTap: () async {
                   DateTime? pickedDate = await showDatePicker(
-                    context: context, initialDate: DateTime.now(),
+                    context: context, initialDate: DateTime.tryParse(_diagnosisDateController.text) ?? DateTime.now(),
                     firstDate: DateTime(1900), lastDate: DateTime.now(),
                   );
                   if (pickedDate != null) {
@@ -781,7 +541,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
                     _diagnosisDateController.text = formattedDate;
                   }
                 },
-              ),              
+              ),
             ],
           ),
         ),
@@ -798,18 +558,18 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       children: [
         _buildSectionTitle('Tinggi (cm)', isMandatory: true),
         _buildTextField(
-          controller: _heightController, hintText: 'Tinggi (cm)', keyboardType: TextInputType.number,
+          controller: _heightController, hintText: 'Tinggi (100 - 250 cm)', keyboardType: TextInputType.number,
           formatters: [_NumberRangeInputFormatter(minValue: 100, maxValue: 250)],
         ),
         const SizedBox(height: 16),
         _buildSectionTitle('Berat Badan Saat Ini (kg)', isMandatory: true),
         _buildTextField(
-          controller: _currentWeightController, hintText: 'Berat (kg)', keyboardType: TextInputType.number,
+          controller: _currentWeightController, hintText: 'Berat (20 - 300 kg)', keyboardType: TextInputType.number,
           formatters: [_NumberRangeInputFormatter(minValue: 20, maxValue: 300)],
         ),
         const SizedBox(height: 16),
         _buildTextField(controller: _targetWeightController, hintText: 'Target Berat Badan (kg)', keyboardType: TextInputType.number),
-        
+
         Visibility(
           visible: isAdvanced && isObesity,
           child: Column(
@@ -827,7 +587,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
             ],
           ),
         ),
-        
+
         Visibility(
           visible: isT2dOrPrediabetes,
           child: Column(
@@ -850,7 +610,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
                 controller: _lastHba1cDateController, readOnly: true,
                 decoration: _inputDecoration(hintText: 'Pilih Tanggal'),
                 onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(1900), lastDate: DateTime.now());
+                  DateTime? pickedDate = await showDatePicker(context: context, initialDate: DateTime.tryParse(_lastHba1cDateController.text) ?? DateTime.now(), firstDate: DateTime(1900), lastDate: DateTime.now());
                   if (pickedDate != null) {
                     String formattedDate = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
                     _lastHba1cDateController.text = formattedDate;
@@ -939,12 +699,12 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       ],
     );
   }
-  
+
   Widget _buildActivityLifestyleSection(bool isAdvanced) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('Tingkat Aktivitas Umum'),        
+        _buildSectionTitle('Tingkat Aktivitas Umum'),
         _buildDropdown(
             hint: 'Pilih Tingkat Aktivitas',
             value: _selectedActivityLevel,
@@ -1078,7 +838,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
         _buildTextField(controller: _typicalSleepHoursController, hintText: 'Jam Tidur Rata-rata', keyboardType: TextInputType.number),
         const SizedBox(height: 16),
         _buildTextField(controller: _sleepQualityController, hintText: 'Kualitas Tidur (e.g., good, poor)'),
-        
+
         const SizedBox(height: 24),
         Visibility(
           visible: _isPregnant,
@@ -1095,7 +855,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
                 decoration: _inputDecoration(hintText: 'Pilih Tanggal'),
                 onTap: () async {
                   DateTime? pickedDate = await showDatePicker(
-                    context: context, initialDate: DateTime.now(),
+                    context: context, initialDate: DateTime.tryParse(_expectedDueDateController.text) ?? DateTime.now(),
                     firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 300)),
                   );
                   if (pickedDate != null) {
@@ -1185,6 +945,45 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
   }
 
   // --- WIDGET HELPERS ---
+
+  Widget _buildExperienceToggle(String title, bool isAdvanced, String iconAsset) {
+    bool isSelected = _isAdvancedMode == isAdvanced;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _isAdvancedMode = isAdvanced),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                iconAsset,
+                colorFilter: ColorFilter.mode(
+                    isSelected ? Colors.white : Colors.grey.shade600,
+                    BlendMode.srcIn),
+                width: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : Colors.grey.shade800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildSectionTitle(String title, {bool isMandatory = false}) {
     return Padding(
@@ -1352,7 +1151,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      margin: const EdgeInsets.symmetric(vertical: 4), // Add some vertical margin for spacing
+      margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),

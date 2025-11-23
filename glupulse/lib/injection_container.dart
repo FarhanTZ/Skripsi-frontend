@@ -1,4 +1,10 @@
 import 'package:get_it/get_it.dart';
+import 'package:glupulse/features/HealthData/data/datasources/health_profile_remote_data_source.dart';
+import 'package:glupulse/features/HealthData/data/repositories/health_profile_repository_impl.dart';
+import 'package:glupulse/features/HealthData/domain/repositories/health_profile_repository.dart';
+import 'package:glupulse/features/HealthData/domain/usecases/get_health_profile.dart';
+import 'package:glupulse/features/HealthData/domain/usecases/update_health_profile.dart';
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/profile/data/repositories/profile_repository_impl.dart';
@@ -184,23 +190,35 @@ Future<void> init() async {
         localDataSource: sl()
       ));
 
-  // --- Features - Cart ---
+  // --- Features - HealthData ---
 
   // Cubit
   sl.registerFactory(
-    () => CartCubit(
-      getCartUseCase: sl(),
-      addToCartUseCase: sl(),
-      updateCartItemUseCase: sl(),
-      removeCartItemUseCase: sl(),
+    () => HealthProfileCubit(
+      getHealthProfile: sl(),
+      updateHealthProfile: sl(),
     ),
   );
 
-  // Use cases
-  sl.registerLazySingleton(() => GetCartUseCase(sl()));
-  sl.registerLazySingleton(() => AddToCartUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateCartItemUseCase(sl()));
-  sl.registerLazySingleton(() => RemoveCartItemUseCase(sl()));
+  // Use Cases
+  sl.registerLazySingleton(() => GetHealthProfile(sl()));
+  sl.registerLazySingleton(() => UpdateHealthProfile(sl()));
+
+  // Repository
+  sl.registerLazySingleton<HealthProfileRepository>(
+    () => HealthProfileRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<HealthProfileRemoteDataSource>(
+    () => HealthProfileRemoteDataSourceImpl(
+      client: sl(),
+      localDataSource: sl(),
+    ),
+  );
 
   // --- Core ---
   sl.registerLazySingleton(() => ApiClient());
