@@ -23,6 +23,7 @@ class UserModel extends UserEntity {
           email: email,
           firstName: firstName,
           lastName: lastName,
+          isGoogleLinked: isGoogleLinked,
         );
 
   final String? dob;

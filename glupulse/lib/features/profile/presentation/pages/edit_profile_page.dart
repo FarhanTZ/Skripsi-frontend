@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/HealthData/presentation/pages/health_profile_page.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart' as auth;
@@ -8,6 +9,7 @@ import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_state.dart';
 import 'package:glupulse/injection_container.dart';
+
 
 
 /// Widget ini bertugas untuk menyediakan ProfileCubit ke EditProfileScreen.
@@ -134,9 +136,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               // Update state di AuthCubit juga
               context.read<auth.AuthCubit>().updateUser(state.user);
 
-              // JANGAN navigasi dari sini. Cukup pop halaman ini.
-              // Biarkan listener di halaman sebelumnya (LoginPage) yang menangani navigasi.
-              Navigator.of(context).pop();
             } else if (state is ProfileError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.message)),
@@ -149,11 +148,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             if (state is ProfileLoading && _firstNameController.text.isEmpty) {
               return const Center(child: CircularProgressIndicator());
             }
-
-            return Stack(
-              children: [
-                // Header
-                Container(
+            // Tambahkan listener untuk AuthCubit di sini
+            return BlocListener<auth.AuthCubit, AuthState>(
+              listener: (context, authState) {
+                if (authState is AuthHealthProfileIncomplete) {
+                  // Jika ini adalah bagian dari alur otentikasi awal,
+                  // arahkan ke halaman profil kesehatan.
+                  if (widget.isFromAuthFlow) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const HealthProfilePage()),
+                    );
+                  }
+                } else if (authState is AuthAuthenticated && !widget.isFromAuthFlow) {
+                  // Jika pengguna hanya mengedit profil (bukan alur awal) dan semuanya sudah lengkap,
+                  // kembali ke halaman sebelumnya.
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Stack(
+                children: [
+                  // Header
+                  Container(
             width: double.infinity,
             height: 238, // Tinggi disamakan dengan profile_tab.dart
             decoration: BoxDecoration(
@@ -240,8 +255,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   left: 0,
                   right: 0,
                   child: Center(child: _buildProfileAvatar()),
-                ),
+                )
               ],
+            ),
             );
           },
         ));

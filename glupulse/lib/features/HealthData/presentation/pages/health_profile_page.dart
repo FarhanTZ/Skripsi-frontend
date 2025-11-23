@@ -9,6 +9,8 @@ import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.da
 import 'package:glupulse/features/HealthData/domain/entities/health_profile.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart'; // Changed from bloc to cubit
 import 'package:glupulse/injection_container.dart';
+import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart' as auth;
+import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart' as auth_state;
 
 enum AppExperience { none, simple, advanced }
 
@@ -404,28 +406,26 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: BlocConsumer<HealthProfileCubit, HealthProfileState>( // Changed from HealthProfileBloc to HealthProfileCubit
+          child: BlocConsumer<HealthProfileCubit, HealthProfileState>(
             listener: (context, state) {
               if (state is HealthProfileLoaded) {
                 _populateUI(state.healthProfile);
-                // After loading, if experience is not none, directly show the page view
                 if (state.healthProfile.appExperience != null) {
                   setState(() {
                     _experience = state.healthProfile.appExperience == 'simple' ? AppExperience.simple : AppExperience.advanced;
                     _selectedExperience = _experience;
                   });
                 }
-              } else if (state is HealthProfileError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.message)),
-                );
               } else if (state is HealthProfileSaved) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Profil kesehatan berhasil disimpan!')),
                 );
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                  (route) => false,
+                // JANGAN NAVIGASI DARI SINI.
+                // Beri tahu AuthCubit untuk memvalidasi ulang statusnya.
+                context.read<auth.AuthCubit>().revalidateAuthenticationStatus();
+              } else if (state is HealthProfileError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message)),
                 );
               } else if (state is HealthProfileSaveError) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -437,9 +437,21 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
               if (state is HealthProfileLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
-              return _experience == AppExperience.none
-                  ? _buildExperienceSelector()
-                  : _buildPageViewLayout(context);
+              // Bungkus dengan BlocListener untuk AuthCubit
+              return BlocListener<auth.AuthCubit, auth_state.AuthState>(
+                listener: (context, authState) {
+                  // Jika AuthCubit sudah mengkonfirmasi otentikasi penuh, baru navigasi.
+                  if (authState is auth_state.AuthAuthenticated) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const HomePage()),
+                      (route) => false,
+                    );
+                  }
+                },
+                child: _experience == AppExperience.none
+                    ? _buildExperienceSelector()
+                    : _buildPageViewLayout(context),
+              );
             },
           ),
         ),

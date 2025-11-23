@@ -13,6 +13,7 @@ class UserEntity extends Equatable {
   final String? addressLine1;
   final String? city;
   final List<AddressModel>? addresses;
+  final bool? isGoogleLinked;
 
   const UserEntity({
     required this.id,
@@ -25,6 +26,7 @@ class UserEntity extends Equatable {
     this.addressLine1,
     this.city,
     this.addresses,
+    this.isGoogleLinked,
   });
 
   /// Getter untuk memeriksa apakah profil pengguna sudah lengkap.
@@ -37,5 +39,5 @@ class UserEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, username, email, firstName, lastName, dob, gender, addressLine1, city, addresses];
+  List<Object?> get props => [id, username, email, firstName, lastName, dob, gender, addressLine1, city, addresses, isGoogleLinked];
 }

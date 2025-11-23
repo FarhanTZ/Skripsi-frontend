@@ -257,7 +257,11 @@ class ApiClient {
   }
 
   // Metode DELETE generik
-  Future<Map<String, dynamic>> delete(String endpoint, {required String token}) async {
+  Future<Map<String, dynamic>> delete(
+    String endpoint, {
+    required String token,
+    Map<String, dynamic>? body, // Tambahkan parameter body
+  }) async {
     final url = Uri.parse('$_baseUrl$endpoint');
     final headers = {
       ..._defaultHeaders,
@@ -269,6 +273,7 @@ class ApiClient {
           .delete(
             url,
             headers: headers,
+            body: body != null ? jsonEncode(body) : null, // Kirim body jika ada
           )
           .timeout(const Duration(seconds: 15));
 
@@ -276,7 +281,7 @@ class ApiClient {
         await _refreshToken();
         final newToken = await _localDataSource.getLastToken();
         // Ulangi request dengan token baru
-        return await delete(endpoint, token: newToken);
+        return await delete(endpoint, token: newToken, body: body);
       }
 
       // Untuk DELETE, sukses seringkali ditandai dengan status 204 No Content

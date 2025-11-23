@@ -9,6 +9,7 @@ abstract class ProfileRemoteDataSource {
   Future<UserModel> updateUserProfile(UpdateProfileParams params);
   Future<UserModel> updateUsername(String newUsername);
   Future<void> updatePassword(String currentPassword, String newPassword, String confirmPassword);
+  Future<void> deleteAccount(String password);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -113,6 +114,27 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       rethrow;
     } catch (e) {
       throw ServerException('Gagal memperbarui password.');
+    }
+  }
+
+  @override
+  Future<void> deleteAccount(String password) async {
+    try {
+      final token = await localDataSource.getLastToken();
+      await apiClient.delete(
+        '/profile', // Endpoint diubah menjadi /profile dengan method DELETE
+        body: {
+          'password': password,
+        },
+        token: token,
+      );
+      // Jika berhasil, API client akan menangani status 2xx dan tidak akan melempar error.
+    } on ServerException {
+      rethrow; // Lempar kembali jika error sudah ditangani oleh ApiClient
+    } on CacheException {
+      throw ServerException('Sesi tidak ditemukan. Silakan login kembali.');
+    } catch (e) {
+      throw ServerException('Gagal menghapus akun. Periksa koneksi Anda.');
     }
   }
 }

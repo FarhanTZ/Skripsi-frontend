@@ -68,4 +68,15 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Left(ServerFailure(e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> deleteAccount(String password) async {
+    try {
+      await remoteDataSource.deleteAccount(password);
+      // Jika berhasil, AuthCubit akan menangani proses logout dan pembersihan data lokal.
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
+  }
 }

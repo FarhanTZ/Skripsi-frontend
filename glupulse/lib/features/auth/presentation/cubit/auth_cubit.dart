@@ -11,6 +11,7 @@ import 'package:glupulse/features/auth/domain/usecases/request_password_reset_us
 import 'package:glupulse/features/auth/domain/usecases/complete_password_reset_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/delete_account_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_password_usecase.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
@@ -41,6 +42,7 @@ class AuthCubit extends Cubit<AuthState> {
   final CompletePasswordResetUseCase completePasswordResetUseCase;
   final UpdateUsernameUseCase updateUsernameUseCase;
   final UpdatePasswordUseCase updatePasswordUseCase;
+  final DeleteAccountUseCase deleteAccountUseCase;
   final AuthRepository authRepository; // Tambahkan AuthRepository
   final ProfileRepository profileRepository; // Tambahkan ProfileRepository
   final GoogleSignIn googleSignIn;
@@ -57,6 +59,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.completePasswordResetUseCase,
     required this.updateUsernameUseCase,
     required this.updatePasswordUseCase,
+    required this.deleteAccountUseCase,
     required this.authRepository, // Injeksi AuthRepository
     required this.profileRepository, // Injeksi ProfileRepository
     required this.googleSignIn,
@@ -101,6 +104,23 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
+  /// Metode untuk memeriksa ulang status otentikasi tanpa menampilkan loading.
+  /// Berguna setelah menyelesaikan langkah terakhir dari alur pendaftaran (misal: isi profil kesehatan).
+  Future<void> revalidateAuthenticationStatus() async {
+    print('AuthCubit: Memvalidasi ulang status otentikasi...'); // DEBUG
+    final authResult = await getCurrentUserUseCase(NoParams());
+
+    authResult.fold(
+      (failure) {
+        // Jika terjadi error (seharusnya tidak), kembali ke state unauthenticated.
+        emit(AuthUnauthenticated());
+      },
+      (user) {
+        // Panggil helper untuk memeriksa profil dasar dan kesehatan, lalu emit state yang benar.
+        _fetchProfileAndEmitState(user);
+      },
+    );
+  }
   /// Metode untuk melakukan proses login.
   Future<void> login(String username, String password) async {
     print('AuthCubit: Memulai proses login untuk username: $username'); // DEBUG
@@ -418,6 +438,24 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthUnauthenticated());
   }
 
+  /// Metode untuk menghapus akun pengguna.
+  Future<void> deleteAccount(String password) async {
+    print('AuthCubit: Memulai proses hapus akun...'); // DEBUG
+    emit(AuthLoading());
+
+    final result = await deleteAccountUseCase(DeleteAccountParams(password: password));
+    result.fold(
+      (failure) {
+        final message = _mapFailureToMessage(failure);
+        print('AuthCubit: Gagal menghapus akun. Emitting AuthError: $message'); // DEBUG
+        emit(AuthError(message));
+      },
+      (_) {
+        print('AuthCubit: Akun berhasil dihapus. Melakukan logout...'); // DEBUG
+        logout(); // Panggil logout untuk membersihkan sesi dan emit AuthUnauthenticated
+      },
+    );
+  }
 
   /// Helper untuk mengubah objek Failure menjadi pesan yang mudah dibaca.
   String _mapFailureToMessage(Failure failure) {

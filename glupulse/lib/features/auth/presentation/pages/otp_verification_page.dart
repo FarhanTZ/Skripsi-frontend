@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/pages/complete_password_reset_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_profile_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
+import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 
 class OtpVerificationPage extends StatefulWidget {
   final String? userId;
@@ -143,12 +145,21 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         }
 
         print('OtpVerificationPage Listener: Menerima state -> ${state.runtimeType}'); // DEBUG
-        if (state is AuthAuthenticated) {
+        if (state is AuthProfileIncomplete) {
+          // Jika profil dasar belum lengkap, arahkan ke halaman edit profil.
           Navigator.of(context).pushAndRemoveUntil(
-            // Setelah OTP benar, arahkan ke halaman pengisian profil kesehatan
-            MaterialPageRoute(builder: (context) => const HealthProfilePage()),
+            MaterialPageRoute(builder: (_) => const EditProfilePage(isFromAuthFlow: true)),
             (route) => false,
           );
+        } else if (state is AuthHealthProfileIncomplete) {
+          // Jika profil dasar sudah lengkap tapi profil kesehatan belum, arahkan ke halaman profil kesehatan.
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const HealthProfilePage()),
+            (route) => false,
+          );
+        } else if (state is AuthAuthenticated) {
+          // Jika semua profil sudah lengkap, arahkan ke halaman utama.
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const HomePage()), (route) => false);
         } else if (state is AuthOtpResent) {
           // Tampilkan snackbar sukses dan mulai ulang timer
           ScaffoldMessenger.of(context)
