@@ -113,28 +113,8 @@ class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
   bool _isPregnant = false;
   bool _isBreastfeeding = false;
 
-  String? _selectedPreferredUnit = 'metric';
-  String? _selectedGlucoseUnit = 'mg_dl';
-  String? _selectedTimezone;
-  String? _selectedLanguage = 'id';
   String? _selectedActivityLevel = 'lightly_active';
-
-  final List<String> _activityLevelOptions = [
-    'sedentary', 'lightly_active', 'moderately_active', 'very_active', 'extremely_active'
-  ];
-  final List<String> _preferredUnitOptions = ['metric', 'imperial'];
-  final Map<String, String> _glucoseUnitOptions = {'mg_dl': 'mg/dL', 'mmol_l': 'mmol/L'};
-  final List<String> _timezoneOptions = [
-    'Asia/Jakarta', 'Asia/Singapore', 'America/New_York', 'Europe/London', 'Australia/Sydney'
-  ];
-  final Map<String, String> _languageOptions = {'id': 'Indonesia'};
-
-  bool _enableGlucoseAlerts = true;
-  bool _enableMealReminders = true;
-  bool _enableActivityReminders = true;
-  bool _enableMedicationReminders = true;
-  bool _shareDataForResearch = false;
-  bool _shareAnonymizedData = false;
+  final List<String> _activityLevelOptions = ['sedentary', 'lightly_active', 'moderately_active', 'very_active', 'extremely_active'];
 
   // State untuk menentukan apakah data berasal dari mode 'advanced'
   bool _isAdvancedMode = false;
@@ -264,16 +244,6 @@ class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
       _isBreastfeeding = healthProfile.isBreastfeeding ?? false;
       _expectedDueDateController.text = healthProfile.expectedDueDate?.toIso8601String().split('T').first ?? '';
 
-      _selectedPreferredUnit = healthProfile.preferredUnits;
-      _selectedGlucoseUnit = healthProfile.glucoseUnit;
-      _selectedTimezone = healthProfile.timezone;
-      _selectedLanguage = healthProfile.languageCode;
-      _enableGlucoseAlerts = healthProfile.enableGlucoseAlerts ?? true;
-      _enableMealReminders = healthProfile.enableMealReminders ?? true;
-      _enableActivityReminders = healthProfile.enableActivityReminders ?? true;
-      _enableMedicationReminders = healthProfile.enableMedicationReminders ?? true;
-      _shareDataForResearch = healthProfile.shareDataForResearch ?? false;
-      _shareAnonymizedData = healthProfile.shareAnonymizedData ?? false;
     });
   }
 
@@ -335,16 +305,6 @@ class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
       isPregnant: _isPregnant,
       isBreastfeeding: _isBreastfeeding,
       expectedDueDate: DateTime.tryParse(_expectedDueDateController.text),
-      preferredUnits: _selectedPreferredUnit,
-      glucoseUnit: _selectedGlucoseUnit,
-      timezone: _selectedTimezone,
-      languageCode: _selectedLanguage,
-      enableGlucoseAlerts: _enableGlucoseAlerts,
-      enableMealReminders: _enableMealReminders,
-      enableActivityReminders: _enableActivityReminders,
-      enableMedicationReminders: _enableMedicationReminders,
-      shareDataForResearch: _shareDataForResearch,
-      shareAnonymizedData: _shareAnonymizedData,
     );
   }
 
@@ -450,7 +410,6 @@ class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
       _buildSectionContainer('Kondisi Penyerta & Kehamilan', _buildComorbiditiesSection(_isAdvancedMode)),
       if (_isAdvancedMode)
         _buildSectionContainer('Faktor Gaya Hidup Lain', _buildLifestyleFactorsSection(_isAdvancedMode)),
-      _buildSectionContainer('Pengaturan Aplikasi', _buildAppSettingsSection(_isAdvancedMode)),
     ];
   }
 
@@ -867,79 +826,6 @@ class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
             ],
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildAppSettingsSection(bool isAdvanced) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Unit Pilihan'),
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: _preferredUnitOptions.map((unit) {
-            return ChoiceChip(
-              label: Text(unit),
-              selected: _selectedPreferredUnit == unit,
-              onSelected: (isSelected) {
-                setState(() {
-                  if (isSelected) _selectedPreferredUnit = unit;
-                });
-              },
-              selectedColor: Theme.of(context).colorScheme.primary,
-              labelStyle: TextStyle(
-                color: _selectedPreferredUnit == unit ? Colors.white : Colors.black,
-              ),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: Colors.grey.shade300)),
-              checkmarkColor: Colors.white,
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 16),
-        _buildSectionTitle('Unit Glukosa'),
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: _glucoseUnitOptions.entries.map((entry) {
-            final backendValue = entry.key;
-            final displayValue = entry.value;
-            return ChoiceChip(
-              label: Text(displayValue),
-              selected: _selectedGlucoseUnit == backendValue,
-              onSelected: (isSelected) {
-                setState(() {
-                  if (isSelected) _selectedGlucoseUnit = backendValue;
-                });
-              },
-              selectedColor: Theme.of(context).colorScheme.primary,
-              labelStyle: TextStyle(
-                color: _selectedGlucoseUnit == backendValue ? Colors.white : Colors.black,
-              ),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: Colors.grey.shade300)),
-              checkmarkColor: Colors.white,
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 16),
-        _buildSectionTitle('Zona Waktu'),
-        _buildDropdown(hint: 'Pilih Zona Waktu', value: _selectedTimezone, items: _timezoneOptions, onChanged: (val) => setState(() => _selectedTimezone = val)),
-        const SizedBox(height: 16),
-        _buildSectionTitle('Bahasa'),
-        _buildDropdown(hint: 'Pilih Bahasa', value: _selectedLanguage, items: _languageOptions.keys.toList(), displayBuilder: (val) => _languageOptions[val] ?? val, onChanged: (val) => setState(() => _selectedLanguage = val)),
-        const SizedBox(height: 24),
-        _buildSectionTitle('Notifikasi & Pengingat'),
-        _buildSettingSwitchTile(title: 'Notifikasi Gula Darah', value: _enableGlucoseAlerts, onChanged: (val) => setState(() => _enableGlucoseAlerts = val)),
-        _buildSettingSwitchTile(title: 'Pengingat Makan', value: _enableMealReminders, onChanged: (val) => setState(() => _enableMealReminders = val)),
-        _buildSettingSwitchTile(title: 'Pengingat Aktivitas', value: _enableActivityReminders, onChanged: (val) => setState(() => _enableActivityReminders = val)),
-        _buildSettingSwitchTile(title: 'Pengingat Obat', value: _enableMedicationReminders, onChanged: (val) => setState(() => _enableMedicationReminders = val)),
-        const SizedBox(height: 24),
-        _buildSectionTitle('Privasi & Data'),
-        _buildSettingSwitchTile(title: 'Bagikan data untuk riset', value: _shareDataForResearch, onChanged: (val) => setState(() => _shareDataForResearch = val)),
-        _buildSettingSwitchTile(title: 'Bagikan data anonim', value: _shareAnonymizedData, onChanged: (val) => setState(() => _shareAnonymizedData = val)),
       ],
     );
   }

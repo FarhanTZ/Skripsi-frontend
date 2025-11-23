@@ -95,8 +95,7 @@ class ProfileTab extends StatelessWidget {
                             text: 'Settings',
                             onTap: () {
                               Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) =>
-                                    const ProfileSettingsScreen(),
+                                builder: (context) => const ProfileSettingsPage(),
                               ));
                             },
                           ),
