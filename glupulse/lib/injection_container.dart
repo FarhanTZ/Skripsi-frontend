@@ -65,6 +65,7 @@ Future<void> init() async {
       loginWithGoogleUseCase: sl(),
       getCurrentUserUseCase: sl(),
       requestPasswordResetUseCase: sl(),
+      getHealthProfile: sl(),
       completePasswordResetUseCase: sl(),
       updateUsernameUseCase: sl(), // Tambahkan ini
       updatePasswordUseCase: sl(),
@@ -174,9 +175,21 @@ Future<void> init() async {
 
   // Cubit
   sl.registerFactory(() => FoodCubit(getFoodsUseCase: sl()));
+  sl.registerFactory(
+    () => CartCubit(
+      getCartUseCase: sl(),
+      addToCartUseCase: sl(),
+      updateCartItemUseCase: sl(),
+      removeCartItemUseCase: sl(),
+    ),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => GetFoods(sl()));
+  sl.registerLazySingleton(() => GetCartUseCase(sl()));
+  sl.registerLazySingleton(() => AddToCartUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateCartItemUseCase(sl()));
+  sl.registerLazySingleton(() => RemoveCartItemUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<FoodRepository>(() => FoodRepositoryImpl(

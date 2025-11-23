@@ -5,6 +5,7 @@ import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
 import 'package:glupulse/features/auth/presentation/pages/register_page.dart';
 import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
+import 'package:glupulse/features/HealthData/presentation/pages/health_profile_page.dart';
 import 'package:glupulse/features/auth/presentation/pages/request_password_reset_page.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:glupulse/features/auth/presentation/widgets/login_body.dart';
@@ -89,6 +90,18 @@ class _LoginPageState extends State<LoginPage> {
             MaterialPageRoute(
                 builder: (context) => const EditProfilePage(isFromAuthFlow: true)),
             (route) => false,
+          );
+        } else if (state is AuthHealthProfileIncomplete) {
+          // Jika profil kesehatan tidak lengkap, arahkan ke HealthProfilePage
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const HealthProfilePage()),
+            (route) => false,
+          );
+        } else if (state is AuthProfileIncomplete) {
+          // Jika profil tidak lengkap, arahkan ke EditProfilePage
+          Navigator.of(context).push( // Gunakan push biasa, bukan pushAndRemoveUntil
+            MaterialPageRoute(
+                builder: (context) => const EditProfilePage(isFromAuthFlow: true)),
           );
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context)

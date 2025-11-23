@@ -80,3 +80,11 @@ class PasswordResetCompleted extends AuthState {
   @override
   List<Object?> get props => [];
 }
+
+/// State ketika otentikasi berhasil, profil dasar lengkap, tetapi profil kesehatan belum.
+class AuthHealthProfileIncomplete extends AuthState {
+  final UserEntity user;
+  const AuthHealthProfileIncomplete(this.user);
+  @override
+  List<Object> get props => [user];
+}

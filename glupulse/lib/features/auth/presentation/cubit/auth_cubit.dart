@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
+import 'package:glupulse/features/HealthData/domain/usecases/get_health_profile.dart';
 import 'package:glupulse/core/error/failures.dart';
 import 'package:glupulse/core/usecases/usecase.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
@@ -36,6 +37,7 @@ class AuthCubit extends Cubit<AuthState> {
   final LoginWithGoogleUseCase loginWithGoogleUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final RequestPasswordResetUseCase requestPasswordResetUseCase;
+  final GetHealthProfile getHealthProfile; // Tambahkan use case health profile
   final CompletePasswordResetUseCase completePasswordResetUseCase;
   final UpdateUsernameUseCase updateUsernameUseCase;
   final UpdatePasswordUseCase updatePasswordUseCase;
@@ -51,6 +53,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.loginWithGoogleUseCase,
     required this.getCurrentUserUseCase,
     required this.requestPasswordResetUseCase,
+    required this.getHealthProfile, // Injeksi use case
     required this.completePasswordResetUseCase,
     required this.updateUsernameUseCase,
     required this.updatePasswordUseCase,
@@ -84,8 +87,12 @@ class AuthCubit extends Cubit<AuthState> {
       (user) {
         // Setelah mendapatkan user, cek kelengkapan profilnya
         if (user.isProfileComplete) {
-          print('AuthCubit: Sesi ditemukan dan profil lengkap untuk user: ${user.username}. Emitting AuthAuthenticated.'); // DEBUG
-          emit(AuthAuthenticated(user));
+          // Jika profil dasar lengkap, cek juga profil kesehatannya
+          print(
+              'AuthCubit: Sesi ditemukan, profil dasar lengkap. Mengecek profil kesehatan...');
+          // Kita tidak bisa langsung emit AuthAuthenticated, harus cek health profile dulu
+          // Kita panggil helper yang sudah ada
+          _checkHealthProfileAndEmitState(user);
         } else {
           print('AuthCubit: Sesi ditemukan tapi profil tidak lengkap untuk user: ${user.username}. Emitting AuthProfileIncomplete.'); // DEBUG
           emit(AuthProfileIncomplete(user));
@@ -254,12 +261,23 @@ class AuthCubit extends Cubit<AuthState> {
       },
       (fullUser) {
         print('AuthCubit: Profil lengkap didapatkan. isProfileComplete: ${fullUser.isProfileComplete}');
-        // Gunakan data user yang sudah lengkap untuk menentukan state
         if (fullUser.isProfileComplete) {
-          emit(AuthAuthenticated(fullUser));
+          // Jika profil dasar lengkap, cek profil kesehatan
+          _checkHealthProfileAndEmitState(fullUser);
         } else {
           emit(AuthProfileIncomplete(fullUser));
         }
+      },
+    );
+  }
+
+  /// Helper baru untuk mengecek profil kesehatan.
+  Future<void> _checkHealthProfileAndEmitState(UserEntity user) async {
+    final healthProfileResult = await getHealthProfile(NoParams());
+    healthProfileResult.fold(
+      (failure) => emit(AuthHealthProfileIncomplete(user)), // Jika gagal fetch (kemungkinan besar karena belum ada), anggap tidak lengkap
+      (healthProfile) {
+        emit(AuthAuthenticated(user)); // Jika berhasil fetch, anggap sudah lengkap dan lanjutkan ke home
       },
     );
   }
@@ -380,7 +398,9 @@ class AuthCubit extends Cubit<AuthState> {
     print('AuthCubit: Memperbarui user di state. isProfileComplete: ${user.isProfileComplete}'); // DEBUG
     print('AuthCubit: User yang diperbarui: username="${user.username}", email="${user.email}"'); // DEBUG
     if (user.isProfileComplete) {
-      emit(AuthAuthenticated(user));
+      // JANGAN LANGSUNG EMIT AuthAuthenticated.
+      // Panggil helper untuk cek health profile terlebih dahulu.
+      _checkHealthProfileAndEmitState(user);
     } else {
       // Jika setelah update profil masih belum lengkap (seharusnya tidak terjadi, tapi sebagai fallback)
       emit(AuthProfileIncomplete(user));
