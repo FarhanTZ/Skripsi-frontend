@@ -17,13 +17,15 @@ Future<void> main() async {
   await di.init(); // Inisialisasi service locator
   runApp(MyApp());
 }
-
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<AuthCubit>()..checkAuthenticationStatus(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<AuthCubit>()..checkAuthenticationStatus()),
+        BlocProvider(create: (_) => sl<FoodCubit>()), // GLOBAL FOOD CUBIT
+        // Tambah cubit lain yang harus global di sini
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'GluPulse',
@@ -31,26 +33,17 @@ class MyApp extends StatelessWidget {
         home: BlocBuilder<AuthCubit, AuthState>(
           builder: (context, state) {
             if (state is AuthLoading || state is AuthInitial) {
-              // Tampilkan splash screen saat memeriksa status autentikasi
               return const SplashScreen();
             } else if (state is AuthAuthenticated) {
-              // Jika sudah terotentikasi, langsung ke HomePage
-              return BlocProvider(
-                create: (_) => sl<FoodCubit>(),
-                child: const HomePage(), // Pastikan HomePage sudah di-import
-              );
+              return const HomePage();
             } else if (state is AuthProfileIncomplete) {
-              // Jika profil tidak lengkap, arahkan untuk melengkapi
               return const EditProfilePage(isFromAuthFlow: true);
             } else if (state is AuthOtpRequired) {
-              // Jika butuh verifikasi OTP, arahkan ke OtpVerificationPage
               return OtpVerificationPage(
                 userId: state.userId,
                 pendingId: state.pendingId,
               );
             }
-            // Jika tidak (AuthUnauthenticated, AuthError), tampilkan IntroductionScreen
-            // yang akan mengarahkan ke LoginPage
             return const IntroductionScreen();
           },
         ),
@@ -58,3 +51,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
