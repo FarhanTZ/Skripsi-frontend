@@ -4,7 +4,7 @@ import 'package:glupulse/features/Splash/presentation/pages/splash_screen.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
-import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
+import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/injection_container.dart' as di;
 import 'package:glupulse/injection_container.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';

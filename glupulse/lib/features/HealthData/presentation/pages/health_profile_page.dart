@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
+import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/features/HealthData/domain/entities/health_profile.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart'; // Changed from bloc to cubit
 import 'package:glupulse/injection_container.dart';

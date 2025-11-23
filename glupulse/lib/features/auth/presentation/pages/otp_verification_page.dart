@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
-import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
+import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/pages/complete_password_reset_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_profile_page.dart';

@@ -4,7 +4,7 @@ import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
 import 'package:glupulse/features/auth/presentation/pages/register_page.dart';
-import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
+import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_profile_page.dart';
 import 'package:glupulse/features/auth/presentation/pages/request_password_reset_page.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
