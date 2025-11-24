@@ -114,3 +114,47 @@
 }
 
 
+
+
+Hba1c
+
+/health/hba1c
+
+insert
+get
+Update
+/health/hba1c/39f01827-597a-4e91-bda2-80c0f6d73483
+delete
+/health/hba1c/39f01827-597a-4e91-bda2-80c0f6d73483
+{
+    "test_date": "2025-12-01", //Mandatory
+    "hba1c_percentage": 7.5, //Mandatory
+    "estimated_avg_glucose": 162,
+    "treatment_changed": false,
+    "medication_changes": "None since last test.",
+    "diet_changes": "None",
+    "activity_changes": "None",
+    "notes": "Test done after illness, may be slightly elevated.",
+    "document_url": "https://s3.aws.com/user_documents/hba1c_nov_25.pdf"
+}
+
+
+Health Event
+/health/events
+insert
+get
+update
+/health/events/354af170-8ff2-4336-9046-d5ebcdb690cd
+delete
+/health/events/354af170-8ff2-4336-9046-d5ebcdb690cd
+{
+    "event_date": "2025-11-18", //Mandatory
+    "event_type": "illness",    //Constraint: ['hypoglycemia', 'hyperglycemia', 'illness', 'other']
+    "severity": "moderate",     //Constraint: ['mild', 'moderate', 'severe', 'critical']
+    "glucose_value": 310,       //Mandatory For ['Hypoglicemia', 'Hyperglycemia']
+    "ketone_value_mmol": 1.5,   //Mandatory For ['Hyperglycemia']
+    "symptoms": ["fever", "nausea"], //Mandatory
+    "treatments": ["ibuprofen", "fluids"], //Mandatory
+    "required_medical_attention": false,
+    "notes": "Severe flu led to persistent hyperglycemia."
+}

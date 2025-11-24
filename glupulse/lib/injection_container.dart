@@ -5,6 +5,8 @@ import 'package:glupulse/features/HealthData/domain/repositories/health_profile_
 import 'package:glupulse/features/HealthData/domain/usecases/get_health_profile.dart';
 import 'package:glupulse/features/HealthData/domain/usecases/update_health_profile.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
+import 'package:glupulse/features/hba1c/domain/usecases/get_hba1c_record.dart';
+import 'package:glupulse/features/health_event/domain/usecases/get_health_event_record.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/profile/data/repositories/profile_repository_impl.dart';
@@ -48,6 +50,22 @@ import 'package:glupulse/features/Food/domain/usecases/update_cart_item_usecase.
 import 'package:glupulse/features/Food/domain/usecases/remove_cart_item_usecase.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
 import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
+import 'package:glupulse/features/hba1c/data/datasources/hba1c_remote_data_source.dart';
+import 'package:glupulse/features/hba1c/data/repositories/hba1c_repository_impl.dart';
+import 'package:glupulse/features/hba1c/domain/repositories/hba1c_repository.dart';
+import 'package:glupulse/features/hba1c/domain/usecases/add_hba1c.dart';
+import 'package:glupulse/features/hba1c/domain/usecases/delete_hba1c.dart';
+import 'package:glupulse/features/hba1c/domain/usecases/get_hba1c_records.dart';
+import 'package:glupulse/features/hba1c/domain/usecases/update_hba1c.dart';
+import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
+import 'package:glupulse/features/health_event/data/datasources/health_event_remote_data_source.dart';
+import 'package:glupulse/features/health_event/data/repositories/health_event_repository_impl.dart';
+import 'package:glupulse/features/health_event/domain/repositories/health_event_repository.dart';
+import 'package:glupulse/features/health_event/domain/usecases/add_health_event.dart';
+import 'package:glupulse/features/health_event/domain/usecases/delete_health_event.dart';
+import 'package:glupulse/features/health_event/domain/usecases/get_health_event_records.dart';
+import 'package:glupulse/features/health_event/domain/usecases/update_health_event.dart';
+import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance; // sl = Service Locator
@@ -206,6 +224,39 @@ Future<void> init() async {
         localDataSource: sl()
       ));
 
+  // --- Features - Hba1c ---
+
+  // Cubit
+  sl.registerFactory(
+    () => Hba1cCubit(
+      getHba1cRecordsUseCase: sl(),
+      getHba1cRecordUseCase: sl(),
+      addHba1cUseCase: sl(),
+      updateHba1cUseCase: sl(),
+      deleteHba1cUseCase: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetHba1cRecords(sl()));
+  sl.registerLazySingleton(() => GetHba1cRecord(sl()));
+  sl.registerLazySingleton(() => AddHba1c(sl()));
+  sl.registerLazySingleton(() => UpdateHba1c(sl()));
+  sl.registerLazySingleton(() => DeleteHba1c(sl()));
+
+  // Repository
+  sl.registerLazySingleton<Hba1cRepository>(
+    () => Hba1cRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<Hba1cRemoteDataSource>(
+    () => Hba1cRemoteDataSourceImpl(apiClient: sl()),
+  );
+
   // --- Features - HealthData ---
 
   // Cubit
@@ -234,6 +285,39 @@ Future<void> init() async {
       client: sl(),
       localDataSource: sl(),
     ),
+  );
+
+  // --- Features - Health Event ---
+
+  // Cubit
+  sl.registerFactory(
+    () => HealthEventCubit(
+      getHealthEventRecordsUseCase: sl(),
+      getHealthEventRecordUseCase: sl(),
+      addHealthEventUseCase: sl(),
+      updateHealthEventUseCase: sl(),
+      deleteHealthEventUseCase: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetHealthEventRecords(sl()));
+  sl.registerLazySingleton(() => GetHealthEventRecord(sl()));
+  sl.registerLazySingleton(() => AddHealthEvent(sl()));
+  sl.registerLazySingleton(() => UpdateHealthEvent(sl()));
+  sl.registerLazySingleton(() => DeleteHealthEvent(sl()));
+
+  // Repository
+  sl.registerLazySingleton<HealthEventRepository>(
+    () => HealthEventRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<HealthEventRemoteDataSource>(
+    () => HealthEventRemoteDataSourceImpl(apiClient: sl()),
   );
 
   // --- Core ---

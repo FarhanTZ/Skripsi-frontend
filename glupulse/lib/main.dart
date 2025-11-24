@@ -4,6 +4,8 @@ import 'package:glupulse/features/Splash/presentation/pages/splash_screen.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
+import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
+import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
 import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/injection_container.dart' as di;
 import 'package:glupulse/injection_container.dart';
@@ -24,6 +26,8 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => sl<AuthCubit>()..checkAuthenticationStatus()),
         BlocProvider(create: (_) => sl<FoodCubit>()), // GLOBAL FOOD CUBIT
+        BlocProvider(create: (_) => sl<Hba1cCubit>()),
+        BlocProvider(create: (_) => sl<HealthEventCubit>()),
         // Tambah cubit lain yang harus global di sini
       ],
       child: MaterialApp(
@@ -44,7 +48,7 @@ class MyApp extends StatelessWidget {
                 pendingId: state.pendingId,
               );
             }
-            return const HomePage();
+            return const IntroductionScreen();
           },
         ),
       ),

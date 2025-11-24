@@ -3,6 +3,10 @@ import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
+import 'package:glupulse/features/hba1c/presentation/pages/add_edit_hba1c_page.dart';
+import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart';
+import 'package:glupulse/features/health_event/presentation/pages/add_edit_health_event_page.dart';
+import 'package:glupulse/features/health_event/presentation/pages/health_event_list_page.dart';
 
 class AnalyticTab extends StatefulWidget {
   const AnalyticTab({super.key});
@@ -94,6 +98,55 @@ class _AnalyticTabState extends State<AnalyticTab> {
                     ],
                   ),
                 ),
+                Positioned(
+                  bottom: 24,
+                  left: 24,
+                  right: 24,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const Hba1cListPage(),
+                          ));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Theme.of(context).colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                        ),
+                        child: const Text(
+                          'Track Hba1c',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const HealthEventListPage(),
+                          ));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Theme.of(context).colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                        ),
+                        child: const Text(
+                          'Log Health Event',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ), // <-- Added comma here
+
                 // Widget untuk status kesehatan di pojok kanan atas
                 Positioned(
                   top: 20,
