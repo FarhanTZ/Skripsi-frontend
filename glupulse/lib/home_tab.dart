@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
+import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/activity/presentation/pages/activity_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
-import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
+import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/notification/presentation/pages/notification_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
@@ -26,6 +27,7 @@ class _HomeTabState extends State<HomeTab> {
     super.initState();
     // Memuat data makanan saat halaman pertama kali dibuka
     context.read<FoodCubit>().fetchFoods();
+    context.read<Hba1cCubit>().getHba1cRecords();
   }
 
   @override
@@ -217,8 +219,8 @@ class _HomeTabState extends State<HomeTab> {
           const SizedBox(height: 16),
           InkWell(
             onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const InputHealthDataPage(),
+              Navigator.of(context).push(MaterialPageRoute( // Diubah untuk mengarah ke halaman list HbA1c
+                builder: (context) => const Hba1cListPage(),
               ));
             },
             child: Card(
@@ -237,33 +239,53 @@ class _HomeTabState extends State<HomeTab> {
                       width: 120,
                       color: const Color(0xFF0F67FE),
                       child: Center(
-                        child: Text(
-                          '5.7%', // Contoh Skor
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold),
+                        child: BlocBuilder<Hba1cCubit, Hba1cState>(
+                          builder: (context, state) {
+                            String hba1cValue = '0.0%';
+                            if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
+                              // Urutkan data dari yang terbaru
+                              final sortedRecords = List.from(state.hba1cRecords)
+                                ..sort((a, b) => b.testDate.compareTo(a.testDate));
+                              hba1cValue = '${sortedRecords.first.hba1cPercentage.toStringAsFixed(1)}%';
+                            }
+                            return Text(
+                              hba1cValue,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold),
+                            );
+                          },
                         ),
                       ),
                     ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('Last Hba1c',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16)),
-                            const SizedBox(height: 4),
-                            Text(
-                              'based on your data, we think your health status is above average',
-                              style: const TextStyle(fontSize: 14, color: Colors.grey),
-                              maxLines: 3,
-                            ),
-                          ],
-                        ),
+                        child: BlocBuilder<Hba1cCubit, Hba1cState>(
+                          builder: (context, state) { // Kurung kurawal pembuka
+                            String statusMessage = 'No data available. Please input your Hba1c record.';
+                            if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
+                              final latestRecord = state.hba1cRecords.first;
+                              statusMessage = _getHba1cStatusMessage(latestRecord.hba1cPercentage);
+                            }
+                            return Column(
+                               crossAxisAlignment: CrossAxisAlignment.start,
+                               mainAxisAlignment: MainAxisAlignment.center,
+                               children: [
+                                 const Text('Last Hba1c',
+                                     style: TextStyle(
+                                         fontWeight: FontWeight.bold, fontSize: 16)),
+                                 const SizedBox(height: 4),
+                                 Text(
+                                  statusMessage,
+                                   style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                   maxLines: 3,
+                                 ),
+                               ],
+                             );
+                          }, // Kurung kurawal penutup
+                        ), // Penutup untuk BlocBuilder
                       ),
                     ),
                   ],
@@ -509,6 +531,17 @@ class _HomeTabState extends State<HomeTab> {
         );
       },
     );
+  }
+
+  // Helper untuk mendapatkan pesan status berdasarkan nilai HbA1c
+  String _getHba1cStatusMessage(double value) {
+    if (value < 5.7) {
+      return 'Your last A1c level is normal. Keep it up!';
+    } else if (value >= 5.7 && value <= 6.4) {
+      return 'Your last A1c indicates prediabetes. Consider consulting a doctor.';
+    } else {
+      return 'Your last A1c indicates diabetes. Please consult a doctor.';
+    }
   }
 
   // Widget baru untuk membangun daftar rekomendasi makanan dari API

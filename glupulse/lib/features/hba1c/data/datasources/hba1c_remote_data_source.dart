@@ -62,6 +62,8 @@ class Hba1cRemoteDataSourceImpl implements Hba1cRemoteDataSource {
         token: token,
       );
       return response.map((json) => Hba1cModel.fromJson(json)).toList();
+    } on ServerException {
+      rethrow;
     } catch (e) {
       throw ServerException(e.toString());
     }

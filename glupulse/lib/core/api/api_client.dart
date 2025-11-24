@@ -130,24 +130,47 @@ class ApiClient {
         return await getList(endpoint, token: newToken);
       }
 
-      final responseBody = jsonDecode(response.body);
-
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (response.body.isEmpty) {
+          return []; // Return empty list for 2xx status with empty body
+        }
+        final responseBody = jsonDecode(response.body);
         if (responseBody is List) {
           return responseBody;
+        } else if (responseBody is Map<String, dynamic>) {
+          // Check if the map contains a message indicating no data
+          final message = (responseBody['message'] as String? ?? responseBody['error'] as String? ?? '').toLowerCase();
+          if (message.contains('no records') || message.contains('data not found') || message.contains('empty')) {
+            return []; // Treat as empty list
+          }
+          // If it's a map but doesn't indicate no data, it's still an unexpected format for a list endpoint
+          throw ServerException('Respons dari server bukan format yang diharapkan (diharapkan List, menerima Map).');
         } else {
           throw ServerException('Respons dari server bukan format yang diharapkan (diharapkan List).');
         }
+      } else if (response.statusCode == 404) {
+        // Handle 404 for list endpoint as an empty list, as no resources were found.
+        return [];
       } else {
-        if (responseBody is Map<String, dynamic>) {
-            throw ServerException(responseBody['message'] ?? 'Terjadi kesalahan pada server');
+        // Original error handling for other non-2xx status codes
+        if (response.body.isNotEmpty) {
+          try {
+            final responseBody = jsonDecode(response.body);
+            if (responseBody is Map<String, dynamic>) {
+              throw ServerException(responseBody['message'] ?? 'Terjadi kesalahan pada server');
+            }
+          } on FormatException {
+            // responseBody is not JSON, throw a generic server exception
+          }
         }
-        throw ServerException('Terjadi kesalahan pada server');
+        throw ServerException('Terjadi kesalahan pada server (Status: ${response.statusCode})');
       }
     } on SocketException {
       throw ServerException('Tidak ada koneksi internet. Periksa jaringan Anda.');
     } on TimeoutException {
       throw ServerException('Server tidak merespons. Coba lagi nanti.');
+    } on FormatException { // Catch FormatException if jsonDecode fails for non-2xx with body
+      throw ServerException('Gagal memproses respons dari server. Format tidak valid.');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException('Gagal terhubung ke server. Terjadi kesalahan tak terduga.');

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/features/Splash/presentation/pages/splash_screen.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<FoodCubit>()), // GLOBAL FOOD CUBIT
         BlocProvider(create: (_) => sl<Hba1cCubit>()),
         BlocProvider(create: (_) => sl<HealthEventCubit>()),
+        BlocProvider(create: (_) => sl<HealthProfileCubit>()),
         // Tambah cubit lain yang harus global di sini
       ],
       child: MaterialApp(

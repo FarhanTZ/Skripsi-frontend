@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
-import 'package:glupulse/features/hba1c/presentation/pages/add_edit_hba1c_page.dart';
+import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart';
-import 'package:glupulse/features/health_event/presentation/pages/add_edit_health_event_page.dart';
 import 'package:glupulse/features/health_event/presentation/pages/health_event_list_page.dart';
 
 class AnalyticTab extends StatefulWidget {
@@ -16,6 +16,12 @@ class AnalyticTab extends StatefulWidget {
 }
 
 class _AnalyticTabState extends State<AnalyticTab> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<Hba1cCubit>().getHba1cRecords();
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -49,34 +55,52 @@ class _AnalyticTabState extends State<AnalyticTab> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min, // Column hanya akan setinggi kontennya
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '5.7%', // Contoh skor
-                        style: const TextStyle(
-                          fontSize: 80,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Last Hba1c',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Your last A1c level is normal.',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white.withOpacity(0.8),
-                        ),
-                      ),
-                      const SizedBox(height: 24), // Spasi sebelum tombol
-                      ElevatedButton(
+                    children: [ BlocBuilder<Hba1cCubit, Hba1cState>(
+                        builder: (context, state) {
+                          String hba1cValue = '0.0%';
+                          String hba1cStatus = 'No data available.';
+
+                          if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
+                            // Urutkan data dari yang terbaru
+                            final sortedRecords = List.from(state.hba1cRecords)
+                              ..sort((a, b) => b.testDate.compareTo(a.testDate));
+                            final latestRecord = sortedRecords.first;
+                            hba1cValue = '${latestRecord.hba1cPercentage.toStringAsFixed(1)}%';
+                            hba1cStatus = _getHba1cStatusMessage(latestRecord.hba1cPercentage);
+                          }
+
+                          return Column(
+                            children: [
+                              Text(
+                                hba1cValue,
+                                style: const TextStyle(
+                                  fontSize: 80,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Last Hba1c',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white.withOpacity(0.9),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                hba1cStatus,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),const SizedBox(height: 24), // Spasi sebelum tombol
+                      ElevatedButton( // Tombol di luar BlocBuilder
                         onPressed: () {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => const InputHealthDataPage(),
@@ -151,19 +175,19 @@ class _AnalyticTabState extends State<AnalyticTab> {
                 Positioned(
                   top: 20,
                   right: 20,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF9CF0A6), // Warna luar sesuai permintaan
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: const Text(
-                      'Normal',
-                      style: TextStyle(
-                        color: Color(0xFF02A916), // Warna teks sesuai permintaan
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  child: BlocBuilder<Hba1cCubit, Hba1cState>(
+                    builder: (context, state) {
+                      if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
+                        // Urutkan data dari yang terbaru
+                        final sortedRecords = List.from(state.hba1cRecords)
+                          ..sort((a, b) => b.testDate.compareTo(a.testDate));
+                        final latestRecord = sortedRecords.first;
+                        final statusInfo = _getHba1cStatus(latestRecord.hba1cPercentage);
+                        return _buildStatusBadge(statusInfo['text']!, statusInfo['bgColor']!, statusInfo['textColor']!);
+                      }
+                      // Tampilkan badge 'No Data' jika tidak ada data
+                      return _buildStatusBadge('No Data', Colors.grey.shade300, Colors.black54);
+                    },
                   ),
                 ),
               ],
@@ -464,5 +488,40 @@ class _AnalyticTabState extends State<AnalyticTab> {
       ),
     );
   }
+
+  // --- HELPER FUNCTIONS ---
+
+  String _getHba1cStatusMessage(double value) {
+    if (value < 5.7) {
+      return 'Your last A1c level is normal.';
+    } else if (value >= 5.7 && value <= 6.4) {
+      return 'Your last A1c indicates prediabetes.';
+    } else {
+      return 'Your last A1c indicates diabetes.';
+    }
+  }
+
+  Map<String, dynamic> _getHba1cStatus(double value) {
+    if (value < 5.7) {
+      return {'text': 'Normal', 'bgColor': const Color(0xFF9CF0A6), 'textColor': const Color(0xFF02A916)};
+    } else if (value >= 5.7 && value <= 6.4) {
+      return {'text': 'Prediabetes', 'bgColor': const Color(0xFFFDFD66), 'textColor': const Color(0xFFB7B726)};
+    } else {
+      return {'text': 'Diabetes', 'bgColor': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
+    }
+  }
+
+  Widget _buildStatusBadge(String text, Color bgColor, Color textColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  // --- END OF HELPER FUNCTIONS ---
 
 }

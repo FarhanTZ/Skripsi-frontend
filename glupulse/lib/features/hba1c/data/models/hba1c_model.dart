@@ -10,6 +10,9 @@ class Hba1cModel extends Hba1c {
     String? medicationChanges,
     String? dietChanges,
     String? activityChanges,
+    int? hba1cMmolMol,
+    num? changeFromPrevious,
+    String? trend,
     String? notes,
     String? documentUrl,
   }) : super(
@@ -21,6 +24,9 @@ class Hba1cModel extends Hba1c {
           medicationChanges: medicationChanges,
           dietChanges: dietChanges,
           activityChanges: activityChanges,
+          hba1cMmolMol: hba1cMmolMol,
+          changeFromPrevious: changeFromPrevious,
+          trend: trend,
           notes: notes,
           documentUrl: documentUrl,
         );
@@ -37,6 +43,9 @@ class Hba1cModel extends Hba1c {
       medicationChanges: json['medication_changes'],
       dietChanges: json['diet_changes'],
       activityChanges: json['activity_changes'],
+      hba1cMmolMol: json['hba1c_mmol_mol'],
+      changeFromPrevious: json['change_from_previous'],
+      trend: json['trend'],
       notes: json['notes'],
       documentUrl: json['document_url'],
     );
@@ -44,10 +53,7 @@ class Hba1cModel extends Hba1c {
 
   Map<String, dynamic> toJson() {
     return {
-      // Saat mengirim ke server, kita tidak perlu mengirim 'hba1c_id'
-      // karena biasanya server yang membuatnya.
-      // 'id' juga tidak perlu jika hanya untuk create.
-      // Untuk update, ID biasanya ada di URL.
+      'hba1c_id': id, // Include ID for update/identification purposes
       'test_date': testDate.toIso8601String().split('T').first, // Format YYYY-MM-DD
       'hba1c_percentage': hba1cPercentage,
       'estimated_avg_glucose': estimatedAvgGlucose,
@@ -55,6 +61,9 @@ class Hba1cModel extends Hba1c {
       'medication_changes': medicationChanges,
       'diet_changes': dietChanges,
       'activity_changes': activityChanges,
+      'hba1c_mmol_mol': hba1cMmolMol,
+      'change_from_previous': changeFromPrevious,
+      'trend': trend,
       'notes': notes,
       'document_url': documentUrl,
     };
@@ -70,6 +79,9 @@ class Hba1cModel extends Hba1c {
       medicationChanges: entity.medicationChanges,
       dietChanges: entity.dietChanges,
       activityChanges: entity.activityChanges,
+      hba1cMmolMol: entity.hba1cMmolMol,
+      changeFromPrevious: entity.changeFromPrevious,
+      trend: entity.trend,
       notes: entity.notes,
       documentUrl: entity.documentUrl,
     );

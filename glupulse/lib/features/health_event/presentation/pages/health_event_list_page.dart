@@ -131,8 +131,8 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
               },
             );
           } else if (state is HealthEventError) {
-            return Center(
-              child: Text('Failed to load Health Event records: ${state.message}'),
+            return const Center(
+              child: Text('Tidak ada data ditemukan, silakan masukan data terlebih dahulu'),
             );
           }
           return const Center(child: Text('Press the + button to add a new Health Event record.'));

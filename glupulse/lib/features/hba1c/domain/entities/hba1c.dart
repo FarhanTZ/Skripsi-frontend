@@ -9,6 +9,9 @@ class Hba1c extends Equatable {
   final String? medicationChanges;
   final String? dietChanges;
   final String? activityChanges;
+  final int? hba1cMmolMol;
+  final num? changeFromPrevious;
+  final String? trend;
   final String? notes;
   final String? documentUrl;
 
@@ -21,6 +24,9 @@ class Hba1c extends Equatable {
     this.medicationChanges,
     this.dietChanges,
     this.activityChanges,
+    this.hba1cMmolMol,
+    this.changeFromPrevious,
+    this.trend,
     this.notes,
     this.documentUrl,
   });
@@ -35,6 +41,9 @@ class Hba1c extends Equatable {
         medicationChanges,
         dietChanges,
         activityChanges,
+        hba1cMmolMol,
+        changeFromPrevious,
+        trend,
         notes,
         documentUrl,
       ];
