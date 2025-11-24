@@ -13,6 +13,7 @@ class UserEntity extends Equatable {
   final String? addressLine1;
   final String? city;
   final List<AddressModel>? addresses;
+  final String? avatarUrl;
   final bool? isGoogleLinked;
 
   const UserEntity({
@@ -26,6 +27,7 @@ class UserEntity extends Equatable {
     this.addressLine1,
     this.city,
     this.addresses,
+    this.avatarUrl,
     this.isGoogleLinked,
   });
 
@@ -39,5 +41,5 @@ class UserEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, username, email, firstName, lastName, dob, gender, addressLine1, city, addresses, isGoogleLinked];
+  List<Object?> get props => [id, username, email, firstName, lastName, dob, gender, addressLine1, city, addresses, avatarUrl, isGoogleLinked];
 }

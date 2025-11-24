@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
-
-enum DateFilter { weekly, monthly, yearly }
 
 class AnalyticTab extends StatefulWidget {
   const AnalyticTab({super.key});
@@ -15,9 +12,6 @@ class AnalyticTab extends StatefulWidget {
 }
 
 class _AnalyticTabState extends State<AnalyticTab> {
-  DateFilter _selectedFilter = DateFilter.weekly; // Default filter
-  String _displayDateText = 'Mingguan'; // Default text
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -32,14 +26,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
             width: double.infinity,
             height: 400,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                ],
-              ),
+              color: const Color(0xFF0F67FE),
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(50),
               ),  
@@ -53,21 +40,23 @@ class _AnalyticTabState extends State<AnalyticTab> {
             ),
             child: Stack( // Menggunakan Stack untuk menumpuk widget
               children: [
-                Center(
+                Align(
+                  alignment: Alignment.center, // Align akan menengahkan child-nya
                   child: Column(
+                    mainAxisSize: MainAxisSize.min, // Column hanya akan setinggi kontennya
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        '85', // Contoh skor
-                        style: TextStyle(
-                          fontSize: 96,
+                      Text(
+                        '5.7%', // Contoh skor
+                        style: const TextStyle(
+                          fontSize: 80,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Glupulse Score',
+                        'Last Hba1c',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -76,7 +65,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'You are a healthy individual.',
+                        'Your last A1c level is normal.',
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.white.withOpacity(0.8),
@@ -120,40 +109,6 @@ class _AnalyticTabState extends State<AnalyticTab> {
                       style: TextStyle(
                         color: Color(0xFF02A916), // Warna teks sesuai permintaan
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                // Widget untuk ikon kalender di pojok kiri atas
-                Positioned(
-                  top: 20,
-                  left: 20,
-                  child: GestureDetector(
-                    onTap: () => _showDateFilterPicker(context),
-                    child: Container( // Mengubah container menjadi persegi panjang membulat
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9), // Latar belakang putih semi-transparan
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row( // Menggunakan Row untuk menyejajarkan ikon dan teks
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/images/calender.svg', // Path diperbaiki
-                            width: 20,
-                            height: 20,
-                            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn), // Ikon berwarna biru
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _displayDateText, // Teks dinamis dipindahkan ke sini
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ),
@@ -457,74 +412,4 @@ class _AnalyticTabState extends State<AnalyticTab> {
     );
   }
 
-  void _showDateFilterPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (builder) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Pilih Rentang Waktu',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.calendar_view_week),
-                title: const Text('Mingguan'),
-                trailing: _selectedFilter == DateFilter.weekly ? const Icon(Icons.check, color: Colors.green) : null,
-                onTap: () {
-                  _updateFilter(DateFilter.weekly);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.calendar_view_month),
-                title: const Text('Bulanan'),
-                trailing: _selectedFilter == DateFilter.monthly ? const Icon(Icons.check, color: Colors.green) : null,
-                onTap: () {
-                  _updateFilter(DateFilter.monthly);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.calendar_today),
-                title: const Text('Tahunan'),
-                trailing: _selectedFilter == DateFilter.yearly ? const Icon(Icons.check, color: Colors.green) : null,
-                onTap: () {
-                  _updateFilter(DateFilter.yearly);
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _updateFilter(DateFilter filter) {
-    setState(() {
-      _selectedFilter = filter;
-      final now = DateTime.now();
-      switch (filter) {
-        case DateFilter.weekly:
-          _displayDateText = 'Mingguan';
-          break;
-        case DateFilter.monthly:
-          _displayDateText = DateFormat('MMMM yyyy').format(now);
-          break;
-        case DateFilter.yearly:
-          _displayDateText = DateFormat('yyyy').format(now);
-          break;
-      }
-    });
-  }
 }

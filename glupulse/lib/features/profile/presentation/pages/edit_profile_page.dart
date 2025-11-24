@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
@@ -8,6 +9,7 @@ import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart' as au
 import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_state.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:glupulse/injection_container.dart';
 
 
@@ -45,6 +47,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _dobController = TextEditingController();
   String? _selectedGender;
   final List<String> _genders = ['Male', 'Female'];
+  
+  // Variabel untuk menyimpan gambar yang dipilih dan URL avatar yang ada
+  File? _pickedImage;
+  String? _currentAvatarUrl;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -64,6 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController.dispose();
     _emailController.dispose();
     _dobController.dispose();
+
     super.dispose();
   }
 
@@ -87,6 +95,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (user.gender != null && _genders.contains(user.gender)) {
       _selectedGender = user.gender;
     }
+    // Simpan URL avatar saat ini dari data user
+    _currentAvatarUrl = user.avatarUrl;
+
   }
   void _saveChanges() async {
     print('--- DEBUG: _saveChanges() dipanggil ---'); // DEBUG
@@ -112,6 +123,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _proceedWithUpdate() {
      print('--- DEBUG: Validasi BERHASIL ---'); // DEBUG
+     // TODO: Jika _pickedImage tidak null, panggil cubit untuk upload avatar dulu.
+     // if (_pickedImage != null) {
+     //   context.read<ProfileCubit>().updateAvatar(_pickedImage!);
+     // }
+
      final params = UpdateProfileParams(
        firstName: _firstNameController.text,
        lastName: _lastNameController.text,
@@ -122,6 +138,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
      print('--- DEBUG: Parameter yang akan dikirim: ${params.toJson()} ---'); // DEBUG
      context.read<ProfileCubit>().updateProfile(params);
      print('--- DEBUG: Memanggil ProfileCubit.updateProfile... ---'); // DEBUG
+  }
+
+  // Fungsi untuk memilih gambar dari galeri
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _pickedImage = File(image.path);
+      });
+      // Di sini Anda akan memanggil method di Cubit untuk mengunggah gambar.
+      // Contoh:
+      // context.read<ProfileCubit>().updateAvatar(_pickedImage!);
+      // Untuk saat ini, kita hanya menampilkannya di UI.
+    }
   }
   
   @override
@@ -266,23 +297,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // Widget untuk Avatar Profil, diekstrak agar lebih rapi
   Widget _buildProfileAvatar() {
     return Stack(
+      alignment: Alignment.center,
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           radius: 60,
           backgroundColor: AppTheme.inputFieldColor,
-          child: Icon(
-            Icons.person,
-            size: 70,
-            color: AppTheme.inputLabelColor,
-          ),
+          backgroundImage: _getAvatarImage(),
+          child: _pickedImage == null && _currentAvatarUrl == null
+              ? const Icon(
+                  Icons.person,
+                  size: 70,
+                  color: AppTheme.inputLabelColor,
+                )
+              : null,
         ),
         Positioned(
           bottom: 0,
           right: 0,
           child: GestureDetector(
-            onTap: () {
-              // TODO: Implementasikan logika untuk memilih gambar
-            },
+            onTap: _pickImage, // Panggil fungsi untuk memilih gambar
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -299,6 +332,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
       ],
     );
+  }
+
+  ImageProvider? _getAvatarImage() {
+    if (_pickedImage != null) {
+      // Jika ada gambar yang baru dipilih, tampilkan itu.
+      return FileImage(_pickedImage!);
+    } else if (_currentAvatarUrl != null && _currentAvatarUrl!.isNotEmpty) {
+      // Jika tidak, coba tampilkan gambar dari URL yang ada.
+      // Pastikan URL lengkap. Jika backend hanya memberikan path, Anda perlu menggabungkannya dengan base URL.
+      // Contoh: return NetworkImage('https://your-api-base.com/$_currentAvatarUrl');
+      // Untuk ngrok, Anda mungkin perlu header khusus, yang lebih baik ditangani di ApiClient.
+      // Untuk kesederhanaan di sini, kita gunakan NetworkImage langsung.
+      return NetworkImage(_currentAvatarUrl!);
+    }
+    return null; // Tidak ada gambar untuk ditampilkan
   }
 
   // Helper widget untuk TextField

@@ -124,8 +124,8 @@ class ProfileTab extends StatelessWidget {
                                   const ColorFilter.mode(Colors.red, BlendMode.srcIn),
                             ),
                             text: 'Logout',
-                            textColor: Colors.red,
-                            iconColor: Colors.red,
+                            textColor: Colors.redAccent, // Warna disamakan dengan warna ikon di analytic_tab
+                            iconColor: Colors.redAccent, // Warna disamakan dengan warna ikon di analytic_tab
                             onTap: () {
                               _showModernLogoutDialog(context);
                             },
@@ -309,8 +309,8 @@ class ProfileTab extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(            
-            color: (textColor == Colors.red
-                ? const Color(0xFFFFA6AE)
+            color: (iconColor == Colors.redAccent // Cek jika ini item destruktif
+                ? Colors.redAccent.withOpacity(0.15) // Latar merah transparan
                 : AppTheme.inputFieldColor.withOpacity(0.7)),
             borderRadius: BorderRadius.circular(12),
           ),

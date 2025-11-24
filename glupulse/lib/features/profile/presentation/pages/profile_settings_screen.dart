@@ -4,6 +4,7 @@ import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/HealthData/domain/entities/health_profile.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
+import 'package:glupulse/features/profile/presentation/pages/delete_account_confirmation_page.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
@@ -175,11 +176,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                               icon: Icons.delete_forever_outlined,
                               text: 'Hapus Akun',
                               onTap: () {
-                                bool isGoogleLinked = user?.isGoogleLinked ?? false;
-                                _showDeleteAccountDialog(context, isGoogleLinked: isGoogleLinked);
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (_) => DeleteAccountConfirmationPage(
+                                    // Kirim status tautan Google ke halaman baru
+                                    isGoogleLinked: user?.isGoogleLinked ?? false,
+                                  ),
+                                ));
                               },
-                              textColor: Colors.red,
-                              iconColor: Colors.red,
+                              textColor: Colors.redAccent, // Warna disamakan dengan warna ikon di analytic_tab
+                              iconColor: Colors.redAccent, // Warna disamakan dengan warna ikon di analytic_tab
                             ),
                           ],
                         ),
@@ -266,8 +271,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-                color: (textColor == Colors.red
-                    ? const Color(0xFFFFA6AE)
+                color: (iconColor == Colors.redAccent // Cek jika ini item destruktif
+                    ? Colors.redAccent.withOpacity(0.15) // Latar merah transparan
                     : AppTheme.inputFieldColor.withOpacity(0.7)),
                 borderRadius: BorderRadius.circular(12)),
             child: Icon(icon, color: iconColor ?? defaultIconColor)),
@@ -398,76 +403,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           Switch(value: value, onChanged: onChanged, activeColor: Theme.of(context).colorScheme.primary),
         ],
       ),
-    );
-  }
-
-  void _showDeleteAccountDialog(BuildContext context, {required bool isGoogleLinked}) {
-    final passwordController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return BlocListener<AuthCubit, AuthState>(
-          listener: (context, state) {
-            if (state is AuthError) {
-              // Tampilkan error jika password salah atau ada masalah lain
-              ScaffoldMessenger.of(dialogContext)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red));
-            }
-          },
-          child: BlocBuilder<AuthCubit, AuthState>(
-            builder: (context, state) {
-              final isLoading = state is AuthLoading;
-              return AlertDialog(
-                title: const Text('Konfirmasi Hapus Akun'),
-                content: SingleChildScrollView(
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (isGoogleLinked)
-                          const Text('Ini adalah tindakan permanen dan tidak dapat dibatalkan. Apakah Anda yakin ingin melanjutkan?')
-                        else ...[
-                          const Text('Ini adalah tindakan permanen dan tidak dapat dibatalkan. Untuk melanjutkan, masukkan kata sandi Anda.'),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: passwordController,
-                            obscureText: true,
-                            decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
-                            validator: (value) {
-                              if (!isGoogleLinked && (value == null || value.isEmpty)) {
-                                return 'Password tidak boleh kosong';
-                              }
-                              return null;
-                            },
-                          ),
-                        ]
-                      ],
-                    ),
-                  ),
-                ),
-                actions: <Widget>[
-                  TextButton(onPressed: isLoading ? null : () => Navigator.of(dialogContext).pop(), child: const Text('Batal')),
-                  ElevatedButton(
-                    onPressed: isLoading ? null : () {
-                      if (isGoogleLinked || formKey.currentState!.validate()) {
-                        context.read<AuthCubit>().deleteAccount(passwordController.text);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Hapus Akun', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              );
-            },
-          ),
-        );
-      },
     );
   }
 }

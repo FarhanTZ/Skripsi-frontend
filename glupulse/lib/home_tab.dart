@@ -234,32 +234,32 @@ class _HomeTabState extends State<HomeTab> {
                 child: Row(
                   children: [
                     Container(
-                      width: 120, // Lebar container biru
-                      color: Theme.of(context).colorScheme.primary,
-                      child: const Center(
+                      width: 120,
+                      color: const Color(0xFF0F67FE),
+                      child: Center(
                         child: Text(
-                          '85', // Contoh Skor
-                          style: TextStyle(
+                          '5.7%', // Contoh Skor
+                          style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 48,
+                              fontSize: 40,
                               fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Glupulse Score',
-                                style: TextStyle(
+                            const Text('Last Hba1c',
+                                style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               'based on your data, we think your health status is above average',
-                              style: TextStyle(fontSize: 14, color: Colors.grey),
+                              style: const TextStyle(fontSize: 14, color: Colors.grey),
                               maxLines: 3,
                             ),
                           ],

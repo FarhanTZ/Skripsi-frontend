@@ -23,6 +23,7 @@ class UserModel extends UserEntity {
           email: email,
           firstName: firstName,
           lastName: lastName,
+          avatarUrl: avatarUrl,
           isGoogleLinked: isGoogleLinked,
         );
 
@@ -111,6 +112,7 @@ class UserModel extends UserEntity {
       accountType: profileData['account_type'] as int?,
       isEmailVerified: profileData['is_email_verified'] as bool?,
       avatarUrl: profileData['avatar_url'] as String?,
+      // avatarUrl sudah ada di sini dan akan diteruskan ke super
       isGoogleLinked: profileData['is_google_linked'] as bool?,
       addresses: parsedAddresses,
     );
