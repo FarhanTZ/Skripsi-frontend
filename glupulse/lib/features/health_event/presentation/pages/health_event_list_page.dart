@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:glupulse/features/health_event/domain/entities/health_event.dart';
 import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
+import 'package:glupulse/features/health_event/presentation/pages/health_event_history_page.dart';
 import 'package:glupulse/features/health_event/presentation/pages/add_edit_health_event_page.dart';
 
 class HealthEventListPage extends StatefulWidget {
@@ -13,6 +14,14 @@ class HealthEventListPage extends StatefulWidget {
 }
 
 class _HealthEventListPageState extends State<HealthEventListPage> {
+  // Daftar tipe event yang bisa dipilih, diambil dari add_edit_health_event_page.dart
+  final List<String> _eventTypes = [
+    'hypoglycemia',
+    'hyperglycemia',
+    'illness',
+    'other'
+  ];
+  String? _selectedEventType; // State untuk menyimpan event type yang dipilih
   @override
   void initState() {
     super.initState();
@@ -32,28 +41,14 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
     // _fetchHealthEventRecords(); // Dihapus: Biarkan BlocConsumer yang menangani refresh
   }
 
-  void _confirmDelete(BuildContext context, String id) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this record?'),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('No'),
-            onPressed: () => Navigator.of(ctx).pop(),
-          ),
-          TextButton(
-            child: const Text('Yes'),
-            onPressed: () {
-              context.read<HealthEventCubit>().deleteHealthEvent(id);
-              Navigator.of(ctx).pop();
-            },
-          ),
-        ],
+  void _navigateToHistoryPage() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const HealthEventHistoryPage(),
       ),
     );
   }
+
 
   Widget _buildSummaryCard({
     required String title,
@@ -131,6 +126,67 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
     );
   }
 
+  // Widget baru untuk dropdown event type dengan tampilan seperti kartu
+  Widget _buildEventTypeDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: DropdownButtonFormField<String>(
+        value: _selectedEventType,
+        items: _eventTypes.map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+          );
+        }).toList(),
+        onChanged: (newValue) {
+          setState(() {
+            _selectedEventType = newValue;
+          });
+        },
+        decoration: InputDecoration(
+          label: Row(
+            mainAxisSize: MainAxisSize.min, // Agar Row tidak mengambil semua lebar
+            children: const [
+              Text('Event Type'),
+              SizedBox(width: 8),
+              Icon(Icons.event_note, size: 20, color: Colors.black87),
+            ],
+          ),
+          labelStyle: const TextStyle(fontSize: 14, color: Colors.black54),
+          border: InputBorder.none,
+          // contentPadding diatur agar tidak terlalu rapat dengan label
+          contentPadding: const EdgeInsets.only(top: 4),
+        ),
+        isExpanded: true,
+      ),
+    );
+  }
+
+  // --- Helper untuk warna berdasarkan tipe event ---
+  Color _eventColor(String eventType) {
+    switch (eventType.toLowerCase()) {
+      case "hypoglycemia":
+        return Colors.orange.shade700;
+      case "hyperglycemia":
+        return Colors.red.shade700;
+      case "illness":
+        return Colors.purple.shade700;
+      case "other":
+      default:
+        return Colors.blue.shade700;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,7 +245,48 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
                           child: Text("Belum ada data Health Event."));
                     }
 
-                    final latest = state.healthEventRecords.first;
+                    // Inisialisasi _selectedEventType jika masih null
+                    if (_selectedEventType == null && state.healthEventRecords.isNotEmpty) {
+                      _selectedEventType = state.healthEventRecords.first.eventType;
+                    }
+
+                    HealthEvent? latestFilteredEvent;
+                    if (state.healthEventRecords.isNotEmpty) {
+                      // Cari event yang cocok dengan _selectedEventType
+                      final matchingEvents = state.healthEventRecords
+                          .where((event) => event.eventType == _selectedEventType);
+
+                      if (matchingEvents.isNotEmpty) {
+                        latestFilteredEvent = matchingEvents.first;
+                      }
+                      // Jika matchingEvents kosong, latestFilteredEvent akan tetap null,
+                      // yang akan ditangani oleh kondisi if (latestFilteredEvent == null) di bawah.
+                    }
+
+                    if (latestFilteredEvent == null) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Tidak ada data untuk event type yang dipilih."),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Ambil state terbaru langsung dari Cubit, ini lebih aman.
+                                final currentState = context.read<HealthEventCubit>().state;
+                                setState(() {
+                                  // Reset filter ke event paling baru yang ada di state
+                                  if (currentState is HealthEventLoaded && currentState.healthEventRecords.isNotEmpty) {
+                                    _selectedEventType = currentState.healthEventRecords.first.eventType;
+                                  }
+                                });
+                              },
+                              child: const Text('Reset Filter'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
                     return SingleChildScrollView(
                       padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16), // Hapus padding kanan
@@ -207,18 +304,12 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
                                 flex: 5, // Beri ruang lebih untuk kartu
                                 child: Column( // Padding kanan ditambahkan di sini untuk kartu
                                   children: [
-                                    _buildSingleSummaryCard(
-                                      _buildSummaryCard(
-                                        title: "Event Type",
-                                        value: latest.eventType,
-                                        icon: Icons.event_note,
-                                       ),
-                                    ),
+                                    _buildEventTypeDropdown(), // Menggunakan dropdown baru
                                     const SizedBox(height: 12),
                                     _buildSingleSummaryCard(
                                       _buildSummaryCard(
                                         title: "Glucose",
-                                        value: "${latest.glucoseValue} mg/dL",
+                                        value: "${latestFilteredEvent.glucoseValue ?? 'N/A'} mg/dL",
                                         icon: Icons.bloodtype,
                                         color: Colors.red.shade50,
                                       ),
@@ -227,7 +318,8 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
                                     _buildSingleSummaryCard(
                                       _buildSummaryCard(
                                         title: "Ketone",
-                                        value: "${latest.ketoneValueMmol} mmol",
+                                        value:
+                                            "${latestFilteredEvent.ketoneValueMmol ?? 'N/A'} mmol",
                                         icon: Icons.science,
                                         color: Colors.orange.shade50,
                                       ),
@@ -236,7 +328,7 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
                                     _buildSingleSummaryCard(
                                       _buildSummaryCard(
                                         title: "Severity",
-                                        value: latest.severity,
+                                        value: latestFilteredEvent.severity,
                                         icon: Icons.warning,
                                         color: Colors.yellow.shade50,
                                       ),
@@ -271,9 +363,9 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildChipList("Symptoms", latest.symptoms),
+                                _buildChipList("Symptoms", latestFilteredEvent.symptoms),
                                 const SizedBox(height: 16),
-                                _buildChipList("Treatments", latest.treatments),
+                                _buildChipList("Treatments", latestFilteredEvent.treatments),
                               ],
                             ),
                           ),
@@ -283,51 +375,144 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
                           // ------------------------
                           // 📜 History Section
                           // ------------------------
-                          const Align(
-                            alignment: Alignment.centerLeft,                            
-                            child: Padding(
-                              padding: EdgeInsets.only(right: 16.0), // Padding untuk judul history
-                              child: Text(
-                                "History Health Event",
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "History Health Event",
+                                  style: TextStyle(
+                                      fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                                GestureDetector(
+                                  onTap: _navigateToHistoryPage,
+                                  child: Text(
+                                    'Lihat Semua',
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
                               ),
-                            ),
                           ),
                           const SizedBox(height: 12),
 
                           ListView.builder(
-                            itemCount: state.healthEventRecords.length,
+                            itemCount: state.healthEventRecords.take(5).length, // Batasi hanya 5 item
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemBuilder: (context, index) {
-                              final event = state.healthEventRecords[index];
+                              final event = state.healthEventRecords.take(5).toList()[index];
                               return Padding(
                                 padding: const EdgeInsets.only(right: 16.0), // Padding untuk setiap item list
-                                child: Card(
-                                  child: ListTile(
-                                    title: Text(
-                                      "${event.eventType} (${event.severity})",
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                child: Dismissible(
+                                  key: Key(event.id!),
+                                  direction: DismissDirection.endToStart,
+                                  confirmDismiss: (direction) async {
+                                    final confirmed = await showDialog<bool>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: const Text('Konfirmasi Hapus'),
+                                        content: const Text('Yakin ingin menghapus riwayat event ini?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text('Tidak'),
+                                            onPressed: () => Navigator.of(ctx).pop(false),
+                                          ),
+                                          TextButton(
+                                            child: const Text('Ya'),
+                                            onPressed: () => Navigator.of(ctx).pop(true),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    return confirmed ?? false;
+                                  },
+                                  onDismissed: (direction) {
+                                    // Fungsi ini hanya akan dipanggil jika confirmDismiss mengembalikan true
+                                    context.read<HealthEventCubit>().deleteHealthEvent(event.id!);                                    
+                                  },
+                                  background: Container(
+                                    alignment: Alignment.centerRight,
+                                    padding: const EdgeInsets.only(right: 20.0),
+                                    margin: const EdgeInsets.only(bottom: 16), // Sesuaikan dengan margin Card
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
-                                    subtitle: Text(
-                                      "Tanggal: ${DateFormat('dd MMM yyyy').format(event.eventDate)}",
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.edit),
-                                          onPressed: () => _navigateToAddEditPage(
-                                              healthEvent: event),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete),
-                                          onPressed: () =>
-                                              _confirmDelete(context, event.id!),
-                                        ),
-                                      ],
+                                    child: const Icon(Icons.delete, color: Colors.white),
+                                  ),
+                                  child: Card(
+                                    color: Colors.white,
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    elevation: 4,
+                                    clipBehavior: Clip.antiAlias,
+                                    child: InkWell(
+                                      onTap: () => _navigateToAddEditPage(
+                                          healthEvent: event),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Bagian Atas: Tipe Event
+                                          Container(
+                                            width: double.infinity,
+                                            color: _eventColor(event.eventType),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                            child: Text(
+                                              event.eventType.toUpperCase(),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                          // Bagian Bawah: Detail Teks
+                                          Padding(
+                                            padding: const EdgeInsets.all(16.0),
+                                            child: Row(children: [
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                        "Severity: ${event.severity}",
+                                                        style: const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 14)),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                        "Glukosa: ${event.glucoseValue ?? 'N/A'} mg/dL",
+                                                        style: const TextStyle(
+                                                            color: Colors
+                                                                .black54,
+                                                            fontSize: 12)),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                        "Tanggal: ${DateFormat('dd MMM yyyy').format(event.eventDate)}",
+                                                        style: const TextStyle(
+                                                            fontSize: 12,
+                                                            color: Colors
+                                                                .black54)),
+                                                  ],
+                                                ),
+                                              ),
+                                              Icon(Icons.arrow_forward_ios,
+                                                  color: Colors.grey.shade400,
+                                                  size: 16),
+                                            ]),
+                                          ),
+                                    ],
+                                    ), 
                                     ),
                                   ),
                                 ),

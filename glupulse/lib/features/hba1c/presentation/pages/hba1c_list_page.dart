@@ -45,28 +45,6 @@ class _Hba1cListPageState extends State<Hba1cListPage> {
     );
   }
 
-  void _confirmDelete(BuildContext context, String id) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Hapus Data'),
-        content: const Text('Yakin ingin menghapus data HBA1c ini?'),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Tidak'),
-            onPressed: () => Navigator.of(ctx).pop(),
-          ),
-          TextButton(
-            child: const Text('Ya'),
-            onPressed: () {
-              context.read<Hba1cCubit>().deleteHba1c(id);
-              Navigator.of(ctx).pop();
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   // --- Helper untuk warna berdasarkan trend ---
   Color _trendColor(String? trend) {
@@ -350,9 +328,29 @@ class _Hba1cListPageState extends State<Hba1cListPage> {
                         return Dismissible(
                           key: Key(h.id!), // Key unik untuk setiap item
                           direction: DismissDirection.endToStart, // Geser dari kanan ke kiri
+                          confirmDismiss: (direction) async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Konfirmasi Hapus'),
+                                content: const Text('Yakin ingin menghapus data HBA1c ini?'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text('Tidak'),
+                                    onPressed: () => Navigator.of(ctx).pop(false),
+                                  ),
+                                  TextButton(
+                                    child: const Text('Ya'),
+                                    onPressed: () => Navigator.of(ctx).pop(true),
+                                  ),
+                                ],
+                              ),
+                            );
+                            return confirmed ?? false;
+                          },
                           onDismissed: (direction) {
-                            // Panggil fungsi hapus saat item digeser penuh
-                            context.read<Hba1cCubit>().deleteHba1c(h.id!);
+                            // Fungsi ini hanya akan dipanggil jika confirmDismiss mengembalikan true
+                            context.read<Hba1cCubit>().deleteHba1c(h.id!);                           
                           },
                           background: Container(
                             alignment: Alignment.centerRight,
