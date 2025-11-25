@@ -483,3 +483,98 @@ update
 
 delete
 /health/log/activity/63134815-df63-4589-951f-952ead5112b6
+
+
+/health/medication
+insert
+{
+    "display_name": "Novolog (Rapid Acting)",
+    "medication_type": "INSULIN", //Constraint = ['INSULIN', 'BIGUANIDE', 'GLP', 'SGLT2', 'DPP4', 'OTC', 'SUPPLEMENT', 'OTHER_RX']
+    "default_dose_unit": "units"
+}
+
+/*
+INSULIN	    = All types of insulin (rapid, long-acting)	Core diabetes management.
+BIGUANIDE   = Metformin.	Core oral diabetes drug.
+GLP         = GLP-1 Agonists (e.g., Ozempic).	Diabetes and weight management.
+SGLT2       = SGLT-2 Inhibitors (e.g., Jardiance).	Diabetes and cardio-renal protection.
+DPP4        = DPP-4 Inhibitors (e.g., Januvia).	Oral diabetes drug.
+OTC         = Over-The-Counter (e.g., Ibuprofen, Tylenol).	Critical for tracking illness effects on glucose and  Without prescription
+SUPPLEMENT  = Vitamins, minerals, herbs.	For tracking overall nutritional intake.
+OTHER_RX    = Other Prescribed Medication (non-diabetes).	General prescriptions General prescriptions (e.g., blood pressure, thyroid).
+*/
+
+get
+[
+    {
+        "medication_id": 4,
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "display_name": "Metformin",
+        "medication_type": "BIGUANIDE",
+        "default_dose_unit": "mg",
+        "is_active": true,
+        "created_at": "2025-11-25T10:52:48.252211+07:00",
+        "updated_at": "2025-11-25T10:54:32.104342+07:00"
+    },
+    {
+        "medication_id": 3,
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "display_name": "Novolog (Rapid Acting)",
+        "medication_type": "INSULIN",
+        "default_dose_unit": "units",
+        "is_active": true,
+        "created_at": "2025-11-25T10:52:48.252211+07:00",
+        "updated_at": "2025-11-25T10:52:48.252211+07:00"
+    },
+    {
+        "medication_id": 5,
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "display_name": "Novolog (Rapid Acting)",
+        "medication_type": "INSULIN",
+        "default_dose_unit": "units",
+        "is_active": true,
+        "created_at": "2025-11-25T10:52:48.252211+07:00",
+        "updated_at": "2025-11-25T10:52:48.252211+07:00"
+    }
+]
+
+update
+/health/medication/4
+delete
+/health/medication/5
+
+/health/medication/log
+insert
+{
+    "medication_id": 3, 
+    "medication_name": "Novolog Pen (Fast Acting)",
+    "timestamp": "2025-11-24T12:45:00+07:00",
+    "dose_amount": 8.5,
+    "reason": "meal_bolus", //Constraint = ['meal_bolus', 'basal', 'correction', 'medication_schedule']
+    "is_pump_delivery": false, //Only for Insulin medication type
+    "delivery_duration_minutes": 0, //Only if is_pump_delivery = true
+    "notes": "Taken for lunch carbs."
+}
+
+get
+[
+    {
+        "medicationlog_id": "9c6a5e9a-a2df-40ec-9a6e-5c678560ebb4",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "medication_id": 3,
+        "medication_name": "Novolog (Rapid Acting)",
+        "timestamp": "2025-11-24T12:45:00+07:00",
+        "dose_amount": 8.5,
+        "reason": "meal_bolus",
+        "is_pump_delivery": false,
+        "delivery_duration_minutes": 0,
+        "notes": "Taken for lunch carbs.",
+        "created_at": "2025-11-25T14:03:40.02529+07:00",
+        "updated_at": "2025-11-25T14:03:40.02529+07:00"
+    }
+]
+
+update
+/health/medication/log/9c6a5e9a-a2df-40ec-9a6e-5c678560ebb4
+
+/health/medication/log/9c6a5e9a-a2df-40ec-9a6e-5c678560ebb4

@@ -85,6 +85,13 @@ import 'package:glupulse/features/health_event/domain/usecases/get_health_event_
 import 'package:glupulse/features/health_event/domain/usecases/update_health_event.dart';
 import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:glupulse/features/medication/data/datasources/medication_remote_data_source.dart';
+import 'package:glupulse/features/medication/data/repositories/medication_repository_impl.dart';
+import 'package:glupulse/features/medication/domain/repositories/medication_repository.dart';
+import 'package:glupulse/features/medication/domain/usecases/medication_log_usecases.dart';
+import 'package:glupulse/features/medication/domain/usecases/medication_usecases.dart';
+import 'package:glupulse/features/medication/presentation/cubit/medication_cubit.dart';
+import 'package:glupulse/features/medication/presentation/cubit/medication_log_cubit.dart';
 import 'package:glupulse/features/sleep_log/data/datasources/sleep_log_remote_data_source.dart';
 import 'package:glupulse/features/sleep_log/data/repositories/sleep_log_repository_impl.dart';
 import 'package:glupulse/features/sleep_log/domain/repositories/sleep_log_repository.dart';
@@ -444,6 +451,52 @@ Future<void> init() async {
   // Data Sources
   sl.registerLazySingleton<SleepLogRemoteDataSource>(
     () => SleepLogRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // --- Features - Medication ---
+
+  // Cubit
+  sl.registerFactory(
+    () => MedicationCubit(
+      getMedications: sl(),
+      addMedication: sl(),
+      updateMedication: sl(),
+      deleteMedication: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => MedicationLogCubit(
+      getMedicationLogs: sl(),
+      addMedicationLog: sl(),
+      updateMedicationLog: sl(),
+      deleteMedicationLog: sl(),
+    ),
+  );
+
+  // Use Cases - Medication Definitions
+  sl.registerLazySingleton(() => GetMedications(sl()));
+  sl.registerLazySingleton(() => AddMedication(sl()));
+  sl.registerLazySingleton(() => UpdateMedication(sl()));
+  sl.registerLazySingleton(() => DeleteMedication(sl()));
+
+  // Use Cases - Medication Logs
+  sl.registerLazySingleton(() => GetMedicationLogs(sl()));
+  sl.registerLazySingleton(() => AddMedicationLog(sl()));
+  sl.registerLazySingleton(() => UpdateMedicationLog(sl()));
+  sl.registerLazySingleton(() => DeleteMedicationLog(sl()));
+
+  // Repository
+  sl.registerLazySingleton<MedicationRepository>(
+    () => MedicationRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<MedicationRemoteDataSource>(
+    () => MedicationRemoteDataSourceImpl(apiClient: sl()),
   );
 
   // --- Core ---
