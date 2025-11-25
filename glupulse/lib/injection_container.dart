@@ -5,6 +5,15 @@ import 'package:glupulse/features/HealthData/domain/repositories/health_profile_
 import 'package:glupulse/features/HealthData/domain/usecases/get_health_profile.dart';
 import 'package:glupulse/features/HealthData/domain/usecases/update_health_profile.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
+import 'package:glupulse/features/activity/data/datasources/activity_remote_data_source.dart';
+import 'package:glupulse/features/activity/data/repositories/activity_repository_impl.dart';
+import 'package:glupulse/features/activity/domain/repositories/activity_repository.dart';
+import 'package:glupulse/features/activity/domain/usecases/add_activity_log.dart';
+import 'package:glupulse/features/activity/domain/usecases/delete_activity_log.dart';
+import 'package:glupulse/features/activity/domain/usecases/get_activity_logs.dart';
+import 'package:glupulse/features/activity/domain/usecases/get_activity_types.dart';
+import 'package:glupulse/features/activity/domain/usecases/update_activity_log.dart';
+import 'package:glupulse/features/activity/presentation/cubit/activity_cubit.dart';
 import 'package:glupulse/features/hba1c/domain/usecases/get_hba1c_record.dart';
 import 'package:glupulse/features/health_event/domain/usecases/get_health_event_record.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
@@ -297,6 +306,39 @@ Future<void> init() async {
   // Data Sources
   sl.registerLazySingleton<GlucoseRemoteDataSource>(
     () => GlucoseRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // --- Features - Activity ---
+
+  // Cubit
+  sl.registerFactory(
+    () => ActivityCubit(
+      getActivityTypes: sl(),
+      getActivityLogs: sl(),
+      addActivityLog: sl(),
+      updateActivityLog: sl(),
+      deleteActivityLog: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetActivityTypes(sl()));
+  sl.registerLazySingleton(() => GetActivityLogs(sl()));
+  sl.registerLazySingleton(() => AddActivityLog(sl()));
+  sl.registerLazySingleton(() => UpdateActivityLog(sl()));
+  sl.registerLazySingleton(() => DeleteActivityLog(sl()));
+
+  // Repository
+  sl.registerLazySingleton<ActivityRepository>(
+    () => ActivityRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<ActivityRemoteDataSource>(
+    () => ActivityRemoteDataSourceImpl(apiClient: sl()),
   );
 
   // --- Features - HealthData ---

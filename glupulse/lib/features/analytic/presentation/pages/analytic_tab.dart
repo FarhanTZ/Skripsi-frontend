@@ -8,6 +8,7 @@ import 'package:glupulse/features/glucose/presentation/pages/glucose_list_page.d
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart';
 import 'package:glupulse/features/health_event/presentation/pages/health_event_list_page.dart';
+import 'package:glupulse/features/activity/presentation/pages/activity_type_list_page.dart';
 
 class AnalyticTab extends StatefulWidget {
   const AnalyticTab({super.key});
@@ -127,48 +128,72 @@ class _AnalyticTabState extends State<AnalyticTab> {
                   bottom: 24,
                   left: 24,
                   right: 24,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const Hba1cListPage(),
-                          ));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Theme.of(context).colorScheme.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const Hba1cListPage(),
+                            ));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                        ),
-                        child: const Text(
-                          'Track Hba1c',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const HealthEventListPage(),
-                          ));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Theme.of(context).colorScheme.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                          child: const Text(
+                            'Track Hba1c',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                         ),
-                        child: const Text(
-                          'Log Health Event',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const ActivityTypeListPage(),
+                            ));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                          ),
+                          child: const Text(
+                            'Track Activity',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const HealthEventListPage(),
+                            ));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                          ),
+                          child: const Text(
+                            'Log Health Event',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ), // <-- Added comma here
 
