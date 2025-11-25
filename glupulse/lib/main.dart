@@ -8,6 +8,7 @@ import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
 import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
+import 'package:glupulse/features/sleep_log/presentation/cubit/sleep_log_cubit.dart';
 import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/injection_container.dart' as di;
 import 'package:glupulse/injection_container.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<HealthEventCubit>()),
         BlocProvider(create: (_) => sl<HealthProfileCubit>()),
         BlocProvider(create: (_) => sl<GlucoseCubit>()),
+        BlocProvider(create: (_) => sl<SleepLogCubit>()),
         // Tambah cubit lain yang harus global di sini
       ],
       child: MaterialApp(

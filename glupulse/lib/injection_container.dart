@@ -85,6 +85,15 @@ import 'package:glupulse/features/health_event/domain/usecases/get_health_event_
 import 'package:glupulse/features/health_event/domain/usecases/update_health_event.dart';
 import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:glupulse/features/sleep_log/data/datasources/sleep_log_remote_data_source.dart';
+import 'package:glupulse/features/sleep_log/data/repositories/sleep_log_repository_impl.dart';
+import 'package:glupulse/features/sleep_log/domain/repositories/sleep_log_repository.dart';
+import 'package:glupulse/features/sleep_log/domain/usecases/add_sleep_log.dart';
+import 'package:glupulse/features/sleep_log/domain/usecases/delete_sleep_log.dart';
+import 'package:glupulse/features/sleep_log/domain/usecases/get_sleep_log.dart';
+import 'package:glupulse/features/sleep_log/domain/usecases/get_sleep_logs.dart';
+import 'package:glupulse/features/sleep_log/domain/usecases/update_sleep_log.dart';
+import 'package:glupulse/features/sleep_log/presentation/cubit/sleep_log_cubit.dart';
 
 final sl = GetIt.instance; // sl = Service Locator
 
@@ -402,6 +411,39 @@ Future<void> init() async {
   // Data Sources
   sl.registerLazySingleton<HealthEventRemoteDataSource>(
     () => HealthEventRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // --- Features - Sleep Log ---
+
+  // Cubit
+  sl.registerFactory(
+    () => SleepLogCubit(
+      getSleepLogsUseCase: sl(),
+      getSleepLogUseCase: sl(),
+      addSleepLogUseCase: sl(),
+      updateSleepLogUseCase: sl(),
+      deleteSleepLogUseCase: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetSleepLogs(sl()));
+  sl.registerLazySingleton(() => GetSleepLog(sl()));
+  sl.registerLazySingleton(() => AddSleepLog(sl()));
+  sl.registerLazySingleton(() => UpdateSleepLog(sl()));
+  sl.registerLazySingleton(() => DeleteSleepLog(sl()));
+
+  // Repository
+  sl.registerLazySingleton<SleepLogRepository>(
+    () => SleepLogRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<SleepLogRemoteDataSource>(
+    () => SleepLogRemoteDataSourceImpl(apiClient: sl()),
   );
 
   // --- Core ---
