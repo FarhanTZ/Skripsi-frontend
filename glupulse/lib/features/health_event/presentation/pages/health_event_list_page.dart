@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:glupulse/features/health_event/domain/entities/health_event.dart';
 import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
 import 'package:glupulse/features/health_event/presentation/pages/add_edit_health_event_page.dart';
-import 'package:glupulse/injection_container.dart';
 
 class HealthEventListPage extends StatefulWidget {
   const HealthEventListPage({super.key});
@@ -30,7 +29,7 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
         builder: (context) => AddEditHealthEventPage(healthEvent: healthEvent),
       ),
     );
-    _fetchHealthEventRecords(); // Refresh data after returning
+    // _fetchHealthEventRecords(); // Dihapus: Biarkan BlocConsumer yang menangani refresh
   }
 
   void _confirmDelete(BuildContext context, String id) {
@@ -42,9 +41,7 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
         actions: <Widget>[
           TextButton(
             child: const Text('No'),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
+            onPressed: () => Navigator.of(ctx).pop(),
           ),
           TextButton(
             child: const Text('Yes'),
@@ -58,85 +55,296 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Health Event Records'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _navigateToAddEditPage(),
+  Widget _buildSummaryCard({
+    required String title,
+    required String value,
+    IconData? icon,
+    Color? color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color ?? Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
           ),
         ],
       ),
-      body: BlocConsumer<HealthEventCubit, HealthEventState>(
-        listener: (context, state) {
-          if (state is HealthEventDeleted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Health Event Record Deleted!')),
-            );
-            _fetchHealthEventRecords(); // Refresh after delete
-          } else if (state is HealthEventError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.message}')),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is HealthEventLoading && !(state is HealthEventDeleted)) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is HealthEventLoaded) {
-            if (state.healthEventRecords.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('No Health Event records found.'),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add New Health Event Record'),
-                      onPressed: () => _navigateToAddEditPage(),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return ListView.builder(
-              itemCount: state.healthEventRecords.length,
-              itemBuilder: (context, index) {
-                final healthEvent = state.healthEventRecords[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: ListTile(
-                    title: Text('Type: ${healthEvent.eventType}, Severity: ${healthEvent.severity}'),
-                    subtitle: Text(
-                        'Date: ${DateFormat('yyyy-MM-dd').format(healthEvent.eventDate)}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => _navigateToAddEditPage(healthEvent: healthEvent),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _confirmDelete(context, healthEvent.id!),
-                        ),
-                      ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center, // Pusatkan konten secara vertikal
+        children: [
+          if (icon != null) Icon(icon, size: 26, color: Colors.black87),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, color: Colors.black54),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSingleSummaryCard(Widget card) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: card),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChipList(String label, List<String> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(
+                fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: items
+              .map((e) => Chip(
+                    label: Text(e),
+                    backgroundColor: Colors.blue.shade50,
+                  ))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF2F5F9),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToAddEditPage(),
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add, size: 30),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // --- Header Kustom ---
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Tombol Kembali di kiri
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
-                );
-              },
-            );
-          } else if (state is HealthEventError) {
-            return const Center(
-              child: Text('Tidak ada data ditemukan, silakan masukan data terlebih dahulu'),
-            );
-          }
-          return const Center(child: Text('Press the + button to add a new Health Event record.'));
-        },
+                  // Judul di tengah
+                  const Text(
+                    'Health Event Analytics',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: BlocConsumer<HealthEventCubit, HealthEventState>( // Diubah dari BlocBuilder
+                listener: (context, state) {
+                  // Listener untuk memuat ulang data saat ada perubahan
+                  if (state is HealthEventUpdated || state is HealthEventDeleted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(state is HealthEventUpdated ? 'Event updated successfully' : 'Event deleted successfully')),
+                    );
+                    // Panggil fetch di sini untuk memastikan data selalu terbaru setelah aksi
+                    _fetchHealthEventRecords();
+                  }
+                },
+                builder: (context, state) {
+                  if (state is HealthEventLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (state is HealthEventLoaded) {
+                    if (state.healthEventRecords.isEmpty) {
+                      return const Center(
+                          child: Text("Belum ada data Health Event."));
+                    }
+
+                    final latest = state.healthEventRecords.first;
+
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16), // Hapus padding kanan
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start, // <-- TAMBAHKAN INI
+                        children: [
+                          // ------------------------
+                          // 🔥 Analytic Summary
+                          // ------------------------
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center, // Pusatkan item secara vertikal
+                            children: [
+                              // --- Kolom Kiri: Kartu Ringkasan ---
+                              Expanded(
+                                flex: 5, // Beri ruang lebih untuk kartu
+                                child: Column( // Padding kanan ditambahkan di sini untuk kartu
+                                  children: [
+                                    _buildSingleSummaryCard(
+                                      _buildSummaryCard(
+                                        title: "Event Type",
+                                        value: latest.eventType,
+                                        icon: Icons.event_note,
+                                       ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _buildSingleSummaryCard(
+                                      _buildSummaryCard(
+                                        title: "Glucose",
+                                        value: "${latest.glucoseValue} mg/dL",
+                                        icon: Icons.bloodtype,
+                                        color: Colors.red.shade50,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _buildSingleSummaryCard(
+                                      _buildSummaryCard(
+                                        title: "Ketone",
+                                        value: "${latest.ketoneValueMmol} mmol",
+                                        icon: Icons.science,
+                                        color: Colors.orange.shade50,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _buildSingleSummaryCard(
+                                      _buildSummaryCard(
+                                        title: "Severity",
+                                        value: latest.severity,
+                                        icon: Icons.warning,
+                                        color: Colors.yellow.shade50,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16), // Jarak antara kartu dan gambar                              
+                              // --- Kolom Kanan: Gambar ---
+                              Expanded(
+                                flex: 4, // Sesuaikan rasio flex sesuai kebutuhan
+                                child: ClipRect( // Gunakan ClipRect untuk memotong widget
+                                  child: Align(
+                                    alignment: Alignment.centerLeft, // Posisikan gambar dari KIRI
+                                    widthFactor: 0.5, // Ambil 50% bagian KIRI dari gambar
+                                    child: Image.asset(
+                                      'assets/images/placeholder_health.png',
+                                      fit: BoxFit.cover, // Pastikan gambar menutupi area
+                                      height: 500, // Sesuaikan tinggi gambar
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Symptoms & Treatments (diberi padding kanan secara manual)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildChipList("Symptoms", latest.symptoms),
+                                const SizedBox(height: 16),
+                                _buildChipList("Treatments", latest.treatments),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 30),
+
+                          // ------------------------
+                          // 📜 History Section
+                          // ------------------------
+                          const Align(
+                            alignment: Alignment.centerLeft,                            
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 16.0), // Padding untuk judul history
+                              child: Text(
+                                "History Health Event",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          ListView.builder(
+                            itemCount: state.healthEventRecords.length,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              final event = state.healthEventRecords[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 16.0), // Padding untuk setiap item list
+                                child: Card(
+                                  child: ListTile(
+                                    title: Text(
+                                      "${event.eventType} (${event.severity})",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Text(
+                                      "Tanggal: ${DateFormat('dd MMM yyyy').format(event.eventDate)}",
+                                    ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit),
+                                          onPressed: () => _navigateToAddEditPage(
+                                              healthEvent: event),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete),
+                                          onPressed: () =>
+                                              _confirmDelete(context, event.id!),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return const Center(child: Text("Tidak ada data."));
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

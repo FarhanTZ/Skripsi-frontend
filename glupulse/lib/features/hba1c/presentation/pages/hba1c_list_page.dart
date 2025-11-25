@@ -6,8 +6,6 @@ import 'package:glupulse/features/hba1c/domain/entities/hba1c.dart';
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 import 'package:glupulse/features/hba1c/presentation/pages/hba1c_history_page.dart';
 import 'package:glupulse/features/hba1c/presentation/pages/add_edit_hba1c_page.dart';
-import 'package:glupulse/injection_container.dart';
-
 import '../../../HealthData/presentation/cubit/health_profile_state.dart';
 
 class Hba1cListPage extends StatefulWidget {
