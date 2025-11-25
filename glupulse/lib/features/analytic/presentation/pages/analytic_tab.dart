@@ -4,6 +4,7 @@ import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
+import 'package:glupulse/features/glucose/presentation/pages/glucose_list_page.dart';
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart';
 import 'package:glupulse/features/health_event/presentation/pages/health_event_list_page.dart';
@@ -103,7 +104,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
                       ElevatedButton( // Tombol di luar BlocBuilder
                         onPressed: () {
                           Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const InputHealthDataPage(),
+                            builder: (context) => const GlucoseListPage(),
                           ));
                         },
                         style: ElevatedButton.styleFrom(
@@ -115,7 +116,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
                           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                         ),
                         child: const Text(
-                          'Input Health',
+                          'Input Glucose',
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                         ),
                       )

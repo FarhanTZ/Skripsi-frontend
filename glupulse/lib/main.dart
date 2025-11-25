@@ -6,6 +6,7 @@ import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
+import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
 import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
 import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/injection_container.dart' as di;
@@ -26,10 +27,12 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => sl<AuthCubit>()..checkAuthenticationStatus()),
-        BlocProvider(create: (_) => sl<FoodCubit>()), // GLOBAL FOOD CUBIT
+        BlocProvider(create: (_) => sl<FoodCubit>()),
         BlocProvider(create: (_) => sl<Hba1cCubit>()),
+        BlocProvider(create: (_) => sl<GlucoseCubit>()),
         BlocProvider(create: (_) => sl<HealthEventCubit>()),
         BlocProvider(create: (_) => sl<HealthProfileCubit>()),
+        BlocProvider(create: (_) => sl<GlucoseCubit>()),
         // Tambah cubit lain yang harus global di sini
       ],
       child: MaterialApp(

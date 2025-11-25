@@ -160,3 +160,326 @@ delete
 }
 
 
+/health/glucose
+
+ini buat insert
+{
+    "glucose_value": 250, //Constraint >= 20 and <= 600
+    "reading_type": "post_meal_2h", //Constraint = ['fasting', 'pre_meal', 'post_meal_1h', 'post_meal_2h', 'bedtime', 'overnight', 'random', 'exercise', 'sick_day']
+    "reading_timestamp": "2025-11-24T03:50:00Z",
+    "source": "glucose_meter", //Constraint = ['manual', 'cgm', 'glucose_meter', 'lab_test']
+    "device_name": "Accu-Chek Guide",
+    "device_id": "Test123",
+    "notes": "Ate a large lunch. Will take a short walk.",
+    "symptoms": ["fatigue"]
+}
+
+ini get datanya
+[
+    {
+        "reading_id": "55737996-f2b4-4478-ad1d-5eb5f7d6f22c",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "glucose_value": 250,
+        "reading_timestamp": "2025-11-24T10:50:00+07:00",
+        "reading_type": "post_meal_2h",
+        "trend_arrow": "rising_rapidly",
+        "rate_of_change": 2,
+        "source": "glucose_meter",
+        "device_id": "Test123",
+        "device_name": "Accu-Chek Guide",
+        "is_flagged": false,
+        "flag_reason": null,
+        "is_outlier": false,
+        "notes": "Ate a large lunch. Will take a short walk.",
+        "symptoms": [
+            "fatigue"
+        ],
+        "created_at": "2025-11-24T11:57:54.481787+07:00",
+        "updated_at": "2025-11-24T11:57:54.481787+07:00"
+    },
+    {
+        "reading_id": "57e00e48-b934-45af-8153-c608ee4dc416",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "glucose_value": 180,
+        "reading_timestamp": "2025-11-24T10:20:00+07:00",
+        "reading_type": "random",
+        "trend_arrow": "falling_rapidly",
+        "rate_of_change": -2,
+        "source": "manual",
+        "device_id": null,
+        "device_name": null,
+        "is_flagged": false,
+        "flag_reason": null,
+        "is_outlier": false,
+        "notes": "Test for falling trend.",
+        "symptoms": [],
+        "created_at": "2025-11-24T11:50:51.372439+07:00",
+        "updated_at": "2025-11-24T11:50:51.372439+07:00"
+    },
+    {
+        "reading_id": "a472a083-6aee-4246-a75a-8ea4cd3ed849",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "glucose_value": 200,
+        "reading_timestamp": "2025-11-24T10:10:00+07:00",
+        "reading_type": "post_meal_1h",
+        "trend_arrow": "rising_rapidly",
+        "rate_of_change": 5,
+        "source": "manual",
+        "device_id": null,
+        "device_name": null,
+        "is_flagged": false,
+        "flag_reason": null,
+        "is_outlier": false,
+        "notes": "Test for rising rapidly trend.",
+        "symptoms": [],
+        "created_at": "2025-11-24T11:48:08.338863+07:00",
+        "updated_at": "2025-11-24T11:48:08.338863+07:00"
+    },
+    {
+        "reading_id": "6a3179c6-c80c-4200-983c-aa1324e92b87",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "glucose_value": 150,
+        "reading_timestamp": "2025-11-24T10:00:00+07:00",
+        "reading_type": "random",
+        "trend_arrow": "unknown",
+        "rate_of_change": 0,
+        "source": "manual",
+        "device_id": null,
+        "device_name": null,
+        "is_flagged": false,
+        "flag_reason": null,
+        "is_outlier": false,
+        "notes": "Baseline reading before tests.",
+        "symptoms": [],
+        "created_at": "2025-11-24T11:47:59.496942+07:00",
+        "updated_at": "2025-11-24T11:47:59.496942+07:00"
+    }
+]
+
+ini update
+/health/glucose/55737996-f2b4-4478-ad1d-5eb5f7d6f22c
+
+ini delete
+/health/glucose/55737996-f2b4-4478-ad1d-5eb5f7d6f22c
+
+
+
+/health/log/sleep
+insert
+{
+    "sleep_date": "2025-11-24",
+    "bed_time": "2025-11-24T23:00:00+07:00",
+    "wake_time": "2025-11-25T06:45:00+07:00",
+    
+    "quality_rating": 4, //Constraint > 1 & < 5
+    "tracker_score": 0, //Constraint > 0 & < 100, for integration with smartwatch
+
+    "deep_sleep_minutes": 90,
+    "rem_sleep_minutes": 20, //Penjelasan cari di google panjang soale
+    "light_sleep_minutes": 240,
+    "awake_minutes": 15,
+    "average_hrv": 50,//Penjelasan cari di google panjang soale
+    "resting_heart_rate": 70,
+    "tags": [""],
+    "source": "manual", //Constraint = ['manual', 'wearable_sync']
+    "notes": "Felt rested, but woke up once at 3 AM."
+}
+
+get
+[
+    {
+        "sleep_id": "bc6e1d27-e3b8-4c58-9685-a62716a3be31",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "sleep_date": "2025-11-24",
+        "bed_time": "2025-11-24T23:00:00+07:00",
+        "wake_time": "2025-11-25T06:45:00+07:00",
+        "quality_rating": 4,
+        "tracker_score": 0,
+        "deep_sleep_minutes": 90,
+        "rem_sleep_minutes": 20,
+        "light_sleep_minutes": 240,
+        "awake_minutes": 15,
+        "average_hrv": 50,
+        "resting_heart_rate": 70,
+        "tags": [
+            ""
+        ],
+        "source": "manual",
+        "notes": "Felt rested, but woke up once at 3 AM.",
+        "created_at": "2025-11-24T23:35:50.983415+07:00",
+        "updated_at": "2025-11-24T23:35:50.983415+07:00"
+    }
+]
+
+update
+/health/log/sleep/bc6e1d27-e3b8-4c58-9685-a62716a3be31
+delete
+/health/log/sleep/bc6e1d27-e3b8-4c58-9685-a62716a3be31
+
+
+
+get aktivity
+/health/activity_type
+[
+    {
+        "activity_type_id": 12,
+        "activity_code": "CALISTHENICS",
+        "display_name": "Calisthenics (Pushups/Situps)",
+        "intensity_level": "MODERATE"
+    },
+    {
+        "activity_type_id": 8,
+        "activity_code": "CYCLING_LIGHT",
+        "display_name": "Cycling (Leisure)",
+        "intensity_level": "MODERATE"
+    },
+    {
+        "activity_type_id": 9,
+        "activity_code": "CYCLING_INTENSE",
+        "display_name": "Cycling (Vigorous)",
+        "intensity_level": "HIGH"
+    },
+    {
+        "activity_type_id": 3,
+        "activity_code": "DANCE",
+        "display_name": "Dancing (Zumba, Ballroom, etc.)",
+        "intensity_level": "MODERATE"
+    },
+    {
+        "activity_type_id": 1,
+        "activity_code": "HIIT",
+        "display_name": "High Intensity Interval Training",
+        "intensity_level": "HIGH"
+    },
+    {
+        "activity_type_id": 6,
+        "activity_code": "HIKING",
+        "display_name": "Hiking",
+        "intensity_level": "MODERATE"
+    },
+    {
+        "activity_type_id": 16,
+        "activity_code": "HOUSEWORK",
+        "display_name": "Household Chores",
+        "intensity_level": "LOW"
+    },
+    {
+        "activity_type_id": 2,
+        "activity_code": "MARTIAL_ARTS",
+        "display_name": "Martial Arts & Boxing",
+        "intensity_level": "HIGH"
+    },
+    {
+        "activity_type_id": 4,
+        "activity_code": "OCCUPATIONAL",
+        "display_name": "Occupational Labor",
+        "intensity_level": "MODERATE"
+    },
+    {
+        "activity_type_id": 15,
+        "activity_code": "RACKET_SPORTS",
+        "display_name": "Racket Sports (Badminton, Tennis)",
+        "intensity_level": "MODERATE"
+    },
+    {
+        "activity_type_id": 7,
+        "activity_code": "RUNNING",
+        "display_name": "Running / Jogging",
+        "intensity_level": "HIGH"
+    },
+    {
+        "activity_type_id": 10,
+        "activity_code": "SWIMMING",
+        "display_name": "Swimming",
+        "intensity_level": "HIGH"
+    },
+    {
+        "activity_type_id": 14,
+        "activity_code": "TEAM_SPORTS",
+        "display_name": "Team Sports (Soccer, Basketball)",
+        "intensity_level": "HIGH"
+    },
+    {
+        "activity_type_id": 5,
+        "activity_code": "WALKING",
+        "display_name": "Walking (Casual)",
+        "intensity_level": "LOW"
+    },
+    {
+        "activity_type_id": 11,
+        "activity_code": "WEIGHT_LIFTING",
+        "display_name": "Weight Lifting",
+        "intensity_level": "MODERATE"
+    },
+    {
+        "activity_type_id": 13,
+        "activity_code": "YOGA_PILATES",
+        "display_name": "Yoga & Pilates",
+        "intensity_level": "LOW"
+    }
+]
+
+
+/health/log/activity
+insert
+{
+    "activity_timestamp": "2025-11-24T14:30:00+07:00",
+    "activity_code": "SWIMMING", //Constraint = 1-16
+    "intensity": "moderate", //Constraint = ['low', 'moderate', 'high']
+    "duration_minutes": 45, //Constraint > 0
+    
+    "perceived_exertion": 5, //Constraint 1 - 10, penjelasan e panjang cari di google / gpt
+    "steps_count": 5500, 
+    "pre_activity_carbs": 15,
+    "water_intake_ml": 500,
+    "issue_description": "None",
+    "sync_id": "", //Biarin kosong user gk perlu isi. Dipake buat integrasi ke smartwatch
+    "source": "fitness_tracker", //Constraint ['manual', 'fitness_tracker', 'cgm_integrated']
+    "notes": "Walked through the park before afternoon meeting."
+}
+
+get log aktivity
+[
+    {
+        "activity_id": "63134815-df63-4589-951f-952ead5112b6",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "activity_timestamp": "2025-11-24T14:30:00+07:00",
+        "activity_code": "SWIMMING",
+        "intensity": "moderate",
+        "perceived_exertion": 5,
+        "duration_minutes": 45,
+        "steps_count": 5500,
+        "pre_activity_carbs": 15,
+        "water_intake_ml": 500,
+        "issue_description": "None",
+        "source": "fitness_tracker",
+        "sync_id": "",
+        "notes": "Walked through the park before afternoon meeting.",
+        "created_at": "2025-11-24T22:35:11.099285+07:00",
+        "updated_at": "2025-11-24T22:35:11.099285+07:00"
+    },
+    {
+        "activity_id": "dd7068a6-c4ef-4aa3-b08d-2406701300a3",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "activity_timestamp": "2025-11-24T14:30:00+07:00",
+        "activity_code": "SWIMMING",
+        "intensity": "moderate",
+        "perceived_exertion": 5,
+        "duration_minutes": 45,
+        "steps_count": 5500,
+        "pre_activity_carbs": 15,
+        "water_intake_ml": 500,
+        "issue_description": "None",
+        "source": "fitness_tracker",
+        "sync_id": "",
+        "notes": "Walked through the park before afternoon meeting.",
+        "created_at": "2025-11-24T22:41:29.313099+07:00",
+        "updated_at": "2025-11-24T22:41:29.313099+07:00"
+    }
+]
+
+update
+/health/log/activity/63134815-df63-4589-951f-952ead5112b6
+
+delete
+/health/log/activity/63134815-df63-4589-951f-952ead5112b6

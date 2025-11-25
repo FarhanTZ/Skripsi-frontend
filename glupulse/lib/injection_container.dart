@@ -58,6 +58,15 @@ import 'package:glupulse/features/hba1c/domain/usecases/delete_hba1c.dart';
 import 'package:glupulse/features/hba1c/domain/usecases/get_hba1c_records.dart';
 import 'package:glupulse/features/hba1c/domain/usecases/update_hba1c.dart';
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
+import 'package:glupulse/features/glucose/data/datasources/glucose_remote_data_source.dart';
+import 'package:glupulse/features/glucose/data/repositories/glucose_repository_impl.dart';
+import 'package:glupulse/features/glucose/domain/repositories/glucose_repository.dart';
+import 'package:glupulse/features/glucose/domain/usecases/add_glucose_record.dart';
+import 'package:glupulse/features/glucose/domain/usecases/delete_glucose_record.dart';
+import 'package:glupulse/features/glucose/domain/usecases/get_glucose_record.dart';
+import 'package:glupulse/features/glucose/domain/usecases/get_glucose_records.dart';
+import 'package:glupulse/features/glucose/domain/usecases/update_glucose_record.dart';
+import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
 import 'package:glupulse/features/health_event/data/datasources/health_event_remote_data_source.dart';
 import 'package:glupulse/features/health_event/data/repositories/health_event_repository_impl.dart';
 import 'package:glupulse/features/health_event/domain/repositories/health_event_repository.dart';
@@ -255,6 +264,39 @@ Future<void> init() async {
   // Data Sources
   sl.registerLazySingleton<Hba1cRemoteDataSource>(
     () => Hba1cRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // --- Features - Glucose ---
+
+  // Cubit
+  sl.registerFactory(
+    () => GlucoseCubit(
+      getGlucoseRecordsUseCase: sl(),
+      getGlucoseRecordUseCase: sl(),
+      addGlucoseRecordUseCase: sl(),
+      updateGlucoseRecordUseCase: sl(),
+      deleteGlucoseRecordUseCase: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetGlucoseRecords(sl()));
+  sl.registerLazySingleton(() => GetGlucoseRecord(sl()));
+  sl.registerLazySingleton(() => AddGlucoseRecord(sl()));
+  sl.registerLazySingleton(() => UpdateGlucoseRecord(sl()));
+  sl.registerLazySingleton(() => DeleteGlucoseRecord(sl()));
+
+  // Repository
+  sl.registerLazySingleton<GlucoseRepository>(
+    () => GlucoseRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<GlucoseRemoteDataSource>(
+    () => GlucoseRemoteDataSourceImpl(apiClient: sl()),
   );
 
   // --- Features - HealthData ---
