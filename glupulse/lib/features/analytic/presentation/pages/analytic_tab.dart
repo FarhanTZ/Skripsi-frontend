@@ -30,7 +30,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
     super.initState();
     context.read<Hba1cCubit>().getHba1cRecords();
     context.read<GlucoseCubit>().getGlucoseRecords();
-    context.read<HealthProfileCubit>().getHealthProfile(NoParams());
+    context.read<HealthProfileCubit>().fetchHealthProfile();
   }
 
   @override

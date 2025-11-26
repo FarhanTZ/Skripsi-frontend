@@ -41,6 +41,7 @@ class HealthProfileRepositoryImpl implements HealthProfileRepository {
         heightCm: healthProfile.heightCm,
         currentWeightKg: healthProfile.currentWeightKg,
         targetWeightKg: healthProfile.targetWeightKg,
+        bmi: healthProfile.bmi,
         waistCircumferenceCm: healthProfile.waistCircumferenceCm,
         bodyFatPercentage: healthProfile.bodyFatPercentage,
         hba1cTarget: healthProfile.hba1cTarget,

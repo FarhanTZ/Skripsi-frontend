@@ -13,6 +13,8 @@ import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/glucose/presentation/pages/glucose_list_page.dart';
 import 'package:glupulse/features/notification/presentation/pages/notification_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
 import 'package:intl/intl.dart';
 
 
@@ -31,6 +33,7 @@ class _HomeTabState extends State<HomeTab> {
     context.read<FoodCubit>().fetchFoods();
     context.read<Hba1cCubit>().getHba1cRecords();
     context.read<GlucoseCubit>().getGlucoseRecords();
+    context.read<HealthProfileCubit>().fetchHealthProfile();
   }
 
   @override
@@ -387,32 +390,50 @@ class _HomeTabState extends State<HomeTab> {
                 ),
                 const SizedBox(width: 12),
                 // --- Card BMI ---
-                _buildHealthMetricCard(
-                  context: context,
-                  category: 'BMI',
-                  iconWidget: SvgPicture.asset(
-                    'assets/images/bmi.svg', // Menggunakan SVG asset yang baru
-                    colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn), // Warna tetap hijau
-                    width: 24,
-                  ),
-                  iconColor: Colors.green,
-                  value: '22.5',
-                  unit: 'kg/m²',
-                  status: 'Normal',
-                  statusText: 'Normal',
-                  statusColor: const Color(0xFF9CF0A6),
-                  statusTextColor: const Color(0xFF02A916),
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const HealthMetricDetailPage(
-                        title: 'BMI',
-                        value: '22.5',
-                        unit: 'kg/m²',
-                        status: 'Normal',
-                        icon: Icons.calculate_outlined,
-                        iconColor: Colors.green,
+                BlocBuilder<HealthProfileCubit, HealthProfileState>(
+                  builder: (context, state) {
+                    String value = 'N/A';
+                    String status = 'No Data';
+                    Color statusColor = Colors.grey.shade300;
+                    Color statusTextColor = Colors.black54;
+
+                    if (state is HealthProfileLoaded) {
+                      final profile = state.healthProfile;
+                      final bmiInfo = _getBmiStatus(profile.bmi);
+                      value = bmiInfo['value'];
+                      status = bmiInfo['status'];
+                      statusColor = bmiInfo['color'];
+                      statusTextColor = bmiInfo['textColor'];
+                    }
+
+                    return _buildHealthMetricCard(
+                      context: context,
+                      category: 'BMI',
+                      iconWidget: SvgPicture.asset(
+                        'assets/images/bmi.svg', // Menggunakan SVG asset yang baru
+                        colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn), // Warna tetap hijau
+                        width: 24,
                       ),
-                    ));
+                      iconColor: Colors.green,
+                      value: value,
+                      unit: 'kg/m²',
+                      status: status,
+                      statusText: status,
+                      statusColor: statusColor,
+                      statusTextColor: statusTextColor,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => HealthMetricDetailPage(
+                            title: 'BMI',
+                            value: value,
+                            unit: 'kg/m²',
+                            status: status,
+                            icon: Icons.calculate_outlined,
+                            iconColor: Colors.green,
+                          ),
+                        ));
+                      },
+                    );
                   },
                 ),
                 const SizedBox(width: 12),
@@ -566,6 +587,29 @@ class _HomeTabState extends State<HomeTab> {
       return {'status': 'High', 'color': Colors.orange.shade100, 'textColor': Colors.orange.shade800};
     } else { // > 250
       return {'status': 'Critical', 'color': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
+    }
+  }
+
+  Map<String, dynamic> _getBmiStatus(double? bmi) {
+    if (bmi == null || bmi <= 0) {
+      return {
+        'value': 'N/A',
+        'status': 'No Data',
+        'description': 'Input your weight and height to see your BMI category.',
+        'color': Colors.grey.shade300,
+        'textColor': Colors.black54,
+      };
+    }
+    String value = bmi.toStringAsFixed(1);
+
+    if (bmi < 18.5) {
+      return {'value': value, 'status': 'Underweight', 'description': 'Your BMI is in the underweight range. Consider a diet plan.', 'color': const Color(0xFFFDFD66), 'textColor': const Color(0xFFB7B726)};
+    } else if (bmi >= 18.5 && bmi < 25) {
+      return {'value': value, 'status': 'Normal', 'description': 'Your BMI is in the healthy weight range. Great job!', 'color': const Color(0xFF9CF0A6), 'textColor': const Color(0xFF02A916)};
+    } else if (bmi >= 25 && bmi < 29.9) { 
+      return {'value': value, 'status': 'Overweight', 'description': 'Your BMI is in the overweight range. Consider more activity.', 'color': Colors.orange.shade100, 'textColor': Colors.orange.shade800};
+    } else {
+      return {'value': value, 'status': 'Obesity', 'description': 'Your BMI is in the obesity range. Please consult a doctor.', 'color': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
     }
   }
 
