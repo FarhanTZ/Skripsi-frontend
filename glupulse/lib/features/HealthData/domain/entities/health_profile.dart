@@ -10,6 +10,7 @@ class HealthProfile extends Equatable {
   final double? heightCm;
   final double? currentWeightKg;
   final double? targetWeightKg;
+  final double? bmi;
   final double? waistCircumferenceCm;
   final double? bodyFatPercentage;
   final double? hba1cTarget;
@@ -88,6 +89,7 @@ class HealthProfile extends Equatable {
     this.heightCm,
     this.currentWeightKg,
     this.targetWeightKg,
+    this.bmi,
     this.waistCircumferenceCm,
     this.bodyFatPercentage,
     this.hba1cTarget,
@@ -155,6 +157,7 @@ class HealthProfile extends Equatable {
     double? heightCm,
     double? currentWeightKg,
     double? targetWeightKg,
+    double? bmi,
     double? waistCircumferenceCm,
     double? bodyFatPercentage,
     double? hba1cTarget,
@@ -221,6 +224,7 @@ class HealthProfile extends Equatable {
       heightCm: heightCm ?? this.heightCm,
       currentWeightKg: currentWeightKg ?? this.currentWeightKg,
       targetWeightKg: targetWeightKg ?? this.targetWeightKg,
+      bmi: bmi ?? this.bmi,
       waistCircumferenceCm: waistCircumferenceCm ?? this.waistCircumferenceCm,
       bodyFatPercentage: bodyFatPercentage ?? this.bodyFatPercentage,
       hba1cTarget: hba1cTarget ?? this.hba1cTarget,
@@ -290,6 +294,7 @@ class HealthProfile extends Equatable {
         heightCm,
         currentWeightKg,
         targetWeightKg,
+        bmi,
         waistCircumferenceCm,
         bodyFatPercentage,
         hba1cTarget,
