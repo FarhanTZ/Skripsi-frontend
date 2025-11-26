@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:glupulse/core/usecases/usecase.dart';
 import 'package:glupulse/features/glucose/domain/entities/glucose.dart';
+import 'package:glupulse/features/HealthData/domain/entities/health_profile.dart';
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart'; // <-- Impor state // <-- Impor untuk AuthCubit
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
 import 'package:glupulse/features/glucose/presentation/pages/add_edit_glucose_page.dart';
 
@@ -17,10 +21,16 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
   void initState() {
     super.initState();
     _fetchGlucoseRecords();
+    _fetchHealthProfile();
   }
 
   Future<void> _fetchGlucoseRecords() async {
     context.read<GlucoseCubit>().getGlucoseRecords();
+  }
+
+  Future<void> _fetchHealthProfile() async {
+    // Memuat data profil kesehatan pengguna. userId akan diambil dari token secara otomatis.
+    context.read<HealthProfileCubit>().getHealthProfile(NoParams());
   }
 
   void _navigateToInputPage({Glucose? glucose}) async {
@@ -63,6 +73,132 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
         return Icons.help_outline;
     }
   }
+
+  // Helper widget untuk menampilkan symptoms sebagai chip
+  Widget _buildSymptomsChips(List<String> symptoms) {
+    // Jika daftar symptoms kosong atau null, jangan tampilkan apa-apa
+    if (symptoms.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Align(
+        alignment: Alignment.centerLeft, // <-- Perubahan di sini
+        child: Wrap(
+          spacing: 6.0,
+          runSpacing: 4.0,
+          children: symptoms.map((symptom) {
+            return Chip(
+              avatar: Icon(Icons.local_fire_department_outlined, size: 16, color: Colors.orange.shade800),
+              label: Text(
+                symptom.replaceAll('_', ' '),
+                style: TextStyle(color: Colors.orange.shade900, fontSize: 12),
+              ),
+              backgroundColor: Colors.orange.shade50,
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // Widget baru untuk menampilkan bagian symptoms dari record terbaru
+  Widget _buildLatestSymptomsSection(Glucose latestRecord) {
+    // Jika tidak ada symptoms, jangan tampilkan apa-apa
+    if (latestRecord.symptoms == null || latestRecord.symptoms!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Symptoms',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Menggunakan kembali _buildSymptomsChips untuk konsistensi
+          // Padding di dalam _buildSymptomsChips diatur ulang ke nol agar tidak ada padding ganda
+          Padding(
+            padding: const EdgeInsets.only(top: 0), // Reset padding atas
+            child: _buildSymptomsChips(latestRecord.symptoms!),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget untuk menampilkan kartu target glukosa
+  Widget _buildTargetCard(String title, int? value, IconData icon, Color iconColor) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white, // Warna latar belakang kartu
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Kotak untuk ikon
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Nilai (angka)
+            Text(
+              value != null ? '$value' : 'N/A',
+              style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: Colors.black87),
+            ),
+            const SizedBox(height: 8),
+            // Judul kartu
+            Text(
+              title,
+              style: TextStyle(color: Colors.grey.shade700, fontSize: 12, height: 1.3),
+              maxLines: 2,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget untuk menampilkan bagian target glukosa dari HealthProfile
+  Widget _buildTargetRangesSection(HealthProfile profile) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+      child: Row(
+        children: [
+          _buildTargetCard('Fasting Target', profile.targetGlucoseFasting, Icons.wb_sunny_outlined, Colors.blue.shade600),
+          const SizedBox(width: 16),
+          _buildTargetCard('Post-Meal Target', profile.targetGlucosePostprandial, Icons.restaurant_menu_outlined, Colors.orange.shade600),
+        ],
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +319,34 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                   ),
                 ),
               ),
+              // --- Bagian Target Glukosa dari Health Profile ---
+              BlocBuilder<HealthProfileCubit, HealthProfileState>(
+                builder: (context, state) {
+                  if (state is HealthProfileLoaded) {
+                    // Jika data profil berhasil dimuat, tampilkan bagian target
+                    return _buildTargetRangesSection(state.healthProfile);
+                  }
+                  // Selama loading atau jika ada error, jangan tampilkan apa-apa
+                  // Anda bisa menambahkan CircularProgressIndicator kecil jika mau
+                  return const SizedBox.shrink(
+
+                  );
+                },
+              ),
+              // --- Bagian Symptoms Terbaru ---
+              BlocBuilder<GlucoseCubit, GlucoseState>(
+                builder: (context, state) {
+                  if (state is GlucoseLoaded && state.glucoseRecords.isNotEmpty) {
+                    // Ambil record terbaru dan tampilkan symptoms-nya
+                    final latestRecord = state.glucoseRecords.first;
+                    return _buildLatestSymptomsSection(latestRecord);
+                  }
+                  // Jika tidak ada data, jangan tampilkan apa-apa
+                  return const SizedBox.shrink();
+                },
+              ),
+
+              // --- Judul History ---
               const Padding(
                 padding: EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
                 child: Align(
@@ -353,26 +517,24 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ],
-                                            if (record.notes != null && record.notes!.isNotEmpty) ...[
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                    record.notes!,
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: const TextStyle(fontSize: 12, color: Colors.black45, fontStyle: FontStyle.italic),
-                                                )
-                                            ]
+                                            // Gejala sekarang ditampilkan di atas daftar
                                           ],
                                         ),
                                       ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.only(right: 16.0),
-                                      child: Icon(
-                                        _trendIcon(record.trendArrow),
-                                        color: _trendColor(record.trendArrow),
+                                      child: Row(
+                                          children: [
+                                            Icon(_trendIcon(record.trendArrow), color: _trendColor(record.trendArrow)),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              record.trendArrow ?? "stable",
+                                              style: TextStyle(color: _trendColor(record.trendArrow), fontWeight: FontWeight.bold, fontSize: 12),
+                                            ),
+                                          ],
                                       ),
-                                    ),
+                                    )
                                   ],
                                 ),
                               ),

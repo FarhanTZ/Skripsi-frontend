@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
+import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
@@ -9,6 +10,7 @@ import 'package:glupulse/features/activity/presentation/pages/activity_detail_pa
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
 import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
+import 'package:glupulse/features/glucose/presentation/pages/glucose_list_page.dart';
 import 'package:glupulse/features/notification/presentation/pages/notification_page.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 import 'package:intl/intl.dart';
@@ -28,6 +30,7 @@ class _HomeTabState extends State<HomeTab> {
     // Memuat data makanan saat halaman pertama kali dibuka
     context.read<FoodCubit>().fetchFoods();
     context.read<Hba1cCubit>().getHba1cRecords();
+    context.read<GlucoseCubit>().getGlucoseRecords();
   }
 
   @override
@@ -315,32 +318,41 @@ class _HomeTabState extends State<HomeTab> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               children: [
                 // --- Card Gula Darah ---
-                _buildHealthMetricCard(
-                  context: context,
-                  category: 'Blood Sugar',
-                  iconWidget: SvgPicture.asset(
-                    'assets/images/Health.svg', // Menggunakan SVG asset
-                    colorFilter: const ColorFilter.mode(Colors.redAccent, BlendMode.srcIn),
-                    width: 24,
-                  ),
-                  iconColor: Colors.redAccent,
-                  value: '110',
-                  unit: 'mg/dL',
-                  status: 'Critical',
-                  statusText: 'Critical', // Status baru
-                  statusColor: const Color(0xFFFA4D5E), // Warna BG Merah
-                  statusTextColor: const Color(0xFFBF070A), // Warna Teks Merah
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const HealthMetricDetailPage(
-                        title: 'Blood Sugar',
-                        value: '110',
-                        unit: 'mg/dL',
-                        status: 'Critical',
-                        icon: Icons.water_drop_outlined,
-                        iconColor: Colors.redAccent,
+                BlocBuilder<GlucoseCubit, GlucoseState>(
+                  builder: (context, state) {
+                    String value = 'N/A';
+                    String status = 'No Data';
+                    Color statusColor = Colors.grey.shade300;
+                    Color statusTextColor = Colors.black54;
+
+                    if (state is GlucoseLoaded && state.glucoseRecords.isNotEmpty) {
+                      final latestRecord = state.glucoseRecords.first;
+                      value = latestRecord.glucoseValue.toString();
+                      final statusInfo = _getGlucoseStatus(latestRecord.glucoseValue);
+                      status = statusInfo['status'];
+                      statusColor = statusInfo['color'];
+                      statusTextColor = statusInfo['textColor'];
+                    }
+
+                    return _buildHealthMetricCard(
+                      context: context,
+                      category: 'Blood Sugar',
+                      iconWidget: SvgPicture.asset(
+                        'assets/images/Health.svg',
+                        colorFilter: const ColorFilter.mode(Colors.redAccent, BlendMode.srcIn),
+                        width: 24,
                       ),
-                    ));
+                      iconColor: Colors.redAccent,
+                      value: value,
+                      unit: 'mg/dL',
+                      status: status,
+                      statusText: status,
+                      statusColor: statusColor,
+                      statusTextColor: statusTextColor,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const GlucoseListPage()));
+                      },
+                    );
                   },
                 ),
                 const SizedBox(width: 12),
@@ -541,6 +553,19 @@ class _HomeTabState extends State<HomeTab> {
       return 'Your last A1c indicates prediabetes. Consider consulting a doctor.';
     } else {
       return 'Your last A1c indicates diabetes. Please consult a doctor.';
+    }
+  }
+
+  // Helper untuk mendapatkan status dan warna berdasarkan nilai glukosa
+  Map<String, dynamic> _getGlucoseStatus(int value) {
+    if (value < 70) {
+      return {'status': 'Low', 'color': const Color(0xFFFDFD66), 'textColor': const Color(0xFFB7B726)};
+    } else if (value >= 70 && value <= 140) {
+      return {'status': 'Normal', 'color': const Color(0xFF9CF0A6), 'textColor': const Color(0xFF02A916)};
+    } else if (value > 140 && value <= 250) {
+      return {'status': 'High', 'color': Colors.orange.shade100, 'textColor': Colors.orange.shade800};
+    } else { // > 250
+      return {'status': 'Critical', 'color': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
     }
   }
 

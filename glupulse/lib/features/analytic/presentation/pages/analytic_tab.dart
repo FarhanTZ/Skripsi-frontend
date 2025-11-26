@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/core/usecases/usecase.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
+import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
 import 'package:glupulse/features/glucose/presentation/pages/glucose_list_page.dart';
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart';
 import 'package:glupulse/features/health_event/presentation/pages/health_event_list_page.dart';
@@ -25,6 +29,8 @@ class _AnalyticTabState extends State<AnalyticTab> {
   void initState() {
     super.initState();
     context.read<Hba1cCubit>().getHba1cRecords();
+    context.read<GlucoseCubit>().getGlucoseRecords();
+    context.read<HealthProfileCubit>().getHealthProfile(NoParams());
   }
 
   @override
@@ -120,7 +126,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
                           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                         ),
                         child: const Text(
-                          'Input Glucose',
+                          'Track Glucose',
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                         ),
                       )
@@ -278,99 +284,78 @@ class _AnalyticTabState extends State<AnalyticTab> {
                   // --- Kartu Metrik ---
                   Column(
                     children: [
-                      _buildMetricCard(
-                        context: context, 
-                        iconWidget: SvgPicture.asset(
-                          'assets/images/Health.svg',
-                          colorFilter: const ColorFilter.mode(Colors.redAccent, BlendMode.srcIn),
-                        ),
-                        iconBackgroundColor: Colors.redAccent,
-                        status: 'Critical',
-                        statusColor: const Color(0xFFFA4D5E), // Warna BG Merah
-                        statusTextColor: const Color(0xFFBF070A), // Warna Teks Merah
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const HealthMetricDetailPage(
-                              title: 'Blood Sugar',
-                              value: '110',
-                              unit: 'mg/dL',
-                              status: 'Critical',
-                              icon: Icons.water_drop_outlined,
-                              iconColor: Colors.redAccent,
+                      BlocBuilder<GlucoseCubit, GlucoseState>(
+                        builder: (context, state) {
+                          String value = 'N/A';
+                          String status = 'No Data';
+                          Color statusColor = Colors.grey.shade300;
+                          Color statusTextColor = Colors.black54;
+
+                          if (state is GlucoseLoaded && state.glucoseRecords.isNotEmpty) {
+                            final latestRecord = state.glucoseRecords.first;
+                            value = latestRecord.glucoseValue.toString();
+                            final statusInfo = _getGlucoseStatus(latestRecord.glucoseValue);
+                            status = statusInfo['text'];
+                            statusColor = statusInfo['bgColor'];
+                            statusTextColor = statusInfo['textColor'];
+                          }
+
+                          return _buildMetricCard(
+                            context: context,
+                            title: 'Blood Sugar',
+                            value: value,
+                            unit: 'mg/dL',
+                            iconWidget: SvgPicture.asset(
+                              'assets/images/Health.svg',
+                              colorFilter: const ColorFilter.mode(Colors.redAccent, BlendMode.srcIn),
                             ),
-                          ));
+                            iconBackgroundColor: Colors.redAccent,
+                            status: status,
+                            statusColor: statusColor,
+                            statusTextColor: statusTextColor,
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const GlucoseListPage(),
+                              ));
+                            },
+                          );
                         },
                       ),
                       const SizedBox(height: 12),
-                      _buildMetricCard(
-                        context: context,
-                        iconWidget: SvgPicture.asset(
-                          'assets/images/Blood_Pressure.svg',
-                          colorFilter: const ColorFilter.mode(Color(0xFF4043FD), BlendMode.srcIn),
-                        ),
-                        iconBackgroundColor: const Color(0xFF4043FD),
-                        status: 'Low',
-                        statusColor: const Color(0xFFFDFD66), // Warna BG Kuning
-                        statusTextColor: const Color(0xFFB7B726), // Warna Teks Kuning
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const HealthMetricDetailPage(
-                              title: 'Blood Pressure',
-                              value: '120/80',
-                              unit: 'mmHg',
-                              status: 'Low',
-                              icon: Icons.favorite_border,
-                              iconColor: const Color(0xFF4043FD),
+                      BlocBuilder<HealthProfileCubit, HealthProfileState>(
+                        builder: (context, state) {
+                          String value = 'N/A';
+                          String status = 'No Data';
+                          Color statusColor = Colors.grey.shade300;
+                          Color statusTextColor = Colors.black54;
+                      
+                          if (state is HealthProfileLoaded) {
+                            final profile = state.healthProfile;
+                            final bmiInfo = _getBmiStatus(profile.bmi);
+                            value = bmiInfo['value'];
+                            status = bmiInfo['status'];
+                            statusColor = bmiInfo['bgColor'];
+                            statusTextColor = bmiInfo['textColor'];
+                          }
+                      
+                          return _buildMetricCard(
+                            context: context,
+                            title: 'BMI',
+                            value: value,
+                            unit: 'kg/m²',
+                            iconWidget: SvgPicture.asset(
+                              'assets/images/bmi.svg',
+                              colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
                             ),
-                          ));
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      _buildMetricCard(
-                        context: context, 
-                        iconWidget: SvgPicture.asset(
-                          'assets/images/bmi.svg',
-                          colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
-                        ),
-                        iconBackgroundColor: Colors.green,
-                        status: 'Normal',
-                        statusColor: const Color(0xFF9CF0A6),
-                        statusTextColor: const Color(0xFF02A916),
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const HealthMetricDetailPage(
-                              title: 'BMI',
-                              value: '22.5',
-                              unit: 'kg/m²',
-                              status: 'Normal',
-                              icon: Icons.calculate_outlined,
-                              iconColor: Colors.green,
-                            ),
-                          ));
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      _buildMetricCard(
-                        context: context,
-                        iconWidget: SvgPicture.asset(
-                          'assets/images/health-rate.svg',
-                          colorFilter: const ColorFilter.mode(Colors.orangeAccent, BlendMode.srcIn),
-                        ),
-                        iconBackgroundColor: Colors.orangeAccent,
-                        status: 'Normal',
-                        statusColor: const Color(0xFF9CF0A6),
-                        statusTextColor: const Color(0xFF02A916),
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const HealthMetricDetailPage(
-                              title: 'Heart Rate',
-                              value: '72',
-                              unit: 'BPM',
-                              status: 'Normal',
-                              icon: Icons.monitor_heart_outlined,
-                              iconColor: Colors.orangeAccent,
-                            ),
-                          ));
+                            iconBackgroundColor: Colors.green,
+                            status: status,
+                            statusColor: statusColor,
+                            statusTextColor: statusTextColor,
+                            onTap: () {
+                              // Anda bisa membuat halaman detail BMI jika diperlukan
+                              // Untuk saat ini, kita bisa tampilkan SnackBar atau biarkan kosong
+                            },
+                          );
                         },
                       ),
                     ],
@@ -392,31 +377,23 @@ class _AnalyticTabState extends State<AnalyticTab> {
                     color: Colors.redAccent,
                   ),
                   const SizedBox(height: 12),
-                  _buildCategoryCard(
-                    context: context,
-                    title: 'Category Blood Pressure',
-                    description:
-                        'Your blood pressure is slightly high. Consider consulting a doctor.',
-                    icon: Icons.favorite_border,
-                    color: Colors.blueAccent,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildCategoryCard(
-                    context: context,
-                    title: 'Category BMI',
-                    description:
-                        'Your BMI is in the healthy weight range. Great job!',
-                    icon: Icons.calculate_outlined,
-                    color: Colors.green,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildCategoryCard(
-                    context: context,
-                    title: 'Category Heart Rate',
-                    description:
-                        'Your resting heart rate is normal. This indicates good cardiovascular health.',
-                    icon: Icons.monitor_heart_outlined,
-                    color: Colors.blueAccent,
+                  BlocBuilder<HealthProfileCubit, HealthProfileState>(
+                    builder: (context, state) {
+                       String description = 'Input your weight and height to see your BMI category.';
+                        if (state is HealthProfileLoaded) {
+                          final profile = state.healthProfile;
+                          final bmiInfo = _getBmiStatus(profile.bmi);
+                          description = bmiInfo['description'];
+                        }
+
+                      return _buildCategoryCard(
+                        context: context,
+                        title: 'Category BMI',
+                        description: description,
+                        icon: Icons.calculate_outlined,
+                        color: Colors.green,
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -430,6 +407,9 @@ class _AnalyticTabState extends State<AnalyticTab> {
 
   Widget _buildMetricCard({
     required BuildContext context,
+    required String title,
+    required String value,
+    required String unit,
     required Widget iconWidget,
     required Color iconBackgroundColor,
     String? status,
@@ -437,26 +417,6 @@ class _AnalyticTabState extends State<AnalyticTab> {
     Color? statusTextColor,
     required VoidCallback onTap,
   }) {
-    // Data dummy, nantinya akan diganti dengan data dinamis
-    String title, value, unit;
-    if (iconWidget is SvgPicture && iconWidget.bytesLoader is SvgAssetLoader && (iconWidget.bytesLoader as SvgAssetLoader).assetName.contains('Health.svg')) {
-      title = 'Blood Sugar';
-      value = '110';
-      unit = 'mg/dL';
-    } else if (iconWidget is SvgPicture && iconWidget.bytesLoader is SvgAssetLoader && (iconWidget.bytesLoader as SvgAssetLoader).assetName.contains('Blood_Pressure.svg')) {
-      title = 'Blood Pressure';
-      value = '120/80';
-      unit = 'mmHg';
-    } else if (iconWidget is SvgPicture && iconWidget.bytesLoader is SvgAssetLoader && (iconWidget.bytesLoader as SvgAssetLoader).assetName.contains('bmi.svg')) {
-      title = 'BMI';
-      value = '22.5';
-      unit = 'kg/m²';
-    } else {
-      title = 'Heart Rate';
-      value = '72';
-      unit = 'BPM';
-    }
-
     return SizedBox(
       // Tinggi diatur otomatis oleh konten di dalamnya
       child: Card(
@@ -580,6 +540,42 @@ class _AnalyticTabState extends State<AnalyticTab> {
     }
   }
 
+  Map<String, dynamic> _getBmiStatus(double? bmi) {
+    if (bmi == null || bmi <= 0) {
+      return {
+        'value': 'N/A',
+        'status': 'No Data',
+        'description': 'Input your weight and height to see your BMI category.',
+        'bgColor': Colors.grey.shade300,
+        'textColor': Colors.black54,
+      };
+    }
+    String value = bmi.toStringAsFixed(1);
+
+    if (bmi < 18.5) {
+      return {'value': value, 'status': 'Underweight', 'description': 'Your BMI is in the underweight range. Consider a diet plan.', 'bgColor': const Color(0xFFFDFD66), 'textColor': const Color(0xFFB7B726)};
+    } else if (bmi >= 18.5 && bmi < 25) {
+      return {'value': value, 'status': 'Normal', 'description': 'Your BMI is in the healthy weight range. Great job!', 'bgColor': const Color(0xFF9CF0A6), 'textColor': const Color(0xFF02A916)};
+    } else if (bmi >= 25 && bmi < 29.9) { // Sesuai standar umum, obesitas dimulai dari 30
+      return {'value': value, 'status': 'Overweight', 'description': 'Your BMI is in the overweight range. Consider more activity.', 'bgColor': Colors.orange.shade100, 'textColor': Colors.orange.shade800};
+    } else {
+      return {'value': value, 'status': 'Obesity', 'description': 'Your BMI is in the obesity range. Please consult a doctor.', 'bgColor': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
+    }
+  }
+
+
+  // Helper untuk mendapatkan status dan warna berdasarkan nilai glukosa
+  Map<String, dynamic> _getGlucoseStatus(int value) {
+    if (value < 70) {
+      return {'text': 'Low', 'bgColor': const Color(0xFFFDFD66), 'textColor': const Color(0xFFB7B726)};
+    } else if (value >= 70 && value <= 140) {
+      return {'text': 'Normal', 'bgColor': const Color(0xFF9CF0A6), 'textColor': const Color(0xFF02A916)};
+    } else if (value > 140 && value <= 250) {
+      return {'text': 'High', 'bgColor': Colors.orange.shade100, 'textColor': Colors.orange.shade800};
+    } else { // > 250
+      return {'text': 'Diabetes', 'bgColor': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
+    }
+  }
   Widget _buildStatusBadge(String text, Color bgColor, Color textColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
