@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:glupulse/core/usecases/usecase.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:glupulse/features/glucose/domain/entities/glucose.dart';
 import 'package:glupulse/features/HealthData/domain/entities/health_profile.dart';
-import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart'; // <-- Impor state // <-- Impor untuk AuthCubit
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
 import 'package:glupulse/features/glucose/presentation/pages/add_edit_glucose_page.dart';
+import 'package:glupulse/features/glucose/presentation/pages/glucose_history_page.dart';
 
 class GlucoseListPage extends StatefulWidget {
   const GlucoseListPage({super.key});
@@ -17,6 +18,8 @@ class GlucoseListPage extends StatefulWidget {
 }
 
 class _GlucoseListPageState extends State<GlucoseListPage> {
+  DateTime _selectedDate = DateTime.now(); // State untuk tanggal yang dipilih
+
   @override
   void initState() {
     super.initState();
@@ -29,8 +32,7 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
   }
 
   Future<void> _fetchHealthProfile() async {
-    // Memuat data profil kesehatan pengguna. userId akan diambil dari token secara otomatis.
-    context.read<HealthProfileCubit>().getHealthProfile(NoParams());
+    context.read<HealthProfileCubit>().fetchHealthProfile();
   }
 
   void _navigateToInputPage({Glucose? glucose}) async {
@@ -39,7 +41,6 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
         builder: (context) => InputGlucosePage(glucose: glucose),
       ),
     );
-    // Tidak perlu fetch manual, BlocConsumer akan menangani refresh UI.
   }
 
   Color _trendColor(String? trend) {
@@ -74,9 +75,86 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
     }
   }
 
-  // Helper widget untuk menampilkan symptoms sebagai chip
+  // --- Widget Selector Bulan & Tahun ---
+  Widget _buildDateSelector() {
+    return Column(
+      children: [
+        // Selector Tahun
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                onPressed: () {
+                  setState(() {
+                    _selectedDate = DateTime(_selectedDate.year - 1, _selectedDate.month);
+                  });
+                },
+              ),
+              Text(
+                DateFormat('yyyy').format(_selectedDate),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                onPressed: () {
+                  setState(() {
+                    _selectedDate = DateTime(_selectedDate.year + 1, _selectedDate.month);
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        // Selector Bulan (Horizontal Scroll)
+        SizedBox(
+          height: 50,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 12,
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            itemBuilder: (context, index) {
+              final monthIndex = index + 1;
+              final isSelected = monthIndex == _selectedDate.month;
+              final date = DateTime(_selectedDate.year, monthIndex);
+              
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedDate = DateTime(_selectedDate.year, monthIndex);
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(20),
+                    border: isSelected 
+                      ? null 
+                      : Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Center(
+                    child: Text(
+                      DateFormat('MMM').format(date),
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.grey.shade700,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSymptomsChips(List<String> symptoms) {
-    // Jika daftar symptoms kosong atau null, jangan tampilkan apa-apa
     if (symptoms.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -84,7 +162,7 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Align(
-        alignment: Alignment.centerLeft, // <-- Perubahan di sini
+        alignment: Alignment.centerLeft,
         child: Wrap(
           spacing: 6.0,
           runSpacing: 4.0,
@@ -103,9 +181,7 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
     );
   }
 
-  // Widget baru untuk menampilkan bagian symptoms dari record terbaru
   Widget _buildLatestSymptomsSection(Glucose latestRecord) {
-    // Jika tidak ada symptoms, jangan tampilkan apa-apa
     if (latestRecord.symptoms == null || latestRecord.symptoms!.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -123,10 +199,8 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
             ),
           ),
           const SizedBox(height: 8),
-          // Menggunakan kembali _buildSymptomsChips untuk konsistensi
-          // Padding di dalam _buildSymptomsChips diatur ulang ke nol agar tidak ada padding ganda
           Padding(
-            padding: const EdgeInsets.only(top: 0), // Reset padding atas
+            padding: const EdgeInsets.only(top: 0),
             child: _buildSymptomsChips(latestRecord.symptoms!),
           ),
         ],
@@ -134,13 +208,12 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
     );
   }
 
-  // Widget untuk menampilkan kartu target glukosa
   Widget _buildTargetCard(String title, int? value, IconData icon, Color iconColor) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white, // Warna latar belakang kartu
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: const [
             BoxShadow(
@@ -153,7 +226,6 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Kotak untuk ikon
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -167,13 +239,11 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
               ),
             ),
             const SizedBox(height: 16),
-            // Nilai (angka)
             Text(
               value != null ? '$value' : 'N/A',
               style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: Colors.black87),
             ),
             const SizedBox(height: 8),
-            // Judul kartu
             Text(
               title,
               style: TextStyle(color: Colors.grey.shade700, fontSize: 12, height: 1.3),
@@ -185,7 +255,6 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
     );
   }
 
-  // Widget untuk menampilkan bagian target glukosa dari HealthProfile
   Widget _buildTargetRangesSection(HealthProfile profile) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
@@ -199,6 +268,187 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
     );
   }
 
+  Widget _buildChart(List<Glucose> records) {
+    if (records.isEmpty) {
+       return Container(
+        height: 220,
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(child: Text("No data for this month")),
+      );
+    }
+
+    // Sort data by date ascending for the chart
+    final sortedRecords = List<Glucose>.from(records)
+      ..sort((a, b) => a.readingTimestamp.compareTo(b.readingTimestamp));
+
+    // Gunakan semua data bulan ini untuk chart, tidak perlu di-limit 10 jika user ingin lihat sebulan penuh
+    // Namun jika terlalu banyak, label bisa bertumpuk. FlChart menangani plotting, kita atur label.
+    final chartData = sortedRecords;
+
+    List<FlSpot> spots = chartData.asMap().entries.map((e) {
+      return FlSpot(e.key.toDouble(), e.value.glucoseValue.toDouble());
+    }).toList();
+
+    return Container(
+      height: 220,
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          )
+        ],
+      ),
+      child: LineChart(
+        LineChartData(
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: 50,
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: Colors.grey.shade200,
+                strokeWidth: 1,
+              );
+            },
+          ),
+          titlesData: FlTitlesData(
+            show: true,
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 30,
+                interval: 1, // Interval 1 index
+                getTitlesWidget: (value, meta) {
+                  int index = value.toInt();
+                  if (index >= 0 && index < chartData.length) {
+                    // Logika sederhana untuk menampilkan label agar tidak bertumpuk
+                    // Tampilkan awal, tengah, akhir, atau setiap n item tergantung jumlah data
+                    bool showLabel = false;
+                    if (chartData.length <= 7) {
+                      showLabel = true; // Tampilkan semua jika sedikit
+                    } else {
+                      // Tampilkan index 0, index terakhir, dan kelipatan tertentu
+                      if (index == 0 || index == chartData.length - 1 || index % (chartData.length ~/ 5 + 1) == 0) {
+                        showLabel = true;
+                      }
+                    }
+
+                    if (showLabel) {
+                       return Padding(
+                         padding: const EdgeInsets.only(top: 8.0),
+                         child: Text(
+                          DateFormat('dd/MM').format(chartData[index].readingTimestamp),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
+                       );
+                    }
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                interval: 50,
+                reservedSize: 40,
+                getTitlesWidget: (value, meta) {
+                  const style = TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  );
+                  String text;
+                  switch (value.toInt()) {
+                    case 0:
+                      text = '0';
+                      break;
+                    case 50:
+                      text = '50';
+                      break;
+                    case 100:
+                      text = '100';
+                      break;
+                    case 200:
+                      text = '200';
+                      break;
+                    case 300:
+                      text = '300';
+                      break;
+                    case 400:
+                      text = '400';
+                      break;
+                    default:
+                      return const SizedBox.shrink();
+                  }
+                  return Text(text, style: style);
+                },
+              ),
+            ),
+          ),
+          borderData: FlBorderData(
+            show: false,
+          ),
+          minX: 0,
+          maxX: (chartData.length - 1).toDouble(),
+          minY: 0,
+          maxY: 400.0,
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: true,
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                ],
+              ),
+              barWidth: 4,
+              isStrokeCapRound: true,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: 4,
+                    color: Colors.white,
+                    strokeWidth: 2,
+                    strokeColor: Theme.of(context).colorScheme.primary,
+                  );
+                },
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    Theme.of(context).colorScheme.primary.withOpacity(0.0),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -226,133 +476,103 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                       ),
                     ),
                     const Text(
-                      'Glucose History',
+                      'Glucose Reading',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    height: 10,
-                    width: MediaQuery.of(context).size.width / 2.2,
-                    decoration: BoxDecoration(
-                        color: const Color(0xFF0F67FE),
-                        borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(10),
-                            bottomRight: Radius.circular(10))),
-                  ),
-                ),
-              ),
+              
+              // --- Selector Tanggal (Bulan & Tahun) ---
+              _buildDateSelector(),
+
               BlocBuilder<GlucoseCubit, GlucoseState>(
                 builder: (context, state) {
-                  if (state is GlucoseLoaded && state.glucoseRecords.isNotEmpty) {
-                    final latestRecord = state.glucoseRecords.first;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
+                  List<Glucose> filteredRecords = [];
+                  Glucose? latestRecord;
+
+                  if (state is GlucoseLoaded) {
+                     // Filter data berdasarkan bulan dan tahun yang dipilih
+                     filteredRecords = state.glucoseRecords.where((record) {
+                       return record.readingTimestamp.month == _selectedDate.month &&
+                              record.readingTimestamp.year == _selectedDate.year;
+                     }).toList();
+
+                     // Ambil record terbaru secara umum (tanpa filter) untuk bagian "Last Glucose Reading"
+                     // Atau jika ingin "Last Record of Selected Month", gunakan filteredRecords.
+                     // Biasanya user ingin lihat status *terkini* di summary, tapi chart melihat history.
+                     // Kita gunakan latestRecord dari SELURUH data untuk widget "Last Reading",
+                     // tapi chart menggunakan data terfilter.
+                     if (state.glucoseRecords.isNotEmpty) {
+                       latestRecord = state.glucoseRecords.first;
+                     }
+                  }
+
+                  return Column(
+                    children: [
+                      // --- Grafik (Chart) dengan Data Terfilter ---
+                      _buildChart(filteredRecords),
+
+                      // --- Last Glucose Reading (General Latest) ---
+                      if (latestRecord != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: Column(
                             children: [
-                              RichText(
-                                text: TextSpan(
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
-                                  ),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                      text: latestRecord.glucoseValue.toString(),
-                                      style: const TextStyle(fontSize: 75),
-                                    ),
-                                    const TextSpan(
-                                      text: ' mg/dL',
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
                                       style: TextStyle(
-                                          fontSize: 20, fontWeight: FontWeight.w500),
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
+                                      ),
+                                      children: <TextSpan>[
+                                        TextSpan(
+                                          text: latestRecord.glucoseValue.toString(),
+                                          style: const TextStyle(fontSize: 75),
+                                        ),
+                                        const TextSpan(
+                                          text: ' mg/dL',
+                                          style: TextStyle(
+                                              fontSize: 20, fontWeight: FontWeight.w500),
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Icon(_trendIcon(latestRecord.trendArrow),
+                                      color: _trendColor(latestRecord.trendArrow), size: 40),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Last Glucose Reading',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Icon(_trendIcon(latestRecord.trendArrow),
-                                  color: _trendColor(latestRecord.trendArrow), size: 40),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Last Glucose Reading',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  // Tampilkan pesan jika tidak ada data sama sekali
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: Center(child: Text("Belum ada data glukosa.")),
-                  );
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    height: 10,
-                    width: MediaQuery.of(context).size.width / 2.2,
-                    decoration: BoxDecoration(
-                        color: const Color(0xFF0F67FE),
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10))),
-                  ),
-                ),
-              ),
+                        )
+                      else if (state is! GlucoseLoading && state is! GlucoseError)
+                         const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32.0),
+                          child: Text("No data available."),
+                        ),
+                      
               // --- Bagian Target Glukosa dari Health Profile ---
-              BlocBuilder<HealthProfileCubit, HealthProfileState>(
-                builder: (context, state) {
-                  if (state is HealthProfileLoaded) {
-                    // Jika data profil berhasil dimuat, tampilkan bagian target
-                    return _buildTargetRangesSection(state.healthProfile);
-                  }
-                  // Selama loading atau jika ada error, jangan tampilkan apa-apa
-                  // Anda bisa menambahkan CircularProgressIndicator kecil jika mau
-                  return const SizedBox.shrink(
-
-                  );
-                },
-              ),
-              // --- Bagian Symptoms Terbaru ---
-              BlocBuilder<GlucoseCubit, GlucoseState>(
-                builder: (context, state) {
-                  if (state is GlucoseLoaded && state.glucoseRecords.isNotEmpty) {
-                    // Ambil record terbaru dan tampilkan symptoms-nya
-                    final latestRecord = state.glucoseRecords.first;
-                    return _buildLatestSymptomsSection(latestRecord);
-                  }
-                  // Jika tidak ada data, jangan tampilkan apa-apa
-                  return const SizedBox.shrink();
-                },
-              ),
-
-              // --- Judul History ---
               const Padding(
                 padding: EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'History',
+                    'Main Overview',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -360,24 +580,60 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                   ),
                 ),
               ),
+              BlocBuilder<HealthProfileCubit, HealthProfileState>(
+                builder: (context, state) {
+                          if (state is HealthProfileLoaded) {
+                            return _buildTargetRangesSection(state.healthProfile);
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+
+                      // --- Bagian Symptoms Terbaru ---
+                      if (latestRecord != null)
+                        _buildLatestSymptomsSection(latestRecord),
+                    ],
+                  );
+                },
+              ),
+
+              // --- Judul History & Lihat Semua ---
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'History',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const GlucoseHistoryPage(),
+                        ));
+                      },
+                      child: const Text('Lihat Semua'),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // --- List History (Terfilter juga agar konsisten dengan chart) ---
               BlocConsumer<GlucoseCubit, GlucoseState>(
                 listener: (context, state) {
-                  if (state is GlucoseAdded) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Glucose data added successfully')),
-                    );
-                    _fetchGlucoseRecords(); // Panggil fetch untuk memuat ulang data
-                  }
-                  if (state is GlucoseUpdated) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Glucose data updated successfully')),
-                    );
-                    _fetchGlucoseRecords(); // Panggil fetch untuk memuat ulang data
-                  } else if (state is GlucoseDeleted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Glucose data deleted successfully')),
-                    );
-                    _fetchGlucoseRecords(); // Panggil fetch untuk memuat ulang data
+                  if (state is GlucoseAdded || state is GlucoseUpdated || state is GlucoseDeleted) {
+                    _fetchGlucoseRecords();
+                    // Tampilkan snackbar sesuai event (kode lama)
+                     String msg = 'Success';
+                     if (state is GlucoseAdded) msg = 'Glucose data added successfully';
+                     else if (state is GlucoseUpdated) msg = 'Glucose data updated successfully';
+                     else if (state is GlucoseDeleted) msg = 'Glucose data deleted successfully';
+                     
+                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
                   } else if (state is GlucoseError) {
                      ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(state.message)),
@@ -388,9 +644,24 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                   if (state is GlucoseLoading) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is GlucoseLoaded) {
-                    if (state.glucoseRecords.isEmpty) {
-                      return const Center(
-                        child: Text('No glucose data available. Add a record.'),
+                    // Filter list juga agar konsisten dengan tampilan bulan yang dipilih
+                    var filteredList = state.glucoseRecords.where((record) {
+                       return record.readingTimestamp.month == _selectedDate.month &&
+                              record.readingTimestamp.year == _selectedDate.year;
+                     }).toList();
+
+                    // Sort descending (terbaru di atas)
+                    filteredList.sort((a, b) => b.readingTimestamp.compareTo(a.readingTimestamp));
+
+                    // Ambil maksimal 5 data terakhir
+                    filteredList = filteredList.take(5).toList();
+
+                    if (filteredList.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 50.0, top: 20.0),
+                        child: Center(
+                          child: Text('No records found for ${DateFormat('MMMM yyyy').format(_selectedDate)}.'),
+                        ),
                       );
                     }
 
@@ -398,9 +669,9 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
-                      itemCount: state.glucoseRecords.length,
+                      itemCount: filteredList.length,
                       itemBuilder: (context, index) {
-                        final record = state.glucoseRecords[index];
+                        final record = filteredList[index];
                         return Dismissible(
                           key: Key(record.readingId!),
                           direction: DismissDirection.endToStart,
@@ -517,7 +788,6 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ],
-                                            // Gejala sekarang ditampilkan di atas daftar
                                           ],
                                         ),
                                       ),
@@ -545,7 +815,7 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                     );
                   }
                   if (state is GlucoseError) {
-                    return Center(child: Text('Terjadi kesalahan: ${state.message}'));
+                    return const Center(child: Text('Tidak ada data untuk ditampilkan.'));
                   }
                   return const Center(child: Text('Tidak ada data untuk ditampilkan.'));
                 },
