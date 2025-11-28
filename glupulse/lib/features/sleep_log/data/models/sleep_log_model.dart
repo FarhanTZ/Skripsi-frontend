@@ -65,24 +65,31 @@ class SleepLogModel extends SleepLog {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'sleep_id': id,
-      'user_id': userId,
+    final Map<String, dynamic> data = {
       'sleep_date': sleepDate,
       'bed_time': _toRfc3339(bedTime),
       'wake_time': _toRfc3339(wakeTime),
-      'quality_rating': qualityRating,
-      'tracker_score': trackerScore,
-      'deep_sleep_minutes': deepSleepMinutes,
-      'rem_sleep_minutes': remSleepMinutes,
-      'light_sleep_minutes': lightSleepMinutes,
-      'awake_minutes': awakeMinutes,
-      'average_hrv': averageHrv,
-      'resting_heart_rate': restingHeartRate,
-      'tags': tags ?? [],
-      'source': source,
-      'notes': notes,
+      'quality_rating': qualityRating ?? 0,
+      'tracker_score': trackerScore ?? 0,
+      'deep_sleep_minutes': deepSleepMinutes ?? 0,
+      'rem_sleep_minutes': remSleepMinutes ?? 0,
+      'light_sleep_minutes': lightSleepMinutes ?? 0,
+      'awake_minutes': awakeMinutes ?? 0,
+      'average_hrv': averageHrv ?? 0,
+      'resting_heart_rate': restingHeartRate ?? 0,
+      'tags': (tags == null || tags!.isEmpty) ? [""] : tags,
+      'source': source ?? 'manual',
+      'notes': notes ?? '',
     };
+
+    if (id != null) {
+      data['sleep_id'] = id;
+    }
+    if (userId != null) {
+      data['user_id'] = userId;
+    }
+
+    return data;
   }
 
   String _toRfc3339(DateTime date) {

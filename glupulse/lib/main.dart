@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/features/Splash/presentation/pages/splash_screen.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/activity/presentation/cubit/activity_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<SleepLogCubit>()),
         BlocProvider(create: (_) => sl<MedicationCubit>()),
         BlocProvider(create: (_) => sl<MedicationLogCubit>()),
+        BlocProvider(create: (_) => sl<ActivityCubit>()),
         // Tambah cubit lain yang harus global di sini
       ],
       child: MaterialApp(

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/sleep_log/domain/entities/sleep_log.dart';
 import 'package:glupulse/features/sleep_log/presentation/cubit/sleep_log_cubit.dart';
 
-
 class AddEditSleepLogPage extends StatefulWidget {
   final SleepLog? sleepLog;
+  final DateTime? initialDate;
 
-  const AddEditSleepLogPage({super.key, this.sleepLog});
+  const AddEditSleepLogPage({super.key, this.sleepLog, this.initialDate});
 
   @override
   State<AddEditSleepLogPage> createState() => _AddEditSleepLogPageState();
@@ -22,7 +21,9 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
   late DateTime _wakeTime;
   
   // Controllers
-  final _qualityRatingController = TextEditingController();
+  final _notesController = TextEditingController();
+  
+  // Advanced Controllers
   final _trackerScoreController = TextEditingController();
   final _deepSleepController = TextEditingController();
   final _remSleepController = TextEditingController();
@@ -30,23 +31,38 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
   final _awakeMinutesController = TextEditingController();
   final _averageHrvController = TextEditingController();
   final _restingHeartRateController = TextEditingController();
-  final _notesController = TextEditingController();
   
+  double _qualityRating = 3.0; // Default middle
+  bool _isAdvancedExpanded = false;
   String _source = 'manual';
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _sleepDate = widget.sleepLog != null 
-        ? DateTime.parse(widget.sleepLog!.sleepDate) 
-        : DateTime(now.year, now.month, now.day);
     
-    _bedTime = widget.sleepLog?.bedTime ?? DateTime(now.year, now.month, now.day, 22, 0);
-    _wakeTime = widget.sleepLog?.wakeTime ?? DateTime(now.year, now.month, now.day + 1, 7, 0);
+    // Default: Sleep Date from widget.initialDate or yesterday/today
+    if (widget.sleepLog != null) {
+       _sleepDate = DateTime.parse(widget.sleepLog!.sleepDate);
+    } else if (widget.initialDate != null) {
+       _sleepDate = widget.initialDate!;
+    } else {
+       _sleepDate = DateTime(now.year, now.month, now.day);
+    }
+    
+    // Bed time default 10 PM on Sleep Date
+    _bedTime = widget.sleepLog?.bedTime ?? 
+        DateTime(_sleepDate.year, _sleepDate.month, _sleepDate.day, 22, 0);
+    
+    // Wake time default 7 AM next day
+    _wakeTime = widget.sleepLog?.wakeTime ?? 
+        DateTime(_sleepDate.year, _sleepDate.month, _sleepDate.day + 1, 7, 0);
 
     if (widget.sleepLog != null) {
-      _qualityRatingController.text = widget.sleepLog!.qualityRating?.toString() ?? '';
+      _qualityRating = (widget.sleepLog!.qualityRating ?? 3).toDouble();
+      _notesController.text = widget.sleepLog!.notes ?? '';
+      
+      // Advanced Fields
       _trackerScoreController.text = widget.sleepLog!.trackerScore?.toString() ?? '';
       _deepSleepController.text = widget.sleepLog!.deepSleepMinutes?.toString() ?? '';
       _remSleepController.text = widget.sleepLog!.remSleepMinutes?.toString() ?? '';
@@ -54,14 +70,18 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
       _awakeMinutesController.text = widget.sleepLog!.awakeMinutes?.toString() ?? '';
       _averageHrvController.text = widget.sleepLog!.averageHrv?.toString() ?? '';
       _restingHeartRateController.text = widget.sleepLog!.restingHeartRate?.toString() ?? '';
-      _notesController.text = widget.sleepLog!.notes ?? '';
       _source = widget.sleepLog!.source ?? 'manual';
+      
+      // Auto expand if there is advanced data
+      if (_trackerScoreController.text.isNotEmpty || _deepSleepController.text.isNotEmpty) {
+        _isAdvancedExpanded = true;
+      }
     }
   }
 
   @override
   void dispose() {
-    _qualityRatingController.dispose();
+    _notesController.dispose();
     _trackerScoreController.dispose();
     _deepSleepController.dispose();
     _remSleepController.dispose();
@@ -69,25 +89,14 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
     _awakeMinutesController.dispose();
     _averageHrvController.dispose();
     _restingHeartRateController.dispose();
-    _notesController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _sleepDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != _sleepDate) {
-      setState(() {
-        _sleepDate = picked;
-        // Adjust bedTime and wakeTime dates if needed, but for now keep them independent or linked?
-        // Usually sleep date is the date the sleep started or the main date.
-        // Let's keep it simple.
-      });
-    }
+  String _calculateDuration() {
+    final diff = _wakeTime.difference(_bedTime);
+    final hours = diff.inHours;
+    final minutes = diff.inMinutes % 60;
+    return '${hours}h ${minutes}m';
   }
 
   Future<void> _selectTime(BuildContext context, bool isBedTime) async {
@@ -99,20 +108,50 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
 
     if (picked != null) {
       setState(() {
-        final baseDate = isBedTime ? _bedTime : _wakeTime;
-        final newDateTime = DateTime(
-          baseDate.year,
-          baseDate.month,
-          baseDate.day,
-          picked.hour,
-          picked.minute,
-        );
+        // Logic to handle dates intelligently
+        // If BedTime > WakeTime, assume BedTime is previous day
         
+        DateTime baseDate = _sleepDate; // Default to sleep date
+        
+        // Simple logic: Apply time to today/yesterday logic relative to sleep date
+        // Usually sleep date is the "night of".
+        // BedTime usually on SleepDate (night). WakeTime usually on SleepDate + 1 (morning).
+        
+        DateTime newDateTime;
         if (isBedTime) {
-          _bedTime = newDateTime;
+           newDateTime = DateTime(baseDate.year, baseDate.month, baseDate.day, picked.hour, picked.minute);
+           // If choosing e.g. 1 AM for bed time, it might be "next day" technically, but let's stick to simple logic first
+           // Or let user pick simple time and we construct standard overnight
         } else {
-          _wakeTime = newDateTime;
+           // Wake time usually next day
+           newDateTime = DateTime(baseDate.year, baseDate.month, baseDate.day + 1, picked.hour, picked.minute);
         }
+        
+        // Update the specific variable
+        if (isBedTime) {
+          // Keep the date part of _bedTime if possible or reset to relative? 
+          // Simplest: Apply HH:MM to the existing _bedTime's date
+          _bedTime = DateTime(_bedTime.year, _bedTime.month, _bedTime.day, picked.hour, picked.minute);
+        } else {
+          _wakeTime = DateTime(_wakeTime.year, _wakeTime.month, _wakeTime.day, picked.hour, picked.minute);
+        }
+      });
+    }
+  }
+  
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _sleepDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _sleepDate = picked;
+        // Reset bed/wake times to align with new date
+        _bedTime = DateTime(picked.year, picked.month, picked.day, _bedTime.hour, _bedTime.minute);
+        _wakeTime = DateTime(picked.year, picked.month, picked.day + 1, _wakeTime.hour, _wakeTime.minute);
       });
     }
   }
@@ -125,7 +164,7 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
         sleepDate: DateFormat('yyyy-MM-dd').format(_sleepDate),
         bedTime: _bedTime,
         wakeTime: _wakeTime,
-        qualityRating: int.tryParse(_qualityRatingController.text),
+        qualityRating: _qualityRating.toInt(),
         trackerScore: int.tryParse(_trackerScoreController.text),
         deepSleepMinutes: int.tryParse(_deepSleepController.text),
         remSleepMinutes: int.tryParse(_remSleepController.text),
@@ -135,7 +174,6 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
         restingHeartRate: int.tryParse(_restingHeartRateController.text),
         source: _source,
         notes: _notesController.text,
-        // tags: [], // Implement tags if needed
       );
 
       if (widget.sleepLog == null) {
@@ -151,167 +189,213 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F5F9),
       appBar: AppBar(
-        toolbarHeight: 80,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-        ),
-        title: Text(widget.sleepLog == null ? 'Log Sleep' : 'Edit Sleep Log'),
+        title: Text(widget.sleepLog == null ? 'Catat Tidur' : 'Edit Tidur'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       body: BlocConsumer<SleepLogCubit, SleepLogState>(
         listener: (context, state) {
-          if (state is SleepLogAdded) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Sleep Log added successfully!')),
-            );
-            Navigator.of(context).pop();
-          } else if (state is SleepLogUpdated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Sleep Log updated successfully!')),
-            );
+          if (state is SleepLogAdded || state is SleepLogUpdated) {
             Navigator.of(context).pop();
           } else if (state is SleepLogError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.message}')),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
-          if (state is SleepLogLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle('Sleep Date', isMandatory: true),
-                  _buildDateField(context),
-                  const SizedBox(height: 24),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  // --- CARD UTAMA (TANGGAL & WAKTU) ---
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                    ),
+                    child: Column(
+                      children: [
+                        // Tanggal Tidur
+                        InkWell(
+                          onTap: () => _selectDate(context),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.calendar_today, size: 18, color: Theme.of(context).colorScheme.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                DateFormat('EEEE, d MMMM yyyy').format(_sleepDate),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              const Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: Divider(),
+                        ),
+                        
+                        // Jam Tidur & Bangun
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildSectionTitle('Bed Time', isMandatory: true),
-                            _buildTimeField(context, true),
+                            _buildTimeBox('Mulai Tidur', _bedTime, true),
+                            const Icon(Icons.arrow_forward, color: Colors.grey),
+                            _buildTimeBox('Bangun', _wakeTime, false),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(height: 20),
+                        
+                        // Total Durasi (Auto Calculated)
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.access_time_filled, size: 18, color: Colors.blue),
+                              const SizedBox(width: 8),
+                              Text(
+                                _calculateDuration(),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold, 
+                                  fontSize: 16,
+                                  color: Theme.of(context).colorScheme.primary
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+
+                  // --- CARD KUALITAS & NOTES ---
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Kualitas Tidur', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        const SizedBox(height: 8),
+                        Row(
                           children: [
-                            _buildSectionTitle('Wake Time', isMandatory: true),
-                            _buildTimeField(context, false),
+                            Expanded(
+                              child: Slider(
+                                value: _qualityRating,
+                                min: 1,
+                                max: 5,
+                                divisions: 4,
+                                label: _qualityRating.toInt().toString(),
+                                onChanged: (val) => setState(() => _qualityRating = val),
+                              ),
+                            ),
+                            Text(
+                              '${_qualityRating.toInt()}/5', 
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold, 
+                                fontSize: 18,
+                                color: Theme.of(context).colorScheme.primary
+                              )
+                            ),
                           ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        const Text('Catatan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _notesController,
+                          decoration: InputDecoration(
+                            hintText: 'Mimpi indah? Sering terbangun?',
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          ),
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
                   ),
+
                   const SizedBox(height: 24),
 
-                  _buildSectionTitle('Quality Rating (1-5)'),
-                  _buildTextField(
-                    controller: _qualityRatingController,
-                    hintText: 'e.g. 4',
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value != null && value.isNotEmpty) {
-                        final rating = int.tryParse(value);
-                        if (rating == null || rating < 1 || rating > 5) {
-                          return 'Enter 1-5';
-                        }
-                      }
-                      return null;
-                    }
+                  // --- ADVANCED EXPANDABLE ---
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                    ),
+                    child: ExpansionTile(
+                      title: const Text('Data Lanjutan (Optional)', style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text('Deep sleep, REM, HRV, dll.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      initiallyExpanded: _isAdvancedExpanded,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(child: _buildCompactField(_deepSleepController, 'Deep (min)', Icons.bed)),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: _buildCompactField(_remSleepController, 'REM (min)', Icons.psychology)),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(child: _buildCompactField(_lightSleepController, 'Light (min)', Icons.light_mode)),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: _buildCompactField(_awakeMinutesController, 'Awake (min)', Icons.visibility)),
+                                ],
+                              ),
+                              const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider()),
+                              Row(
+                                children: [
+                                  Expanded(child: _buildCompactField(_averageHrvController, 'HRV (ms)', Icons.monitor_heart)),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: _buildCompactField(_restingHeartRateController, 'Rest HR (bpm)', Icons.favorite)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 24),
 
-                  _buildSectionTitle('Tracker Score (0-100)'),
-                  _buildTextField(
-                    controller: _trackerScoreController,
-                    hintText: 'e.g. 85',
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value != null && value.isNotEmpty) {
-                        final score = int.tryParse(value);
-                        if (score == null || score < 0 || score > 100) {
-                          return 'Enter 0-100';
-                        }
-                      }
-                      return null;
-                    }
-                  ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                  _buildSectionTitle('Sleep Stages (Minutes)'),
-                  Row(
-                    children: [
-                      Expanded(child: _buildTextField(controller: _deepSleepController, hintText: 'Deep', keyboardType: TextInputType.number)),
-                      const SizedBox(width: 8),
-                      Expanded(child: _buildTextField(controller: _remSleepController, hintText: 'REM', keyboardType: TextInputType.number)),
-                      const SizedBox(width: 8),
-                      Expanded(child: _buildTextField(controller: _lightSleepController, hintText: 'Light', keyboardType: TextInputType.number)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTextField(controller: _awakeMinutesController, hintText: 'Awake Minutes', keyboardType: TextInputType.number),
-                  const SizedBox(height: 24),
-
-                  _buildSectionTitle('Biometrics'),
-                  Row(
-                    children: [
-                      Expanded(child: _buildTextField(controller: _averageHrvController, hintText: 'Avg HRV', keyboardType: TextInputType.number)),
-                      const SizedBox(width: 16),
-                      Expanded(child: _buildTextField(controller: _restingHeartRateController, hintText: 'Resting HR', keyboardType: TextInputType.number)),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  _buildSectionTitle('Notes'),
-                  _buildTextField(controller: _notesController, hintText: 'How did you sleep?', maxLines: 3),
-                  const SizedBox(height: 24),
-
-                  _buildSectionTitle('Source'),
-                  DropdownButtonFormField<String>(
-                    value: _source,
-                    decoration: _inputDecoration(hintText: 'Select Source'),
-                    items: const [
-                      DropdownMenuItem(value: 'manual', child: Text('Manual Entry')),
-                      DropdownMenuItem(value: 'wearable_sync', child: Text('Wearable Sync')),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _source = value;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 40),
-
+                  // --- TOMBOL SIMPAN ---
                   ElevatedButton(
-                    onPressed: _submitForm,
+                    onPressed: state is SleepLogLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 55),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      elevation: 4,
                     ),
-                    child: Text(
-                      widget.sleepLog == null ? 'Save Log' : 'Update Log',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                    child: state is SleepLogLoading 
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('SIMPAN DATA', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -321,90 +405,39 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
     );
   }
 
-  Widget _buildSectionTitle(String title, {bool isMandatory = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: RichText(
-        text: TextSpan(
-          text: title,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            color: Colors.black87,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+  Widget _buildTimeBox(String label, DateTime time, bool isBedTime) {
+    return GestureDetector(
+      onTap: () => _selectTime(context, isBedTime),
+      child: Column(
+        children: [
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              DateFormat('HH:mm').format(time),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
           ),
-          children: [
-            if (isMandatory)
-              const TextSpan(
-                text: ' *',
-                style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    TextInputType keyboardType = TextInputType.text,
-    int maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
+  Widget _buildCompactField(TextEditingController controller, String label, IconData icon) {
     return TextFormField(
       controller: controller,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      decoration: _inputDecoration(hintText: hintText),
-      validator: validator,
-    );
-  }
-
-  Widget _buildDateField(BuildContext context) {
-    return TextFormField(
-      readOnly: true,
-      decoration: _inputDecoration(
-        hintText: DateFormat('yyyy-MM-dd').format(_sleepDate),
-      ).copyWith(
-        prefixIcon: const Icon(Icons.calendar_today),
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 18, color: Colors.grey),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      onTap: () => _selectDate(context),
-    );
-  }
-
-  Widget _buildTimeField(BuildContext context, bool isBedTime) {
-    final time = isBedTime ? _bedTime : _wakeTime;
-    return TextFormField(
-      readOnly: true,
-      decoration: _inputDecoration(
-        hintText: DateFormat('HH:mm').format(time),
-      ).copyWith(
-        prefixIcon: const Icon(Icons.access_time),
-      ),
-      onTap: () => _selectTime(context, isBedTime),
-    );
-  }
-
-  InputDecoration _inputDecoration({required String hintText}) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: const TextStyle(color: AppTheme.inputLabelColor, fontSize: 14),
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.0),
-        borderSide: BorderSide(color: Colors.grey.shade300),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.0),
-        borderSide: BorderSide(color: Colors.grey.shade300),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.0),
-        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 }

@@ -53,12 +53,10 @@ class ActivityLogModel extends ActivityLog {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'activity_id': activityId,
-      'user_id': userId,
+    final Map<String, dynamic> data = {
       'activity_timestamp': activityTimestamp.toUtc().toIso8601String(),
       'activity_code': activityCode,
-      'intensity': intensity,
+      'intensity': intensity.toLowerCase(), // Ensure lowercase as per api.md
       'duration_minutes': durationMinutes,
       'perceived_exertion': perceivedExertion ?? 5,
       'steps_count': stepsCount ?? 0,
@@ -66,9 +64,21 @@ class ActivityLogModel extends ActivityLog {
       'water_intake_ml': waterIntakeMl ?? 0,
       'issue_description': issueDescription ?? "None",
       'source': source,
-      'sync_id': syncId ?? "",
+      'sync_id': syncId ?? "", // Ensure empty string if null
       'notes': notes ?? "",
     };
+
+    if (activityId != null) {
+      data['activity_id'] = activityId;
+    }
+    if (userId != null) {
+      data['user_id'] = userId;
+    }
+    if (syncId != null) {
+      data['sync_id'] = syncId;
+    }
+
+    return data;
   }
 
   factory ActivityLogModel.fromEntity(ActivityLog entity) {

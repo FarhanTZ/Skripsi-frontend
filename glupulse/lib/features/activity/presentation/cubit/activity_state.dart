@@ -1,4 +1,3 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:glupulse/features/activity/domain/entities/activity_log.dart';
 import 'package:glupulse/features/activity/domain/entities/activity_type.dart';
