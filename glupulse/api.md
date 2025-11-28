@@ -578,3 +578,171 @@ update
 /health/medication/log/9c6a5e9a-a2df-40ec-9a6e-5c678560ebb4
 
 /health/medication/log/9c6a5e9a-a2df-40ec-9a6e-5c678560ebb4
+
+
+
+/health/meal/log
+post
+{
+    "meal_timestamp": "2025-11-25T19:30:00+07:00",
+    "meal_type_id": 2,
+    "description": "High protein meal after a session at the gym.",
+    "tags": ["homemade", "high-protein"],
+    "items": [
+        {
+            "food_name": "Grilled Chicken Salad",
+            "food_id": "2e766c3b-e374-4ab2-8b2a-ac1a3738c27b",
+            "seller": "",
+            "serving_size": "",
+            "serving_size_grams": 0,
+            "quantity": 1.0,
+            "calories": 12,
+            "carbs_grams": 10.0,
+            "protein_grams": 45.0,
+            "fat_grams": 10,
+            "fiber_grams": 5,
+            "sugar_grams": 7,
+            "sodium_mg": 8,
+            "glycemic_index": 21,
+            "glycemic_load": 23,
+            "food_category": ""
+        },
+        {
+            "food_name": "Rawon",
+            "food_id": "",
+            "seller": "",
+            "serving_size": "",
+            "serving_size_grams": 0,
+            "quantity": 1.0,
+            "calories": 0,
+            "carbs_grams": 10.0,
+            "protein_grams": 45.0,
+            "fat_grams": 0,
+            "fiber_grams": 0,
+            "sugar_grams": 0,
+            "sodium_mg": 0,
+            "glycemic_index": 0,
+            "glycemic_load": 0,
+            "food_category": ""
+        }
+    ]
+}
+
+update
+/health/meal/log/bc12e3cc-8dc2-4a56-a284-e8c5ee98e0da
+
+get
+/health/log/meals
+[
+    {
+        "meal_id": "bc12e3cc-8dc2-4a56-a284-e8c5ee98e0da",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "meal_timestamp": "2025-11-25T19:30:00+07:00",
+        "meal_type_id": 3,
+        "description": "High protein meal after a session at the gym.",
+        "total_calories": 12,
+        "total_carbs_grams": 20,
+        "total_protein_grams": 90,
+        "total_fat_grams": 10,
+        "total_fiber_grams": 5,
+        "total_sugar_grams": 7,
+        "tags": [
+            "homemade",
+            "high-protein"
+        ],
+        "created_at": "2025-11-25T22:17:53.2623+07:00",
+        "updated_at": "2025-11-25T22:42:04.029735+07:00"
+    },
+    {
+        "meal_id": "573dcdb7-81f0-4019-9537-52417e0ce4d8",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "meal_timestamp": "2025-11-25T19:30:00+07:00",
+        "meal_type_id": 2,
+        "description": "High protein meal after a session at the gym.",
+        "total_calories": 12,
+        "total_carbs_grams": 20,
+        "total_protein_grams": 90,
+        "total_fat_grams": 10,
+        "total_fiber_grams": 5,
+        "total_sugar_grams": 7,
+        "tags": [
+            "homemade",
+            "high-protein"
+        ],
+        "created_at": "2025-11-25T23:18:35.211157+07:00",
+        "updated_at": "2025-11-25T23:18:35.211157+07:00"
+    }
+]
+
+
+
+get meal log by id
+/health/log/meal/0e855acc-64ea-4a3b-b156-8dc922d10227
+
+{
+    "items": [
+        {
+            "item_id": "613d34ee-2d21-47f4-a187-ea888464fae8",
+            "meal_id": "0e855acc-64ea-4a3b-b156-8dc922d10227",
+            "food_name": "Grilled Chicken Salad",
+            "food_id": "2e766c3b-e374-4ab2-8b2a-ac1a3738c27b",
+            "seller": "",
+            "serving_size": "",
+            "serving_size_grams": 0,
+            "quantity": 1,
+            "calories": 0,
+            "carbs_grams": 10,
+            "fiber_grams": 0,
+            "protein_grams": 45,
+            "fat_grams": 0,
+            "sugar_grams": 0,
+            "sodium_mg": 0,
+            "glycemic_index": 0,
+            "glycemic_load": 0,
+            "food_category": "",
+            "created_at": "2025-11-25T22:13:42.594701+07:00"
+        },
+        {
+            "item_id": "501de34a-e7ac-407f-a62b-241a4c06fa62",
+            "meal_id": "0e855acc-64ea-4a3b-b156-8dc922d10227",
+            "food_name": "Rawon",
+            "food_id": null,
+            "seller": "",
+            "serving_size": "",
+            "serving_size_grams": 0,
+            "quantity": 1,
+            "calories": 0,
+            "carbs_grams": 10,
+            "fiber_grams": 0,
+            "protein_grams": 45,
+            "fat_grams": 0,
+            "sugar_grams": 0,
+            "sodium_mg": 0,
+            "glycemic_index": 0,
+            "glycemic_load": 0,
+            "food_category": "",
+            "created_at": "2025-11-25T22:13:42.594701+07:00"
+        }
+    ],
+    "meal_log": {
+        "meal_id": "0e855acc-64ea-4a3b-b156-8dc922d10227",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "meal_timestamp": "2025-11-25T19:30:00+07:00",
+        "meal_type_id": 3,
+        "description": "High protein meal after a session at the gym.",
+        "total_calories": 0,
+        "total_carbs_grams": 20,
+        "total_protein_grams": 90,
+        "total_fat_grams": 0,
+        "total_fiber_grams": 0,
+        "total_sugar_grams": 0,
+        "tags": [
+            "homemade",
+            "high-protein"
+        ],
+        "created_at": "2025-11-25T22:13:42.594701+07:00",
+        "updated_at": "2025-11-25T22:13:42.594701+07:00"
+    }
+}
+Delete
+health/log/meal/0e855acc-64ea-4a3b-b156-8dc922d10227

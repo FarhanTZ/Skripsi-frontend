@@ -19,6 +19,7 @@ import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 import 'features/introduction/presentation/pages/introduction_screen.dart';
+import 'package:glupulse/features/meal_log/presentation/cubit/meal_log_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<MedicationCubit>()),
         BlocProvider(create: (_) => sl<MedicationLogCubit>()),
         BlocProvider(create: (_) => sl<ActivityCubit>()),
+        BlocProvider(create: (_) => sl<MealLogCubit>()),
         // Tambah cubit lain yang harus global di sini
       ],
       child: MaterialApp(

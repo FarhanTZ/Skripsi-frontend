@@ -101,6 +101,15 @@ import 'package:glupulse/features/sleep_log/domain/usecases/get_sleep_log.dart';
 import 'package:glupulse/features/sleep_log/domain/usecases/get_sleep_logs.dart';
 import 'package:glupulse/features/sleep_log/domain/usecases/update_sleep_log.dart';
 import 'package:glupulse/features/sleep_log/presentation/cubit/sleep_log_cubit.dart';
+import 'package:glupulse/features/meal_log/data/datasources/meal_log_remote_data_source.dart';
+import 'package:glupulse/features/meal_log/data/repositories/meal_log_repository_impl.dart';
+import 'package:glupulse/features/meal_log/domain/repositories/meal_log_repository.dart';
+import 'package:glupulse/features/meal_log/domain/usecases/add_meal_log.dart';
+import 'package:glupulse/features/meal_log/domain/usecases/delete_meal_log.dart';
+import 'package:glupulse/features/meal_log/domain/usecases/get_meal_log.dart';
+import 'package:glupulse/features/meal_log/domain/usecases/get_meal_logs.dart';
+import 'package:glupulse/features/meal_log/domain/usecases/update_meal_log.dart';
+import 'package:glupulse/features/meal_log/presentation/cubit/meal_log_cubit.dart';
 
 final sl = GetIt.instance; // sl = Service Locator
 
@@ -497,6 +506,39 @@ Future<void> init() async {
   // Data Sources
   sl.registerLazySingleton<MedicationRemoteDataSource>(
     () => MedicationRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // --- Features - Meal Log ---
+
+  // Cubit
+  sl.registerFactory(
+    () => MealLogCubit(
+      getMealLogsUseCase: sl(),
+      getMealLogUseCase: sl(),
+      addMealLogUseCase: sl(),
+      updateMealLogUseCase: sl(),
+      deleteMealLogUseCase: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetMealLogs(sl()));
+  sl.registerLazySingleton(() => GetMealLog(sl()));
+  sl.registerLazySingleton(() => AddMealLog(sl()));
+  sl.registerLazySingleton(() => UpdateMealLog(sl()));
+  sl.registerLazySingleton(() => DeleteMealLog(sl()));
+
+  // Repository
+  sl.registerLazySingleton<MealLogRepository>(
+    () => MealLogRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<MealLogRemoteDataSource>(
+    () => MealLogRemoteDataSourceImpl(apiClient: sl()),
   );
 
   // --- Core ---

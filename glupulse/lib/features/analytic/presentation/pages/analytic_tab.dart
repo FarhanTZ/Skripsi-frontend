@@ -16,6 +16,7 @@ import 'package:glupulse/features/activity/presentation/pages/activity_type_list
 
 import 'package:glupulse/features/sleep_log/presentation/pages/sleep_log_list_page.dart';
 import 'package:glupulse/features/medication/presentation/pages/medication_log_list_page.dart';
+import 'package:glupulse/features/meal_log/presentation/pages/meal_log_page.dart';
 
 class AnalyticTab extends StatefulWidget {
   const AnalyticTab({super.key});
@@ -238,6 +239,26 @@ class _AnalyticTabState extends State<AnalyticTab> {
                           ),
                           child: const Text(
                             'Log Medication',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const MealLogPage(),
+                            ));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                          ),
+                          child: const Text(
+                            'Log Meal',
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                           ),
                         ),
