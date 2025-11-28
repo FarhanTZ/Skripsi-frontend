@@ -223,22 +223,21 @@ class _SleepLogListPageState extends State<SleepLogListPage> {
                                         ),
                                         child: Column(
                                           children: [
-                                            Text(
-                                              DateFormat('dd').format(log.bedTime),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                                color: Theme.of(context).colorScheme.primary,
-                                              ),
-                                            ),
-                                            Text(
-                                              DateFormat('MMM').format(log.bedTime),
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Theme.of(context).colorScheme.primary,
-                                              ),
-                                            ),
-                                          ],
+                                                                                      Text(
+                                                                                        DateFormat('dd').format(log.bedTime.toLocal()),
+                                                                                        style: TextStyle(
+                                                                                          fontWeight: FontWeight.bold,
+                                                                                          fontSize: 18,
+                                                                                          color: Theme.of(context).colorScheme.primary,
+                                                                                        ),
+                                                                                      ),
+                                                                                      Text(
+                                                                                        DateFormat('MMM').format(log.bedTime.toLocal()),
+                                                                                        style: TextStyle(
+                                                                                          fontSize: 12,
+                                                                                          color: Theme.of(context).colorScheme.primary,
+                                                                                        ),
+                                                                                      ),                                          ],
                                         ),
                                       ),
                                       const SizedBox(width: 16),
@@ -253,7 +252,7 @@ class _SleepLogListPageState extends State<SleepLogListPage> {
                                                 Icon(Icons.bedtime, size: 14, color: Colors.grey[600]),
                                                 const SizedBox(width: 4),
                                                 Text(
-                                                  '${DateFormat('HH:mm').format(log.bedTime)} - ${DateFormat('HH:mm').format(log.wakeTime)}',
+                                                  '${DateFormat('hh:mm a').format(log.bedTime.toLocal())} - ${DateFormat('hh:mm a').format(log.wakeTime.toLocal())}',
                                                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                                                 ),
                                                 const Spacer(),

@@ -29,7 +29,7 @@ class _AddEditMedicationPageState extends State<AddEditMedicationPage> {
     {'value': 'OTC', 'label': 'Over-The-Counter'},
     {'value': 'SUPPLEMENT', 'label': 'Supplement'},
     {'value': 'OTHER_RX', 'label': 'Other Prescription'},
-  ];
+  ];  
 
   @override
   void initState() {
@@ -73,9 +73,16 @@ class _AddEditMedicationPageState extends State<AddEditMedicationPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F5F9),
       appBar: AppBar(
+        toolbarHeight: 80,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+        ),
         title: Text(widget.medication == null ? 'Add Medication' : 'Edit Medication'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: BlocConsumer<MedicationCubit, MedicationState>(
         listener: (context, state) {

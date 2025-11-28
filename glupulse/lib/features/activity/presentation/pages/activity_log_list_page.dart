@@ -158,7 +158,7 @@ class ActivityLogListPage extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Last Session (${DateFormat('d MMM, HH:mm').format(latestLog.activityTimestamp)})',
+                                    'Last Session (${DateFormat('d MMM, HH:mm').format(latestLog.activityTimestamp.toLocal())})',
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -309,7 +309,7 @@ class ActivityLogListPage extends StatelessWidget {
                                               ),
                                               const SizedBox(width: 6),
                                               Text(
-                                                DateFormat('EEEE, d MMM yyyy • HH:mm').format(log.activityTimestamp),
+                                                DateFormat('EEEE, d MMM yyyy • HH:mm').format(log.activityTimestamp.toLocal()),
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.w600,
                                                   fontSize: 13,

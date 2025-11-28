@@ -202,21 +202,21 @@ class _ActivityHistoryPageState extends State<ActivityHistoryPage> {
                                     ),
                                     child: Column(
                                       children: [
-                                        Text(
-                                          DateFormat('dd').format(log.activityTimestamp),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                            color: Theme.of(context).colorScheme.primary,
-                                          ),
-                                        ),
-                                        Text(
-                                          DateFormat('MMM').format(log.activityTimestamp),
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Theme.of(context).colorScheme.primary,
-                                          ),
-                                        ),
+                                    Text(
+                                      DateFormat('dd').format(log.activityTimestamp.toLocal()),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ),
+                                    Text(
+                                      DateFormat('MMM').format(log.activityTimestamp.toLocal()),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ),
                                       ],
                                     ),
                                   ),
@@ -230,10 +230,13 @@ class _ActivityHistoryPageState extends State<ActivityHistoryPage> {
                                           children: [
                                             Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
                                             const SizedBox(width: 4),
-                                            Text(
-                                              DateFormat('HH:mm').format(log.activityTimestamp),
-                                              style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                                            ),
+                                      Text(
+                                        DateFormat('HH:mm').format(log.activityTimestamp.toLocal()),
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
+                                        ),
+                                      ),
                                             const Spacer(),
                                             // Intensity Badge Small
                                             Container(

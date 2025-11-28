@@ -248,7 +248,7 @@ class _GlucoseHistoryPageState extends State<GlucoseHistoryPage> {
                                           const SizedBox(height: 4),
                                           Text(
                                               DateFormat('dd MMM yyyy, HH:mm')
-                                                  .format(record.readingTimestamp),
+                                                  .format(record.readingTimestamp.toLocal()),
                                               style: const TextStyle(
                                                   fontSize: 12, color: Colors.black54),
                                             ),

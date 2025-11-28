@@ -51,11 +51,11 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
     }
     
     // Bed time default 10 PM on Sleep Date
-    _bedTime = widget.sleepLog?.bedTime ?? 
+    _bedTime = widget.sleepLog?.bedTime.toLocal() ?? 
         DateTime(_sleepDate.year, _sleepDate.month, _sleepDate.day, 22, 0);
     
     // Wake time default 7 AM next day
-    _wakeTime = widget.sleepLog?.wakeTime ?? 
+    _wakeTime = widget.sleepLog?.wakeTime.toLocal() ?? 
         DateTime(_sleepDate.year, _sleepDate.month, _sleepDate.day + 1, 7, 0);
 
     if (widget.sleepLog != null) {

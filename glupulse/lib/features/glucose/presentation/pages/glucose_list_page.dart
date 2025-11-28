@@ -349,7 +349,7 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                        return Padding(
                          padding: const EdgeInsets.only(top: 8.0),
                          child: Text(
-                          DateFormat('dd/MM').format(chartData[index].readingTimestamp),
+                          DateFormat('dd/MM').format(chartData[index].readingTimestamp.toLocal()),
                           style: const TextStyle(
                             color: Colors.grey,
                             fontWeight: FontWeight.bold,
@@ -766,12 +766,10 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                                                   fontSize: 14),
                                             ),
                                             const SizedBox(height: 4),
-                                            Text(
-                                              DateFormat('dd MMM yyyy, HH:mm')
-                                                  .format(record.readingTimestamp),
-                                              style: const TextStyle(
-                                                  fontSize: 12, color: Colors.black54),
-                                            ),
+                                  Text(
+                                    DateFormat('dd MMM yyyy, HH:mm').format(record.readingTimestamp.toLocal()),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
                                             if (record.deviceName != null && record.deviceName!.isNotEmpty) ...[
                                               const SizedBox(height: 4),
                                               Text(
