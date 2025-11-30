@@ -75,6 +75,10 @@ class MealItem extends Equatable {
   final num? glycemicLoad;
   final String? foodCategory;
   final DateTime? createdAt;
+  final num? saturatedFatGrams;
+  final num? monounsaturatedFatGrams;
+  final num? polyunsaturatedFatGrams;
+  final num? cholesterolMg;
 
   const MealItem({
     this.itemId,
@@ -96,6 +100,10 @@ class MealItem extends Equatable {
     this.glycemicLoad,
     this.foodCategory,
     this.createdAt,
+    this.saturatedFatGrams,
+    this.monounsaturatedFatGrams,
+    this.polyunsaturatedFatGrams,
+    this.cholesterolMg,
   });
 
   @override
@@ -119,5 +127,9 @@ class MealItem extends Equatable {
         glycemicLoad,
         foodCategory,
         createdAt,
+        saturatedFatGrams,
+        monounsaturatedFatGrams,
+        polyunsaturatedFatGrams,
+        cholesterolMg,
       ];
 }

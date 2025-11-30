@@ -14,12 +14,21 @@ class Food extends Equatable {
   final List<String>? tags;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final int? servingSizeG;
-  final int? calories;
-  final double? proteinG;
-  final double? fatG;
-  final double? carbohydrateG;
-  final double? sodiumMg;
+  
+  // Nutrition & Detail Fields
+  final String? servingSize;
+  final num? servingSizeGrams;
+  final num? quantity;
+  final num? calories;
+  final num? carbsGrams;
+  final num? fiberGrams;
+  final num? proteinGrams;
+  final num? fatGrams;
+  final num? sugarGrams;
+  final num? sodiumMg;
+  final num? glycemicIndex;
+  final num? glycemicLoad;
+  final String? foodCategory;
 
   const Food({
     required this.foodId,
@@ -35,12 +44,19 @@ class Food extends Equatable {
     this.tags,
     required this.createdAt,
     required this.updatedAt,
-    this.servingSizeG,
+    this.servingSize,
+    this.servingSizeGrams,
+    this.quantity,
     this.calories,
-    this.proteinG,
-    this.fatG,
-    this.carbohydrateG,
+    this.carbsGrams,
+    this.fiberGrams,
+    this.proteinGrams,
+    this.fatGrams,
+    this.sugarGrams,
     this.sodiumMg,
+    this.glycemicIndex,
+    this.glycemicLoad,
+    this.foodCategory,
   });
 
   @override
@@ -58,11 +74,18 @@ class Food extends Equatable {
         tags,
         createdAt,
         updatedAt,
-        servingSizeG,
+        servingSize,
+        servingSizeGrams,
+        quantity,
         calories,
-        proteinG,
-        fatG,
-        carbohydrateG,
+        carbsGrams,
+        fiberGrams,
+        proteinGrams,
+        fatGrams,
+        sugarGrams,
         sodiumMg,
+        glycemicIndex,
+        glycemicLoad,
+        foodCategory,
       ];
 }

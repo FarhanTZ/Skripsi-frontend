@@ -1,4 +1,3 @@
-post meals log
 {
     "meal_timestamp": "2025-11-25T19:30:00+07:00",
     "meal_type_id": 2,
@@ -52,83 +51,10 @@ post meals log
     ]
 }
 
-responya
-{
-    "meal_log": {
-        "meal_id": "ad41b668-8fd4-4755-9afa-c9d942097a9f",
-        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
-        "meal_timestamp": "2025-11-25T19:30:00+07:00",
-        "meal_type_id": 2,
-        "description": "High protein meal after a session at the gym.",
-        "total_calories": 24,
-        "total_carbs_grams": 20,
-        "total_protein_grams": 90,
-        "total_fat_grams": 20,
-        "total_fiber_grams": 10,
-        "total_sugar_grams": 14,
-        "tags": [
-            "homemade",
-            "high-protein"
-        ],
-        "created_at": "2025-11-29T10:19:18.113963+07:00",
-        "updated_at": "2025-11-29T10:19:18.113963+07:00"
-    },
-    "items": [
-        {
-            "item_id": "0cc141dd-3a94-4f0f-b047-8821d9b57d8e",
-            "meal_id": "ad41b668-8fd4-4755-9afa-c9d942097a9f",
-            "food_name": "Grilled Chicken Salad",
-            "food_id": "2e766c3b-e374-4ab2-8b2a-ac1a3738c27b",
-            "seller": "",
-            "serving_size": "",
-            "serving_size_grams": 100,
-            "quantity": 1,
-            "calories": 12,
-            "carbs_grams": 10,
-            "fiber_grams": 5,
-            "protein_grams": 45,
-            "fat_grams": 10,
-            "sugar_grams": 7,
-            "sodium_mg": 8,
-            "glycemic_index": 21,
-            "glycemic_load": 23,
-            "food_category": "",
-            "created_at": "2025-11-29T10:19:18.113963+07:00",
-            "saturated_fat_grams": 20,
-            "monounsaturated_fat_grams": 31,
-            "polyunsaturated_fat_grams": 1.52,
-            "cholesterol_mg": 21
-        },
-        {
-            "item_id": "cede3b7b-8ba6-487e-939f-5c72df31afd2",
-            "meal_id": "ad41b668-8fd4-4755-9afa-c9d942097a9f",
-            "food_name": "Sallad",
-            "food_id": null,
-            "seller": "",
-            "serving_size": "",
-            "serving_size_grams": 100,
-            "quantity": 1,
-            "calories": 12,
-            "carbs_grams": 10,
-            "fiber_grams": 5,
-            "protein_grams": 45,
-            "fat_grams": 10,
-            "sugar_grams": 7,
-            "sodium_mg": 8,
-            "glycemic_index": 21,
-            "glycemic_load": 23,
-            "food_category": "",
-            "created_at": "2025-11-29T10:19:18.113963+07:00",
-            "saturated_fat_grams": 20,
-            "monounsaturated_fat_grams": 31,
-            "polyunsaturated_fat_grams": 1.52,
-            "cholesterol_mg": 21
-        }
-    ]
-}
-
-update
 /health/log/meal/ad41b668-8fd4-4755-9afa-c9d942097a9f
+update
+
+bodnya
 {
     "meal_timestamp": "2025-11-25T19:30:00+07:00",
     "meal_type_id": 3,
@@ -182,66 +108,84 @@ update
     ]
 }
 
-delete
-/health/log/meal/0e855acc-64ea-4a3b-b156-8dc922d10227
-
-
-
-
-/health/log/meals
+repsonya
 {
-    "meal_timestamp": "2025-11-25T19:30:00+07:00",
-    "meal_type_id": 2,
-    "description": "High protein meal after a session at the gym.",
-    "tags": ["homemade", "high-protein"],
+    "meal_log": {
+        "meal_id": "ad41b668-8fd4-4755-9afa-c9d942097a9f",
+        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+        "meal_timestamp": "2025-11-25T19:30:00+07:00",
+        "meal_type_id": 3,
+        "description": "High protein meal after a session at the gym.",
+        "total_calories": 12,
+        "total_carbs_grams": 20,
+        "total_protein_grams": 90,
+        "total_fat_grams": 10,
+        "total_fiber_grams": 5,
+        "total_sugar_grams": 7,
+        "tags": [
+            "homemade",
+            "high-protein"
+        ],
+        "created_at": "2025-11-29T10:19:18.113963+07:00",
+        "updated_at": "2025-11-29T10:20:12.439653+07:00"
+    },
     "items": [
         {
+            "item_id": "5cf3ae68-ffe5-48c4-a65b-23e22acb1136",
+            "meal_id": "ad41b668-8fd4-4755-9afa-c9d942097a9f",
             "food_name": "Grilled Chicken Salad",
             "food_id": "2e766c3b-e374-4ab2-8b2a-ac1a3738c27b",
             "seller": "",
             "serving_size": "",
-            "serving_size_grams": 100,
-            "quantity": 1.0,
+            "serving_size_grams": 0,
+            "quantity": 1,
             "calories": 12,
-            "carbs_grams": 10.0,
-            "protein_grams": 45.0,
-            "fat_grams": 10.0,
-            "fiber_grams": 5.0,
-            "sugar_grams": 7.0,
+            "carbs_grams": 10,
+            "fiber_grams": 5,
+            "protein_grams": 45,
+            "fat_grams": 10,
+            "sugar_grams": 7,
             "sodium_mg": 8,
             "glycemic_index": 21,
             "glycemic_load": 23,
             "food_category": "",
-            "saturated_fat_grams": 20.0,
-            "monounsaturated_fat_grams": 31.0,
+            "created_at": "2025-11-29T10:20:12.439653+07:00",
+            "saturated_fat_grams": 20,
+            "monounsaturated_fat_grams": 31,
             "polyunsaturated_fat_grams": 1.52,
             "cholesterol_mg": 21
         },
         {
-            "food_name": "Sallad",
-            "food_id": "",
+            "item_id": "613489ba-bd49-400a-96e0-4134f620cb3b",
+            "meal_id": "ad41b668-8fd4-4755-9afa-c9d942097a9f",
+            "food_name": "Rawon",
+            "food_id": null,
             "seller": "",
             "serving_size": "",
-            "serving_size_grams": 100,
-            "quantity": 1.0,
-            "calories": 12,
-            "carbs_grams": 10.0,
-            "protein_grams": 45.0,
-            "fat_grams": 10.0,
-            "fiber_grams": 5.0,
-            "sugar_grams": 7.0,
-            "sodium_mg": 8,
-            "glycemic_index": 21,
-            "glycemic_load": 23,
+            "serving_size_grams": 0,
+            "quantity": 1,
+            "calories": 0,
+            "carbs_grams": 10,
+            "fiber_grams": 0,
+            "protein_grams": 45,
+            "fat_grams": 0,
+            "sugar_grams": 0,
+            "sodium_mg": 0,
+            "glycemic_index": 0,
+            "glycemic_load": 0,
             "food_category": "",
-            "saturated_fat_grams": 20.0,
-            "monounsaturated_fat_grams": 31.0,
+            "created_at": "2025-11-29T10:20:12.439653+07:00",
+            "saturated_fat_grams": 20,
+            "monounsaturated_fat_grams": 31,
             "polyunsaturated_fat_grams": 1.52,
             "cholesterol_mg": 21
         }
     ]
 }
 
+
+get All meal logs
+/health/log/meals
 [
     {
         "meal_id": "bc12e3cc-8dc2-4a56-a284-e8c5ee98e0da",
@@ -284,8 +228,7 @@ delete
 ]
 
 
-
-get meal log by id
+Dan
 /health/log/meal/bc12e3cc-8dc2-4a56-a284-e8c5ee98e0da
 {
     "_meal_log": {

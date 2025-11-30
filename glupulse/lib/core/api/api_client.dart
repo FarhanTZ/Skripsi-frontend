@@ -143,7 +143,20 @@ class ApiClient {
           if (message.contains('no records') || message.contains('data not found') || message.contains('empty')) {
             return []; // Treat as empty list
           }
-          // If it's a map but doesn't indicate no data, it's still an unexpected format for a list endpoint
+          
+          // NEW: Attempt to find a list inside the map values (e.g. { "data": [...] })
+          for (final value in responseBody.values) {
+            if (value is List) {
+              return value;
+            }
+          }
+          
+          // If map is empty, treat as empty list
+          if (responseBody.isEmpty) {
+            return [];
+          }
+
+          // If it's a map but doesn't indicate no data and contains no list
           throw ServerException('Respons dari server bukan format yang diharapkan (diharapkan List, menerima Map).');
         } else {
           throw ServerException('Respons dari server bukan format yang diharapkan (diharapkan List).');

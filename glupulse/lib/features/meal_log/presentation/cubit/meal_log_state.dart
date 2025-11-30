@@ -29,7 +29,14 @@ class MealLogDetailLoaded extends MealLogState {
   List<Object> get props => [mealLog];
 }
 
-class MealLogAdded extends MealLogState {}
+class MealLogAdded extends MealLogState {
+  final MealLog mealLog;
+
+  const MealLogAdded({required this.mealLog});
+
+  @override
+  List<Object> get props => [mealLog];
+}
 
 class MealLogUpdated extends MealLogState {}
 

@@ -176,7 +176,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                         const SizedBox(height: 16),
                         // Placeholder untuk detail nutrisi
                         Text(
-                          'Calories: ${widget.food.calories ?? 'N/A'} kcal\nProtein: ${widget.food.proteinG ?? 'N/A'} g\nCarbs: ${widget.food.carbohydrateG ?? 'N/A'} g\nFat: ${widget.food.fatG ?? 'N/A'} g',
+                          'Calories: ${widget.food.calories ?? 'N/A'} kcal\nProtein: ${widget.food.proteinGrams ?? 'N/A'} g\nCarbs: ${widget.food.carbsGrams ?? 'N/A'} g\nFat: ${widget.food.fatGrams ?? 'N/A'} g',
                           style: const TextStyle(fontSize: 16, height: 1.5),
                         ),
                         const Divider(color: Colors.grey, thickness: 1, height: 32), // Garis di bawah nutrisi

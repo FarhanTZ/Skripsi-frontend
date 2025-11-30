@@ -17,12 +17,12 @@ class MealLogRepositoryImpl implements MealLogRepository {
   });
 
   @override
-  Future<Either<Failure, Unit>> addMealLog(MealLog mealLog) async {
+  Future<Either<Failure, MealLog>> addMealLog(MealLog mealLog) async {
     try {
       final token = await localDataSource.getLastToken();
       final mealLogModel = MealLogModel.fromEntity(mealLog);
-      await remoteDataSource.addMealLog(mealLogModel, token);
-      return const Right(unit);
+      final createdLog = await remoteDataSource.addMealLog(mealLogModel, token);
+      return Right(createdLog);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     }
@@ -62,12 +62,12 @@ class MealLogRepositoryImpl implements MealLogRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> updateMealLog(MealLog mealLog) async {
+  Future<Either<Failure, MealLog>> updateMealLog(MealLog mealLog) async {
     try {
       final token = await localDataSource.getLastToken();
       final mealLogModel = MealLogModel.fromEntity(mealLog);
-      await remoteDataSource.updateMealLog(mealLogModel, token);
-      return const Right(unit);
+      final updatedLog = await remoteDataSource.updateMealLog(mealLogModel, token);
+      return Right(updatedLog);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     }

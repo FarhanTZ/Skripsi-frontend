@@ -5,13 +5,13 @@ import 'package:glupulse/features/meal_log/domain/entities/meal_log.dart';
 import 'package:glupulse/features/meal_log/domain/repositories/meal_log_repository.dart';
 import 'package:equatable/equatable.dart';
 
-class UpdateMealLog implements UseCase<Unit, UpdateMealLogParams> {
+class UpdateMealLog implements UseCase<MealLog, UpdateMealLogParams> {
   final MealLogRepository repository;
 
   UpdateMealLog(this.repository);
 
   @override
-  Future<Either<Failure, Unit>> call(UpdateMealLogParams params) async {
+  Future<Either<Failure, MealLog>> call(UpdateMealLogParams params) async {
     return await repository.updateMealLog(params.mealLog);
   }
 }

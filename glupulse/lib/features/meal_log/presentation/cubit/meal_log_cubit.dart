@@ -64,7 +64,7 @@ class MealLogCubit extends Cubit<MealLogState> {
     emit(
       failureOrSuccess.fold(
         (failure) => MealLogError(message: _mapFailureToMessage(failure)),
-        (_) => MealLogAdded(),
+        (createdLog) => MealLogAdded(mealLog: createdLog),
       ),
     );
   }
@@ -76,7 +76,7 @@ class MealLogCubit extends Cubit<MealLogState> {
     emit(
       failureOrSuccess.fold(
         (failure) => MealLogError(message: _mapFailureToMessage(failure)),
-        (_) => MealLogUpdated(),
+        (updatedLog) => MealLogDetailLoaded(mealLog: updatedLog),
       ),
     );
   }

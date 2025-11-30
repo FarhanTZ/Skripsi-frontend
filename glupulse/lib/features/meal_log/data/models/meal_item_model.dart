@@ -21,6 +21,10 @@ class MealItemModel extends MealItem {
     num? glycemicLoad,
     String? foodCategory,
     DateTime? createdAt,
+    num? saturatedFatGrams,
+    num? monounsaturatedFatGrams,
+    num? polyunsaturatedFatGrams,
+    num? cholesterolMg,
   }) : super(
           itemId: itemId,
           mealId: mealId,
@@ -41,6 +45,10 @@ class MealItemModel extends MealItem {
           glycemicLoad: glycemicLoad,
           foodCategory: foodCategory,
           createdAt: createdAt,
+          saturatedFatGrams: saturatedFatGrams,
+          monounsaturatedFatGrams: monounsaturatedFatGrams,
+          polyunsaturatedFatGrams: polyunsaturatedFatGrams,
+          cholesterolMg: cholesterolMg,
         );
 
   factory MealItemModel.fromJson(Map<String, dynamic> json) {
@@ -66,30 +74,39 @@ class MealItemModel extends MealItem {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
+      saturatedFatGrams: json['saturated_fat_grams'],
+      monounsaturatedFatGrams: json['monounsaturated_fat_grams'],
+      polyunsaturatedFatGrams: json['polyunsaturated_fat_grams'],
+      cholesterolMg: json['cholesterol_mg'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'item_id': itemId,
-      'meal_id': mealId,
+      'item_id': itemId, // Keep this nullable or remove if create only
+      'meal_id': mealId, // Keep this nullable or remove if create only
       'food_name': foodName,
-      'food_id': foodId,
-      'seller': seller,
-      'serving_size': servingSize,
-      'serving_size_grams': servingSizeGrams,
+      'food_id': foodId ?? "", // Empty string if null (manual input)
+      'seller': seller ?? "", // Empty string if null
+      'serving_size': servingSize ?? "", // Empty string if null
+      'serving_size_grams': servingSizeGrams ?? 0, // Default to 0 if null
       'quantity': quantity,
-      'calories': calories,
-      'carbs_grams': carbsGrams,
-      'fiber_grams': fiberGrams,
-      'protein_grams': proteinGrams,
-      'fat_grams': fatGrams,
-      'sugar_grams': sugarGrams,
-      'sodium_mg': sodiumMg,
-      'glycemic_index': glycemicIndex,
-      'glycemic_load': glycemicLoad,
-      'food_category': foodCategory,
-      'created_at': createdAt?.toIso8601String(),
+      'calories': calories ?? 0,
+      'carbs_grams': carbsGrams ?? 0,
+      'protein_grams': proteinGrams ?? 0,
+      'fat_grams': fatGrams ?? 0,
+      'fiber_grams': fiberGrams ?? 0,
+      'sugar_grams': sugarGrams ?? 0,
+      'sodium_mg': sodiumMg ?? 0,
+      'glycemic_index': glycemicIndex ?? 0,
+      'glycemic_load': glycemicLoad ?? 0,
+      'food_category': foodCategory ?? "", // Empty string if null
+      'saturated_fat_grams': saturatedFatGrams ?? 0,
+      'monounsaturated_fat_grams': monounsaturatedFatGrams ?? 0,
+      'polyunsaturated_fat_grams': polyunsaturatedFatGrams ?? 0,
+      'cholesterol_mg': cholesterolMg ?? 0,
+      // created_at is usually server-generated, can be omitted or kept if needed
+      if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
     };
   }
 }

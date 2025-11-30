@@ -37,29 +37,7 @@ class MealLogRemoteDataSourceImpl implements MealLogRemoteDataSource {
         '/health/log/meal/$id',
         token: token,
       );
-      // The API returns a wrapped object { "items": [...], "meal_log": {...} } for detail
-      // But MealLogModel.fromJson expects the flattened fields or nested structure?
-      // Let's check the API response structure for detail again.
-      /*
-        {
-            "items": [...],
-            "meal_log": {
-                "meal_id": "...",
-                ...
-            }
-        }
-      */
-      // My MealLogModel structure has `items` and `mealId` etc at the same level.
-      // I need to merge them or handle this structure.
-      // I will handle it here by merging them into a single map before passing to fromJson.
-
-      final Map<String, dynamic> mealLogData = response['meal_log'];
-      final List<dynamic> itemsData = response['items'];
-      
-      final Map<String, dynamic> mergedData = Map.from(mealLogData);
-      mergedData['items'] = itemsData;
-
-      return MealLogModel.fromJson(mergedData);
+      return _parseMealLogResponse(response);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -68,18 +46,12 @@ class MealLogRemoteDataSourceImpl implements MealLogRemoteDataSource {
   @override
   Future<MealLogModel> addMealLog(MealLogModel mealLog, String token) async {
     try {
-      // API expects payload structure for POST.
-      // Check @api.md for POST payload.
-      // It seems to accept fields directly.
       final response = await apiClient.post(
         '/health/log/meal',
-        body: mealLog.toJson(), // Ensure toJson matches POST payload expectations
+        body: mealLog.toJson(),
         token: token,
       );
-      // Response might be the created object? Standard REST practice.
-      // Assuming it returns the created object or I might need to fetch it.
-      // Codebase usually assumes response is the object.
-      return MealLogModel.fromJson(response);
+      return _parseMealLogResponse(response);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -93,10 +65,32 @@ class MealLogRemoteDataSourceImpl implements MealLogRemoteDataSource {
         body: mealLog.toJson(),
         token: token,
       );
-      return MealLogModel.fromJson(response);
+      return _parseMealLogResponse(response);
     } catch (e) {
       throw ServerException(e.toString());
     }
+  }
+
+  MealLogModel _parseMealLogResponse(dynamic response) {
+    if (response is Map<String, dynamic>) {
+      Map<String, dynamic>? mealLogData;
+      if (response.containsKey('meal_log')) {
+        mealLogData = response['meal_log'];
+      } else if (response.containsKey('_meal_log')) {
+        mealLogData = response['_meal_log'];
+      }
+
+      if (mealLogData != null) {
+        final List<dynamic>? itemsData = response['items'];
+
+        final Map<String, dynamic> mergedData = Map.from(mealLogData);
+        if (itemsData != null) {
+          mergedData['items'] = itemsData;
+        }
+        return MealLogModel.fromJson(mergedData);
+      }
+    }
+    return MealLogModel.fromJson(response);
   }
 
   @override

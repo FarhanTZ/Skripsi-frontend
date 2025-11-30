@@ -65,23 +65,29 @@ class MealLogModel extends MealLog {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'meal_id': mealId,
-      'user_id': userId,
+    final Map<String, dynamic> data = {
       'meal_timestamp': mealTimestamp.toUtc().toIso8601String(),
       'meal_type_id': mealTypeId,
-      'description': description,
-      'total_calories': totalCalories,
-      'total_carbs_grams': totalCarbsGrams,
-      'total_protein_grams': totalProteinGrams,
-      'total_fat_grams': totalFatGrams,
-      'total_fiber_grams': totalFiberGrams,
-      'total_sugar_grams': totalSugarGrams,
-      'tags': tags,
-      'items': items?.map((item) => (item as MealItemModel).toJson()).toList(),
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
     };
+
+    if (mealId != null) data['meal_id'] = mealId;
+    if (userId != null) data['user_id'] = userId;
+    if (description != null) data['description'] = description;
+    if (totalCalories != null) data['total_calories'] = totalCalories;
+    if (totalCarbsGrams != null) data['total_carbs_grams'] = totalCarbsGrams;
+    if (totalProteinGrams != null) data['total_protein_grams'] = totalProteinGrams;
+    if (totalFatGrams != null) data['total_fat_grams'] = totalFatGrams;
+    if (totalFiberGrams != null) data['total_fiber_grams'] = totalFiberGrams;
+    if (totalSugarGrams != null) data['total_sugar_grams'] = totalSugarGrams;
+    if (tags != null) data['tags'] = tags;
+    if (items != null) {
+      data['items'] = items!.map((item) => (item as MealItemModel).toJson()).toList();
+    }
+    // created_at and updated_at are typically read-only, avoid sending unless necessary
+    if (createdAt != null) data['created_at'] = createdAt!.toIso8601String();
+    if (updatedAt != null) data['updated_at'] = updatedAt!.toIso8601String();
+
+    return data;
   }
 
   factory MealLogModel.fromEntity(MealLog entity) {
@@ -119,6 +125,10 @@ class MealLogModel extends MealLog {
                 glycemicLoad: item.glycemicLoad,
                 foodCategory: item.foodCategory,
                 createdAt: item.createdAt,
+                saturatedFatGrams: item.saturatedFatGrams,
+                monounsaturatedFatGrams: item.monounsaturatedFatGrams,
+                polyunsaturatedFatGrams: item.polyunsaturatedFatGrams,
+                cholesterolMg: item.cholesterolMg,
               ))
           .toList(),
       createdAt: entity.createdAt,

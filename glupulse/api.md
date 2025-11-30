@@ -580,169 +580,173 @@ update
 /health/medication/log/9c6a5e9a-a2df-40ec-9a6e-5c678560ebb4
 
 
+/foods
 
-/health/meal/log
-post
-{
-    "meal_timestamp": "2025-11-25T19:30:00+07:00",
-    "meal_type_id": 2,
-    "description": "High protein meal after a session at the gym.",
-    "tags": ["homemade", "high-protein"],
-    "items": [
-        {
-            "food_name": "Grilled Chicken Salad",
-            "food_id": "2e766c3b-e374-4ab2-8b2a-ac1a3738c27b",
-            "seller": "",
-            "serving_size": "",
-            "serving_size_grams": 0,
-            "quantity": 1.0,
-            "calories": 12,
-            "carbs_grams": 10.0,
-            "protein_grams": 45.0,
-            "fat_grams": 10,
-            "fiber_grams": 5,
-            "sugar_grams": 7,
-            "sodium_mg": 8,
-            "glycemic_index": 21,
-            "glycemic_load": 23,
-            "food_category": ""
-        },
-        {
-            "food_name": "Rawon",
-            "food_id": "",
-            "seller": "",
-            "serving_size": "",
-            "serving_size_grams": 0,
-            "quantity": 1.0,
-            "calories": 0,
-            "carbs_grams": 10.0,
-            "protein_grams": 45.0,
-            "fat_grams": 0,
-            "fiber_grams": 0,
-            "sugar_grams": 0,
-            "sodium_mg": 0,
-            "glycemic_index": 0,
-            "glycemic_load": 0,
-            "food_category": ""
-        }
-    ]
-}
-
-update
-/health/meal/log/bc12e3cc-8dc2-4a56-a284-e8c5ee98e0da
-
-get
-/health/log/meals
+get aja
 [
     {
-        "meal_id": "bc12e3cc-8dc2-4a56-a284-e8c5ee98e0da",
-        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
-        "meal_timestamp": "2025-11-25T19:30:00+07:00",
-        "meal_type_id": 3,
-        "description": "High protein meal after a session at the gym.",
-        "total_calories": 12,
-        "total_carbs_grams": 20,
-        "total_protein_grams": 90,
-        "total_fat_grams": 10,
-        "total_fiber_grams": 5,
-        "total_sugar_grams": 7,
+        "food_id": "cce04c78-054e-47c3-a5ed-0509cfc7779d",
+        "seller_id": "8760aa72-c990-4008-a81b-ec139aed224e",
+        "food_name": "Classic Grilled Chicken Salad",
+        "description": "Tender grilled chicken breast served over fresh mixed greens, cherry tomatoes, and cucumbers. Comes with a light lemon vinaigrette.",
+        "price": 75000,
+        "currency": "IDR",
+        "photo_url": "https://placehold.co/600x400/556B2F/FFFFFF?text=Grilled+Chicken+Salad",
+        "thumbnail_url": "https://placehold.co/200x200/556B2F/FFFFFF?text=Salad",
+        "is_available": true,
+        "stock_count": 50,
         "tags": [
-            "homemade",
-            "high-protein"
+            "healthy",
+            "low-carb",
+            "high-protein",
+            "gluten-free"
         ],
-        "created_at": "2025-11-25T22:17:53.2623+07:00",
-        "updated_at": "2025-11-25T22:42:04.029735+07:00"
+        "created_at": "2025-11-17T16:15:00.798699+07:00",
+        "updated_at": "2025-11-17T16:15:00.798699+07:00",
+        "serving_size": null,
+        "serving_size_grams": null,
+        "quantity": null,
+        "calories": null,
+        "carbs_grams": null,
+        "fiber_grams": null,
+        "protein_grams": null,
+        "fat_grams": null,
+        "sugar_grams": null,
+        "sodium_mg": null,
+        "glycemic_index": null,
+        "glycemic_load": null,
+        "food_category": null
     },
     {
-        "meal_id": "573dcdb7-81f0-4019-9537-52417e0ce4d8",
-        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
-        "meal_timestamp": "2025-11-25T19:30:00+07:00",
-        "meal_type_id": 2,
-        "description": "High protein meal after a session at the gym.",
-        "total_calories": 12,
-        "total_carbs_grams": 20,
-        "total_protein_grams": 90,
-        "total_fat_grams": 10,
-        "total_fiber_grams": 5,
-        "total_sugar_grams": 7,
+        "food_id": "2e766c3b-e374-4ab2-8b2a-ac1a3738c27b",
+        "seller_id": "8760aa72-c990-4008-a81b-ec139aed224e",
+        "food_name": "Fresh Squeezed Orange Juice",
+        "description": "250ml of 100% pure, fresh squeezed orange juice. No added sugar.",
+        "price": 30000,
+        "currency": "IDR",
+        "photo_url": "https://placehold.co/600x400/FFA500/FFFFFF?text=Orange+Juice",
+        "thumbnail_url": "https://placehold.co/200x200/FFA500/FFFFFF?text=Juice",
+        "is_available": true,
+        "stock_count": 100,
         "tags": [
-            "homemade",
-            "high-protein"
+            "drink",
+            "fresh",
+            "no-sugar-added",
+            "vegan"
         ],
-        "created_at": "2025-11-25T23:18:35.211157+07:00",
-        "updated_at": "2025-11-25T23:18:35.211157+07:00"
+        "created_at": "2025-11-17T16:15:00.798699+07:00",
+        "updated_at": "2025-11-17T16:15:00.798699+07:00",
+        "serving_size": null,
+        "serving_size_grams": null,
+        "quantity": null,
+        "calories": null,
+        "carbs_grams": null,
+        "fiber_grams": null,
+        "protein_grams": null,
+        "fat_grams": null,
+        "sugar_grams": null,
+        "sodium_mg": null,
+        "glycemic_index": null,
+        "glycemic_load": null,
+        "food_category": null
+    },
+    {
+        "food_id": "362f0eaa-4321-4d1e-8c22-00b6c3c3ef6e",
+        "seller_id": "8760aa72-c990-4008-a81b-ec139aed224e",
+        "food_name": "Hearty Lentil Soup",
+        "description": "A warm and comforting classic lentil soup with carrots, celery, and onions.",
+        "price": 45000,
+        "currency": "IDR",
+        "photo_url": "https://placehold.co/600x400/8B4513/FFFFFF?text=Lentil+Soup",
+        "thumbnail_url": "https://placehold.co/200x200/8B4513/FFFFFF?text=Soup",
+        "is_available": true,
+        "stock_count": 30,
+        "tags": [
+            "healthy",
+            "vegan",
+            "high-fiber",
+            "soup"
+        ],
+        "created_at": "2025-11-17T16:15:00.798699+07:00",
+        "updated_at": "2025-11-17T16:15:00.798699+07:00",
+        "serving_size": null,
+        "serving_size_grams": null,
+        "quantity": null,
+        "calories": null,
+        "carbs_grams": null,
+        "fiber_grams": null,
+        "protein_grams": null,
+        "fat_grams": null,
+        "sugar_grams": null,
+        "sodium_mg": null,
+        "glycemic_index": null,
+        "glycemic_load": null,
+        "food_category": null
+    },
+    {
+        "food_id": "f617bd1e-1986-4463-807f-aaea3eef3ad3",
+        "seller_id": "8760aa72-c990-4008-a81b-ec139aed224e",
+        "food_name": "Quinoa & Avocado Power Bowl",
+        "description": "A hearty bowl of red quinoa, sliced avocado, black beans, corn, and a cilantro-lime dressing.",
+        "price": 68000,
+        "currency": "IDR",
+        "photo_url": "https://placehold.co/600x400/8A9A5B/FFFFFF?text=Quinoa+Bowl",
+        "thumbnail_url": "https://placehold.co/200x200/8A9A5B/FFFFFF?text=Bowl",
+        "is_available": true,
+        "stock_count": 40,
+        "tags": [
+            "healthy",
+            "vegan",
+            "high-fiber",
+            "gluten-free"
+        ],
+        "created_at": "2025-11-17T16:15:00.798699+07:00",
+        "updated_at": "2025-11-17T16:15:00.798699+07:00",
+        "serving_size": null,
+        "serving_size_grams": null,
+        "quantity": null,
+        "calories": null,
+        "carbs_grams": null,
+        "fiber_grams": null,
+        "protein_grams": null,
+        "fat_grams": null,
+        "sugar_grams": null,
+        "sodium_mg": null,
+        "glycemic_index": null,
+        "glycemic_load": null,
+        "food_category": null
+    },
+    {
+        "food_id": "c99f7a66-46d0-4b8c-8b72-5ccc31bf1890",
+        "seller_id": "8760aa72-c990-4008-a81b-ec139aed224e",
+        "food_name": "Steamed Salmon with Brown Rice",
+        "description": "Flaky steamed salmon fillet served with a side of wholesome brown rice and steamed broccoli.",
+        "price": 110000,
+        "currency": "IDR",
+        "photo_url": "https://placehold.co/600x400/FA8072/FFFFFF?text=Steamed+Salmon",
+        "thumbnail_url": "https://placehold.co/200x200/FA8072/FFFFFF?text=Salmon",
+        "is_available": true,
+        "stock_count": 25,
+        "tags": [
+            "healthy",
+            "high-protein",
+            "omega-3"
+        ],
+        "created_at": "2025-11-17T16:15:00.798699+07:00",
+        "updated_at": "2025-11-17T16:15:00.798699+07:00",
+        "serving_size": null,
+        "serving_size_grams": null,
+        "quantity": null,
+        "calories": null,
+        "carbs_grams": null,
+        "fiber_grams": null,
+        "protein_grams": null,
+        "fat_grams": null,
+        "sugar_grams": null,
+        "sodium_mg": null,
+        "glycemic_index": null,
+        "glycemic_load": null,
+        "food_category": null
     }
 ]
 
-
-
-get meal log by id
-/health/log/meal/0e855acc-64ea-4a3b-b156-8dc922d10227
-
-{
-    "items": [
-        {
-            "item_id": "613d34ee-2d21-47f4-a187-ea888464fae8",
-            "meal_id": "0e855acc-64ea-4a3b-b156-8dc922d10227",
-            "food_name": "Grilled Chicken Salad",
-            "food_id": "2e766c3b-e374-4ab2-8b2a-ac1a3738c27b",
-            "seller": "",
-            "serving_size": "",
-            "serving_size_grams": 0,
-            "quantity": 1,
-            "calories": 0,
-            "carbs_grams": 10,
-            "fiber_grams": 0,
-            "protein_grams": 45,
-            "fat_grams": 0,
-            "sugar_grams": 0,
-            "sodium_mg": 0,
-            "glycemic_index": 0,
-            "glycemic_load": 0,
-            "food_category": "",
-            "created_at": "2025-11-25T22:13:42.594701+07:00"
-        },
-        {
-            "item_id": "501de34a-e7ac-407f-a62b-241a4c06fa62",
-            "meal_id": "0e855acc-64ea-4a3b-b156-8dc922d10227",
-            "food_name": "Rawon",
-            "food_id": null,
-            "seller": "",
-            "serving_size": "",
-            "serving_size_grams": 0,
-            "quantity": 1,
-            "calories": 0,
-            "carbs_grams": 10,
-            "fiber_grams": 0,
-            "protein_grams": 45,
-            "fat_grams": 0,
-            "sugar_grams": 0,
-            "sodium_mg": 0,
-            "glycemic_index": 0,
-            "glycemic_load": 0,
-            "food_category": "",
-            "created_at": "2025-11-25T22:13:42.594701+07:00"
-        }
-    ],
-    "meal_log": {
-        "meal_id": "0e855acc-64ea-4a3b-b156-8dc922d10227",
-        "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
-        "meal_timestamp": "2025-11-25T19:30:00+07:00",
-        "meal_type_id": 3,
-        "description": "High protein meal after a session at the gym.",
-        "total_calories": 0,
-        "total_carbs_grams": 20,
-        "total_protein_grams": 90,
-        "total_fat_grams": 0,
-        "total_fiber_grams": 0,
-        "total_sugar_grams": 0,
-        "tags": [
-            "homemade",
-            "high-protein"
-        ],
-        "created_at": "2025-11-25T22:13:42.594701+07:00",
-        "updated_at": "2025-11-25T22:13:42.594701+07:00"
-    }
-}
-Delete
-health/log/meal/0e855acc-64ea-4a3b-b156-8dc922d10227
