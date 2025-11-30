@@ -303,3 +303,12 @@ Dan
         }
     ]
 }
+
+
+
+
+repsonya debugin update meal log
+I/flutter (22841): Save button pressed
+I/flutter (22841): Form validation passed. Preparing data...
+I/flutter (22841): DEBUG: Calling PUT updateMealLog for ID b6e7e02c-cc55-4a86-aa32-705ca2262a52
+I/flutter (22841): DEBUG: PUT response received: {meal_log: {meal_id: b6e7e02c-cc55-4a86-aa32-705ca2262a52, meal_timestamp: 2025-11-30T12:23:00+07:00, meal_type_id: 2, meal_type_name: Lunch}, items: [{item_id: daf439a4-d3ad-4440-9752-e53a93e46064, meal_id: b6e7e02c-cc55-4a86-aa32-705ca2262a52, food_name: Hearty Lentil Soup, food_id: 362f0eaa-4321-4d1e-8c22-00b6c3c3ef6e, seller: , serving_size: 1 serving, serving_size_grams: 100.0, quantity: 1.0, calories: 0, carbs_grams: 0, fiber_grams: 0, protein_grams: 0, fat_grams: 0, sugar_grams: 0, sodium_mg: 0, glycemic_index: 0, glycemic_load: 0, food_category: , created_at: 2025-11-30T20:39:49.58557+07:00, saturated_fat_grams: 0, monounsaturated_fat_grams: 0, polyunsaturated_fat_grams: 0, cholesterol_mg: 0}]}

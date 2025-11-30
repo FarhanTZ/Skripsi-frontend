@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glupulse/features/Food/domain/entities/food.dart';
 import 'package:glupulse/features/meal_log/domain/entities/meal_log.dart'; // Untuk MealItem
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
 
@@ -75,22 +76,7 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
                   title: Text(food.foodName, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text('${food.calories} kcal • ${food.carbsGrams}g carbs'),
                   trailing: const Icon(Icons.add_circle_outline, color: Colors.green),
-                  onTap: () {
-                    // Konversi Food entity (dari FoodCubit) ke MealItem (untuk MealLog)
-                    final mealItem = MealItem(
-                      foodName: food.foodName,
-                      foodId: food.foodId,
-                      quantity: 1, // Default 1 serving
-                      calories: food.calories,
-                      carbsGrams: food.carbsGrams,
-                      proteinGrams: food.proteinGrams,
-                      fatGrams: food.fatGrams,
-                      servingSize: '1 serving', // Placeholder
-                      servingSizeGrams: 100, // Placeholder standard
-                    );
-                    // Kembalikan item yang dipilih ke halaman sebelumnya
-                    Navigator.of(context).pop(mealItem);
-                  },
+                  onTap: () => _showQuantityDialog(context, food),
                 );
               },
             );
@@ -103,8 +89,61 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
     );
   }
 
+  // Dialog to select quantity for database food
+  void _showQuantityDialog(BuildContext context, Food food) {
+    final quantityController = TextEditingController(text: '1');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Add ${food.foodName}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: quantityController,
+              decoration: const InputDecoration(labelText: 'Quantity (servings)'),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '1 serving = ${food.calories} kcal',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              final qty = num.tryParse(quantityController.text) ?? 1;
+              
+              final mealItem = MealItem(
+                foodName: food.foodName,
+                foodId: food.foodId,
+                quantity: qty,
+                calories: food.calories,
+                carbsGrams: food.carbsGrams,
+                proteinGrams: food.proteinGrams,
+                fatGrams: food.fatGrams,
+                fiberGrams: food.fiberGrams,
+                sugarGrams: food.sugarGrams,
+                servingSize: '1 serving', 
+                servingSizeGrams: 100, 
+              );
+              Navigator.pop(ctx); 
+              Navigator.pop(context, mealItem); 
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showManualInputForm(BuildContext context) {
     final nameController = TextEditingController();
+    final qtyController = TextEditingController(text: '1');
     final calController = TextEditingController();
     final carbController = TextEditingController();
     final protController = TextEditingController();
@@ -123,6 +162,12 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Food Name *'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: qtyController,
+                decoration: const InputDecoration(labelText: 'Quantity (servings)'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
               const SizedBox(height: 8),
               Row(
@@ -159,8 +204,8 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
               
               final item = MealItem(
                 foodName: nameController.text,
-                // foodId null menandakan manual/custom food
-                quantity: 1,
+                // foodId null indicates custom/manual food
+                quantity: num.tryParse(qtyController.text) ?? 1,
                 calories: num.tryParse(calController.text),
                 carbsGrams: num.tryParse(carbController.text),
                 proteinGrams: num.tryParse(protController.text),
@@ -170,8 +215,8 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
                 servingSize: '1 serving',
                 servingSizeGrams: 100,
               );
-              Navigator.pop(ctx); // Tutup dialog
-              Navigator.pop(context, item); // Kembali ke AddMealLogPage dengan item
+              Navigator.pop(ctx); // Close dialog
+              Navigator.pop(context, item); // Return item to previous page
             },
             child: const Text('Add'),
           ),

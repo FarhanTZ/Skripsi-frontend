@@ -106,6 +106,58 @@ class MealItem extends Equatable {
     this.cholesterolMg,
   });
 
+  MealItem copyWith({
+    String? itemId,
+    String? mealId,
+    String? foodName,
+    String? foodId,
+    String? seller,
+    String? servingSize,
+    num? servingSizeGrams,
+    num? quantity,
+    num? calories,
+    num? carbsGrams,
+    num? fiberGrams,
+    num? proteinGrams,
+    num? fatGrams,
+    num? sugarGrams,
+    num? sodiumMg,
+    num? glycemicIndex,
+    num? glycemicLoad,
+    String? foodCategory,
+    DateTime? createdAt,
+    num? saturatedFatGrams,
+    num? monounsaturatedFatGrams,
+    num? polyunsaturatedFatGrams,
+    num? cholesterolMg,
+  }) {
+    return MealItem(
+      itemId: itemId ?? this.itemId,
+      mealId: mealId ?? this.mealId,
+      foodName: foodName ?? this.foodName,
+      foodId: foodId ?? this.foodId,
+      seller: seller ?? this.seller,
+      servingSize: servingSize ?? this.servingSize,
+      servingSizeGrams: servingSizeGrams ?? this.servingSizeGrams,
+      quantity: quantity ?? this.quantity,
+      calories: calories ?? this.calories,
+      carbsGrams: carbsGrams ?? this.carbsGrams,
+      fiberGrams: fiberGrams ?? this.fiberGrams,
+      proteinGrams: proteinGrams ?? this.proteinGrams,
+      fatGrams: fatGrams ?? this.fatGrams,
+      sugarGrams: sugarGrams ?? this.sugarGrams,
+      sodiumMg: sodiumMg ?? this.sodiumMg,
+      glycemicIndex: glycemicIndex ?? this.glycemicIndex,
+      glycemicLoad: glycemicLoad ?? this.glycemicLoad,
+      foodCategory: foodCategory ?? this.foodCategory,
+      createdAt: createdAt ?? this.createdAt,
+      saturatedFatGrams: saturatedFatGrams ?? this.saturatedFatGrams,
+      monounsaturatedFatGrams: monounsaturatedFatGrams ?? this.monounsaturatedFatGrams,
+      polyunsaturatedFatGrams: polyunsaturatedFatGrams ?? this.polyunsaturatedFatGrams,
+      cholesterolMg: cholesterolMg ?? this.cholesterolMg,
+    );
+  }
+
   @override
   List<Object?> get props => [
         itemId,

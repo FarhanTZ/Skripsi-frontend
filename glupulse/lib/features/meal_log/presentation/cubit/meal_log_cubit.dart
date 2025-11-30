@@ -70,13 +70,21 @@ class MealLogCubit extends Cubit<MealLogState> {
   }
 
   Future<void> updateMealLog(MealLog mealLog) async {
+    print('CUBIT: updateMealLog called');
     emit(MealLogLoading());
     final failureOrSuccess =
         await updateMealLogUseCase(UpdateMealLogParams(mealLog: mealLog));
+    print('CUBIT: updateMealLog result received');
     emit(
       failureOrSuccess.fold(
-        (failure) => MealLogError(message: _mapFailureToMessage(failure)),
-        (updatedLog) => MealLogDetailLoaded(mealLog: updatedLog),
+        (failure) {
+          print('CUBIT: updateMealLog failed: ${_mapFailureToMessage(failure)}');
+          return MealLogError(message: _mapFailureToMessage(failure));
+        },
+        (updatedLog) {
+          print('CUBIT: updateMealLog success');
+          return MealLogUpdated();
+        },
       ),
     );
   }

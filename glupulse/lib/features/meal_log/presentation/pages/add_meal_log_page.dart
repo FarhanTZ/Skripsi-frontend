@@ -96,7 +96,20 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
   }
 
   void _submit() {
-    if (!_formKey.currentState!.validate()) return;
+    debugPrint('Save button pressed'); // Debug log
+
+    if (!_formKey.currentState!.validate()) {
+      debugPrint('Form validation failed');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fix the errors in the form.')),
+      );
+      return;
+    }
+
+    debugPrint('Form validation passed. Preparing data...');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Saving...')),
+    );
 
     final finalDateTime = DateTime(
       _selectedDate.year,
@@ -105,6 +118,7 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
       _selectedTime.hour,
       _selectedTime.minute,
     );
+    // ... rest of the function
 
     final tags = _tagsController.text.isNotEmpty
         ? _tagsController.text.split(',').map((e) => e.trim()).toList()
@@ -122,6 +136,12 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
     if (widget.mealLog == null) {
       context.read<MealLogCubit>().addMealLog(mealLog);
     } else {
+      if (mealLog.mealId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: Meal ID is missing for update.')),
+        );
+        return;
+      }
       context.read<MealLogCubit>().updateMealLog(mealLog);
     }
   }
@@ -136,14 +156,31 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
         foregroundColor: Colors.black87,
         elevation: 0,
         actions: [
-          TextButton(
-            onPressed: _submit,
-            child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          BlocBuilder<MealLogCubit, MealLogState>(
+            builder: (context, state) {
+              if (state is MealLogLoading) {
+                return const Padding(
+                  padding: EdgeInsets.only(right: 16.0),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                );
+              }
+              return TextButton(
+                onPressed: _submit,
+                child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              );
+            },
           )
         ],
       ),
       body: BlocListener<MealLogCubit, MealLogState>(
         listener: (context, state) {
+          print('UI LISTENER: Received state $state');
           if (state is MealLogDetailLoaded) {
             // Update state lokal saat detail berhasil diambil
             setState(() {
@@ -156,6 +193,7 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
               _tagsController.text = state.mealLog.tags?.join(', ') ?? '';
             });
           } else if (state is MealLogAdded || state is MealLogUpdated) {
+            print('UI LISTENER: Success state received. Popping...');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Meal log saved successfully!')),
             );
@@ -250,6 +288,12 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
               const SizedBox(height: 24),
               _buildSectionHeader('Food Items'),
               const SizedBox(height: 12),
+
+              // --- Nutrition Summary ---
+              if (_selectedItems.isNotEmpty) ...[
+                _buildNutritionSummary(),
+                const SizedBox(height: 16),
+              ],
               
               // --- Food Items List ---
               if (_selectedItems.isEmpty)
@@ -297,6 +341,81 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
     );
   }
 
+  Widget _buildNutritionSummary() {
+    double totalCal = 0;
+    double totalCarbs = 0;
+    double totalProt = 0;
+    double totalFat = 0;
+    double totalFiber = 0;
+    double totalSugar = 0;
+
+    for (var item in _selectedItems) {
+      final qty = item.quantity;
+      totalCal += (item.calories ?? 0) * qty;
+      totalCarbs += (item.carbsGrams ?? 0) * qty;
+      totalProt += (item.proteinGrams ?? 0) * qty;
+      totalFat += (item.fatGrams ?? 0) * qty;
+      totalFiber += (item.fiberGrams ?? 0) * qty;
+      totalSugar += (item.sugarGrams ?? 0) * qty;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildMacroItem('Calories', '${totalCal.toStringAsFixed(0)} kcal'),
+              _buildMacroItem('Carbs', '${totalCarbs.toStringAsFixed(1)} g'),
+              _buildMacroItem('Protein', '${totalProt.toStringAsFixed(1)} g'),
+              _buildMacroItem('Fat', '${totalFat.toStringAsFixed(1)} g'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildMacroItem('Fiber', '${totalFiber.toStringAsFixed(1)} g'),
+              _buildMacroItem('Sugar', '${totalSugar.toStringAsFixed(1)} g'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMacroItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildEmptyItemsState() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -338,17 +457,52 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.foodName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text('${item.calories} kcal • ${item.quantity}x', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                Text('${item.calories ?? 0} kcal', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-            onPressed: () {
-              setState(() {
-                _selectedItems.removeAt(index);
-              });
-            },
+          // Quantity Selector
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                onPressed: () async {
+                  if (_selectedItems[index].quantity == 1) {
+                    final bool confirmDelete = await showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Delete Food Item?'),
+                        content: Text('Are you sure you want to remove "${_selectedItems[index].foodName}"?'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+                          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+                        ],
+                      ),
+                    ) ?? false;
+
+                    if (confirmDelete) {
+                      setState(() {
+                        _selectedItems.removeAt(index);
+                      });
+                    }
+                  } else {
+                    setState(() {
+                      _selectedItems[index] = _selectedItems[index].copyWith(quantity: _selectedItems[index].quantity - 1);
+                    });
+                  }
+                },
+              ),
+              Text(item.quantity.toStringAsFixed(0), style: const TextStyle(fontWeight: FontWeight.bold)),
+              IconButton(
+                icon: const Icon(Icons.add_circle_outline, color: Colors.green),
+                onPressed: () {
+                  setState(() {
+                    _selectedItems[index] = _selectedItems[index].copyWith(quantity: _selectedItems[index].quantity + 1);
+                  });
+                },
+              ),
+            ],
           ),
         ],
       ),
