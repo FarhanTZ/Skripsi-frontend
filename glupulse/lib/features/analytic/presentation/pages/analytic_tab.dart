@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
-import 'package:glupulse/core/usecases/usecase.dart';
-import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:glupulse/features/HealthData/presentation/pages/input_health_data_page.dart';
 import 'package:glupulse/features/glucose/presentation/pages/glucose_list_page.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
@@ -37,48 +33,92 @@ class _AnalyticTabState extends State<AnalyticTab> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    // Menggunakan ConstrainedBox untuk memastikan konten mengisi seluruh tinggi layar
-    // jika kontennya lebih pendek dari layar.
+
     return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height),
+      constraints:
+          BoxConstraints(minHeight: MediaQuery.of(context).size.height),
       child: SingleChildScrollView(
         child: Column(
           children: [
+            // --- 1. HEADER SECTION ---
             Container(
-            width: double.infinity,
-            height: 400,
-            decoration: BoxDecoration(
-              color: const Color(0xFF0F67FE),
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(50),
-              ),  
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
+              width: double.infinity,
+              // Removed fixed height 400 to let content dictate, but added padding
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF0F67FE),
+                    Color(0xFF4C8CFF), // Slightly lighter blue for gradient
+                  ],
                 ),
-              ],
-            ),
-            child: Stack( // Menggunakan Stack untuk menumpuk widget
-              children: [
-                Align(
-                  alignment: Alignment.center, // Align akan menengahkan child-nya
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(40),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0F67FE).withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 40.0, top: 20),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min, // Column hanya akan setinggi kontennya
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [ BlocBuilder<Hba1cCubit, Hba1cState>(
+                    children: [
+                      // Status Badge Top Right
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: BlocBuilder<Hba1cCubit, Hba1cState>(
+                            builder: (context, state) {
+                              if (state is Hba1cLoaded &&
+                                  state.hba1cRecords.isNotEmpty) {
+                                final sortedRecords =
+                                    List.from(state.hba1cRecords)
+                                      ..sort((a, b) =>
+                                          b.testDate.compareTo(a.testDate));
+                                final latestRecord = sortedRecords.first;
+                                final statusInfo =
+                                    _getHba1cStatus(latestRecord.hba1cPercentage);
+                                return _buildStatusBadge(
+                                  statusInfo['text']!,
+                                  // Use white/glass effect for better contrast on gradient
+                                  Colors.white.withValues(alpha: 0.2),
+                                  Colors.white,
+                                );
+                              }
+                              return _buildStatusBadge(
+                                  'No Data',
+                                  Colors.white.withValues(alpha: 0.2),
+                                  Colors.white70);
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Main Hba1c Display
+                      BlocBuilder<Hba1cCubit, Hba1cState>(
                         builder: (context, state) {
                           String hba1cValue = '0.0%';
                           String hba1cStatus = 'No data available.';
 
-                          if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
-                            // Urutkan data dari yang terbaru
+                          if (state is Hba1cLoaded &&
+                              state.hba1cRecords.isNotEmpty) {
                             final sortedRecords = List.from(state.hba1cRecords)
-                              ..sort((a, b) => b.testDate.compareTo(a.testDate));
+                              ..sort(
+                                  (a, b) => b.testDate.compareTo(a.testDate));
                             final latestRecord = sortedRecords.first;
-                            hba1cValue = '${latestRecord.hba1cPercentage.toStringAsFixed(1)}%';
-                            hba1cStatus = _getHba1cStatusMessage(latestRecord.hba1cPercentage);
+                            hba1cValue =
+                                '${latestRecord.hba1cPercentage.toStringAsFixed(1)}%';
+                            hba1cStatus = _getHba1cStatusMessage(
+                                latestRecord.hba1cPercentage);
                           }
 
                           return Column(
@@ -86,337 +126,331 @@ class _AnalyticTabState extends State<AnalyticTab> {
                               Text(
                                 hba1cValue,
                                 style: const TextStyle(
-                                  fontSize: 80,
+                                  fontSize: 72, // Slightly smaller for balance
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
+                                  height: 1.0,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'Last Hba1c',
                                 style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withValues(alpha: 0.9),
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Text(
-                                hba1cStatus,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white.withOpacity(0.8),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 30),
+                                child: Text(
+                                  hba1cStatus,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                  ),
                                 ),
                               ),
                             ],
                           );
                         },
-                      ),const SizedBox(height: 24), // Spasi sebelum tombol
-                      ElevatedButton( // Tombol di luar BlocBuilder
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const GlucoseListPage(),
-                          ));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Theme.of(context).colorScheme.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                        ),
-                        child: const Text(
-                          'Track Glucose',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                      )
+                      ),
+                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
-                Positioned(
-                  bottom: 24,
-                  left: 24,
-                  right: 24,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const Hba1cListPage(),
-                            ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Theme.of(context).colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                          ),
-                          child: const Text(
-                            'Track Hba1c',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const ActivityTypeListPage(),
-                            ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Theme.of(context).colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                          ),
-                          child: const Text(
-                            'Track Activity',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const HealthEventListPage(),
-                            ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Theme.of(context).colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                          ),
-                          child: const Text(
-                            'Log Health Event',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                         ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const SleepLogListPage(),
-                            ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Theme.of(context).colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                          ),
-                          child: const Text(
-                            'Sleep Log',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const MedicationLogListPage(),
-                            ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Theme.of(context).colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                          ),
-                          child: const Text(
-                            'Log Medication',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const MealLogPage(),
-                            ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Theme.of(context).colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                          ),
-                          child: const Text(
-                            'Log Meal',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ), // <-- Added comma here
-
-                // Widget untuk status kesehatan di pojok kanan atas
-                Positioned(
-                  top: 20,
-                  right: 20,
-                  child: BlocBuilder<Hba1cCubit, Hba1cState>(
-                    builder: (context, state) {
-                      if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
-                        // Urutkan data dari yang terbaru
-                        final sortedRecords = List.from(state.hba1cRecords)
-                          ..sort((a, b) => b.testDate.compareTo(a.testDate));
-                        final latestRecord = sortedRecords.first;
-                        final statusInfo = _getHba1cStatus(latestRecord.hba1cPercentage);
-                        return _buildStatusBadge(statusInfo['text']!, statusInfo['bgColor']!, statusInfo['textColor']!);
-                      }
-                      // Tampilkan badge 'No Data' jika tidak ada data
-                      return _buildStatusBadge('No Data', Colors.grey.shade300, Colors.black54);
-                    },
-                  ),
-                ),
-              ],
+              ),
             ),
-           ),
-            const SizedBox(height: 24),
+
+            // --- 2. QUICK ACTIONS MENU (Floating overlap) ---
+            Transform.translate(
+              offset: const Offset(0, -25),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildQuickActionItem(
+                      context,
+                      'Glucose',
+                      'assets/images/Blood_Pressure.svg', // Or appropriate icon
+                      Colors.redAccent,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const GlucoseListPage())),
+                    ),
+                    _buildQuickActionItem(
+                      context,
+                      'Hba1c',
+                      'assets/images/health-rate.svg', // Placeholder
+                      Colors.orange,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const Hba1cListPage())),
+                    ),
+                    _buildQuickActionItem(
+                      context,
+                      'Meal',
+                      'assets/images/Home.svg', // Placeholder, consider adding food icon
+                      Colors.green,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const MealLogPage())),
+                    ),
+                    _buildQuickActionItem(
+                      context,
+                      'Activity',
+                      'assets/images/Health.svg',
+                      Colors.blue,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const ActivityTypeListPage())),
+                    ),
+                    _buildQuickActionItem(
+                      context,
+                      'Sleep',
+                      'assets/images/profile_glupulsesvg.svg', // Placeholder
+                      Colors.purple,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const SleepLogListPage())),
+                    ),
+                    _buildQuickActionItem(
+                      context,
+                      'Meds',
+                      'assets/images/advanced.svg', // Placeholder
+                      Colors.teal,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) =>
+                              const MedicationLogListPage())),
+                    ),
+                    _buildQuickActionItem(
+                      context,
+                      'Events',
+                      'assets/images/celender.svg',
+                      Colors.amber,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const HealthEventListPage())),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Smart Health Metrix',
-                    style: textTheme.headlineSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+                    'Health Metrics',
+                    style: textTheme.titleLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  // --- Kartu Metrik ---
-                  Column(
-                    children: [
-                      BlocBuilder<GlucoseCubit, GlucoseState>(
-                        builder: (context, state) {
-                          String value = 'N/A';
-                          String status = 'No Data';
-                          Color statusColor = Colors.grey.shade300;
-                          Color statusTextColor = Colors.black54;
 
-                          if (state is GlucoseLoaded && state.glucoseRecords.isNotEmpty) {
-                            final latestRecord = state.glucoseRecords.first;
-                            value = latestRecord.glucoseValue.toString();
-                            final statusInfo = _getGlucoseStatus(latestRecord.glucoseValue);
-                            status = statusInfo['text'];
-                            statusColor = statusInfo['bgColor'];
-                            statusTextColor = statusInfo['textColor'];
-                          }
+                  // --- 3. METRICS SCROLL (Horizontal) ---
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: BlocBuilder<GlucoseCubit, GlucoseState>(
+                            builder: (context, state) {
+                              String value = 'N/A';
+                              String status = '--';
+                              Color statusColor = Colors.grey.shade200;
+                              Color statusTextColor = Colors.grey;
 
-                          return _buildMetricCard(
-                            context: context,
-                            title: 'Blood Sugar',
-                            value: value,
-                            unit: 'mg/dL',
-                            iconWidget: SvgPicture.asset(
-                              'assets/images/Health.svg',
-                              colorFilter: const ColorFilter.mode(Colors.redAccent, BlendMode.srcIn),
-                            ),
-                            iconBackgroundColor: Colors.redAccent,
-                            status: status,
-                            statusColor: statusColor,
-                            statusTextColor: statusTextColor,
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => const GlucoseListPage(),
-                              ));
+                              if (state is GlucoseLoaded &&
+                                  state.glucoseRecords.isNotEmpty) {
+                                final latestRecord = state.glucoseRecords.first;
+                                value = latestRecord.glucoseValue.toString();
+                                final statusInfo =
+                                    _getGlucoseStatus(latestRecord.glucoseValue);
+                                status = statusInfo['text'];
+                                statusColor = statusInfo['bgColor'];
+                                statusTextColor = statusInfo['textColor'];
+                              }
+
+                              return _buildGridMetricCard(
+                                context: context,
+                                title: 'Glucose',
+                                value: value,
+                                unit: 'mg/dL',
+                                iconPath: 'assets/images/Health.svg',
+                                iconColor: Colors.redAccent,
+                                status: status,
+                                statusBgColor: statusColor,
+                                statusTextColor: statusTextColor,
+                                onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const GlucoseListPage())),
+                              );
                             },
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      BlocBuilder<HealthProfileCubit, HealthProfileState>(
-                        builder: (context, state) {
-                          String value = 'N/A';
-                          String status = 'No Data';
-                          Color statusColor = Colors.grey.shade300;
-                          Color statusTextColor = Colors.black54;
-                      
-                          if (state is HealthProfileLoaded) {
-                            final profile = state.healthProfile;
-                            final bmiInfo = _getBmiStatus(profile.bmi);
-                            value = bmiInfo['value'];
-                            status = bmiInfo['status'];
-                            statusColor = bmiInfo['bgColor'];
-                            statusTextColor = bmiInfo['textColor'];
-                          }
-                      
-                          return _buildMetricCard(
-                            context: context,
-                            title: 'BMI',
-                            value: value,
-                            unit: 'kg/m²',
-                            iconWidget: SvgPicture.asset(
-                              'assets/images/bmi.svg',
-                              colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
-                            ),
-                            iconBackgroundColor: Colors.green,
-                            status: status,
-                            statusColor: statusColor,
-                            statusTextColor: statusTextColor,
-                            onTap: () {
-                              // Anda bisa membuat halaman detail BMI jika diperlukan
-                              // Untuk saat ini, kita bisa tampilkan SnackBar atau biarkan kosong
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: BlocBuilder<HealthProfileCubit,
+                              HealthProfileState>(
+                            builder: (context, state) {
+                              String value = 'N/A';
+                              String status = '--';
+                              Color statusColor = Colors.grey.shade200;
+                              Color statusTextColor = Colors.grey;
+
+                              if (state is HealthProfileLoaded) {
+                                final profile = state.healthProfile;
+                                final bmiInfo = _getBmiStatus(profile.bmi);
+                                value = bmiInfo['value'];
+                                status = bmiInfo['status'];
+                                statusColor = bmiInfo['bgColor'];
+                                statusTextColor = bmiInfo['textColor'];
+                              }
+
+                              return _buildGridMetricCard(
+                                context: context,
+                                title: 'BMI',
+                                value: value,
+                                unit: 'kg/m²',
+                                iconPath: 'assets/images/bmi.svg',
+                                iconColor: Colors.green,
+                                status: status,
+                                statusBgColor: statusColor,
+                                statusTextColor: statusTextColor,
+                                onTap: () {
+                                  // Optional: Navigate to profile or bmi detail
+                                },
+                              );
                             },
-                          );
-                        },
-                      ),
-                    ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: BlocBuilder<Hba1cCubit, Hba1cState>(
+                            builder: (context, state) {
+                              String value = 'N/A';
+                              String status = '--';
+                              Color statusColor = Colors.grey.shade200;
+                              Color statusTextColor = Colors.grey;
+
+                              if (state is Hba1cLoaded &&
+                                  state.hba1cRecords.isNotEmpty) {
+                                final sortedRecords =
+                                    List.from(state.hba1cRecords)
+                                      ..sort((a, b) =>
+                                          b.testDate.compareTo(a.testDate));
+                                final latestRecord = sortedRecords.first;
+                                value =
+                                    '${latestRecord.hba1cPercentage.toStringAsFixed(1)}';
+                                final statusInfo =
+                                    _getHba1cStatus(latestRecord.hba1cPercentage);
+                                status = statusInfo['text'];
+                                statusColor = statusInfo['bgColor'];
+                                statusTextColor = statusInfo['textColor'];
+                              }
+
+                              return _buildGridMetricCard(
+                                context: context,
+                                title: 'Hba1c',
+                                value: value,
+                                unit: '%',
+                                iconPath: 'assets/images/health-rate.svg',
+                                iconColor: Colors.purple,
+                                status: status,
+                                statusBgColor: statusColor,
+                                statusTextColor: statusTextColor,
+                                onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Hba1cListPage())),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+
                   const SizedBox(height: 24),
                   Text(
-                    'Category Health',
-                    style: textTheme.headlineSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+                    'Insights',
+                    style: textTheme.titleLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 16),
-                  _buildCategoryCard(
-                    context: context,
-                    title: 'Category Blood Sugar',
-                    description:
-                        'Your blood sugar is in the normal range. Keep up the good work!',
-                    icon: Icons.water_drop_outlined,
-                    color: Colors.redAccent,
-                  ),
                   const SizedBox(height: 12),
-                  BlocBuilder<HealthProfileCubit, HealthProfileState>(
-                    builder: (context, state) {
-                       String description = 'Input your weight and height to see your BMI category.';
-                        if (state is HealthProfileLoaded) {
-                          final profile = state.healthProfile;
-                          final bmiInfo = _getBmiStatus(profile.bmi);
-                          description = bmiInfo['description'];
-                        }
 
-                      return _buildCategoryCard(
+                  // --- 4. INSIGHTS / CATEGORY CARDS ---
+                  // Blood Sugar Insight
+                  BlocBuilder<GlucoseCubit, GlucoseState>(
+                    builder: (context, state) {
+                      String description = 'No recent glucose data.';
+                      Color color = Colors.grey;
+                      
+                      if (state is GlucoseLoaded && state.glucoseRecords.isNotEmpty) {
+                         // Simple logic based on last record, or static message as before
+                         final val = state.glucoseRecords.first.glucoseValue;
+                         if(val >= 70 && val <= 140) {
+                           description = 'Your blood sugar is in the normal range. Keep up the good work!';
+                           color = Colors.green;
+                         } else if (val > 140) {
+                           description = 'Your blood sugar is high. Watch your intake.';
+                           color = Colors.orange;
+                         } else {
+                           description = 'Your blood sugar is low.';
+                           color = Colors.redAccent;
+                         }
+                      }
+                      
+                      return _buildInsightCard(
                         context: context,
-                        title: 'Category BMI',
+                        title: 'Glucose Analysis',
                         description: description,
-                        icon: Icons.calculate_outlined,
-                        color: Colors.green,
+                        icon: Icons.water_drop_rounded,
+                        color: color == Colors.grey ? Colors.blueGrey : color,
                       );
                     },
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+                  
+                  // BMI Insight
+                  BlocBuilder<HealthProfileCubit, HealthProfileState>(
+                    builder: (context, state) {
+                      String description =
+                          'Input your weight and height to see your BMI category.';
+                      Color color = Colors.blue;
+
+                      if (state is HealthProfileLoaded) {
+                        final profile = state.healthProfile;
+                        final bmiInfo = _getBmiStatus(profile.bmi);
+                        description = bmiInfo['description'];
+                        // Use the color from the helper
+                        if (bmiInfo['status'] == 'Normal') {
+                           color = Colors.green;
+                        } else if (bmiInfo['status'] == 'Obesity') {
+                           color = Colors.red;
+                        } else {
+                           color = Colors.orange;
+                        }
+                      }
+
+                      return _buildInsightCard(
+                        context: context,
+                        title: 'BMI Analysis',
+                        description: description,
+                        icon: Icons.monitor_weight_rounded,
+                        color: color,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -426,120 +460,234 @@ class _AnalyticTabState extends State<AnalyticTab> {
     );
   }
 
-  Widget _buildMetricCard({
-    required BuildContext context,
-    required String title,
-    required String value,
-    required String unit,
-    required Widget iconWidget,
-    required Color iconBackgroundColor,
-    String? status,
-    Color? statusColor,
-    Color? statusTextColor,
-    required VoidCallback onTap,
-  }) {
-    return SizedBox(
-      // Tinggi diatur otomatis oleh konten di dalamnya
-      child: Card(
-        elevation: 1,
-        color: Colors.white,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: iconBackgroundColor.withOpacity(0.15),
-                  child: SizedBox(width: 32, height: 32, child: iconWidget),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      const SizedBox(height: 4),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Theme.of(context).colorScheme.primary)),
-                          const SizedBox(width: 8),
-                          Text(unit, style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                        ],
-                      ),
-                    ],
+  // --- NEW WIDGET HELPERS ---
+
+  Widget _buildQuickActionItem(BuildContext context, String label,
+      String iconPath, Color color, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 16.0),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.15),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
-                ),
-                if (status != null && statusColor != null)
-                  Container(
-                    constraints: const BoxConstraints(minWidth: 75), // Menetapkan lebar minimum
-                    alignment: Alignment.center, // Menengahkan teks di dalam badge
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      status,
-                      style: TextStyle(fontWeight: FontWeight.bold, color: statusTextColor ?? Colors.white, fontSize: 12),
-                    ),
-                  ),
-              ],
+                ],
+              ),
+              child: SvgPicture.asset(
+                iconPath,
+                colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+              ),
             ),
-          ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoryCard({
+  Widget _buildGridMetricCard({
+    required BuildContext context,
+    required String title,
+    required String value,
+    required String unit,
+    required String iconPath,
+    required Color iconColor,
+    required String status,
+    required Color statusBgColor,
+    required Color statusTextColor,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.08),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: SvgPicture.asset(
+                    iconPath,
+                    width: 20,
+                    height: 20,
+                    colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                  ),
+                ),
+                // Tiny arrow to indicate interactivity
+                 Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.grey.shade300),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 3.0),
+                  child: Text(
+                    unit,
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: statusBgColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                status,
+                style: TextStyle(
+                  color: statusTextColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInsightCard({
     required BuildContext context,
     required String title,
     required String description,
     required IconData icon,
     required Color color,
   }) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: color.withOpacity(0.15),
-              child: Icon(icon, color: color, size: 28),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 4),
-                  Text(description,
-                      style: const TextStyle(
-                          fontSize: 14, color: AppTheme.inputLabelColor)),
-                ],
-              ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String text, Color bgColor, Color textColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
         ),
       ),
     );
   }
 
-  // --- HELPER FUNCTIONS ---
+  // --- HELPER FUNCTIONS (Restored) ---
 
   String _getHba1cStatusMessage(double value) {
     if (value < 5.7) {
@@ -553,11 +701,23 @@ class _AnalyticTabState extends State<AnalyticTab> {
 
   Map<String, dynamic> _getHba1cStatus(double value) {
     if (value < 5.7) {
-      return {'text': 'Normal', 'bgColor': const Color(0xFF9CF0A6), 'textColor': const Color(0xFF02A916)};
+      return {
+        'text': 'Normal',
+        'bgColor': const Color(0xFF9CF0A6),
+        'textColor': const Color(0xFF02A916)
+      };
     } else if (value >= 5.7 && value <= 6.4) {
-      return {'text': 'Prediabetes', 'bgColor': const Color(0xFFFDFD66), 'textColor': const Color(0xFFB7B726)};
+      return {
+        'text': 'Prediabetes',
+        'bgColor': const Color(0xFFFDFD66),
+        'textColor': const Color(0xFFB7B726)
+      };
     } else {
-      return {'text': 'Diabetes', 'bgColor': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
+      return {
+        'text': 'Diabetes',
+        'bgColor': const Color(0xFFFA4D5E),
+        'textColor': const Color(0xFFBF070A)
+      };
     }
   }
 
@@ -574,40 +734,71 @@ class _AnalyticTabState extends State<AnalyticTab> {
     String value = bmi.toStringAsFixed(1);
 
     if (bmi < 18.5) {
-      return {'value': value, 'status': 'Underweight', 'description': 'Your BMI is in the underweight range. Consider a diet plan.', 'bgColor': const Color(0xFFFDFD66), 'textColor': const Color(0xFFB7B726)};
+      return {
+        'value': value,
+        'status': 'Underweight',
+        'description':
+            'Your BMI is in the underweight range. Consider a diet plan.',
+        'bgColor': const Color(0xFFFDFD66),
+        'textColor': const Color(0xFFB7B726)
+      };
     } else if (bmi >= 18.5 && bmi < 25) {
-      return {'value': value, 'status': 'Normal', 'description': 'Your BMI is in the healthy weight range. Great job!', 'bgColor': const Color(0xFF9CF0A6), 'textColor': const Color(0xFF02A916)};
-    } else if (bmi >= 25 && bmi < 29.9) { // Sesuai standar umum, obesitas dimulai dari 30
-      return {'value': value, 'status': 'Overweight', 'description': 'Your BMI is in the overweight range. Consider more activity.', 'bgColor': Colors.orange.shade100, 'textColor': Colors.orange.shade800};
+      return {
+        'value': value,
+        'status': 'Normal',
+        'description': 'Your BMI is in the healthy weight range. Great job!',
+        'bgColor': const Color(0xFF9CF0A6),
+        'textColor': const Color(0xFF02A916)
+      };
+    } else if (bmi >= 25 && bmi < 29.9) {
+      // Sesuai standar umum, obesitas dimulai dari 30
+      return {
+        'value': value,
+        'status': 'Overweight',
+        'description':
+            'Your BMI is in the overweight range. Consider more activity.',
+        'bgColor': Colors.orange.shade100,
+        'textColor': Colors.orange.shade800
+      };
     } else {
-      return {'value': value, 'status': 'Obesity', 'description': 'Your BMI is in the obesity range. Please consult a doctor.', 'bgColor': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
+      return {
+        'value': value,
+        'status': 'Obesity',
+        'description':
+            'Your BMI is in the obesity range. Please consult a doctor.',
+        'bgColor': const Color(0xFFFA4D5E),
+        'textColor': const Color(0xFFBF070A)
+      };
     }
   }
-
 
   // Helper untuk mendapatkan status dan warna berdasarkan nilai glukosa
   Map<String, dynamic> _getGlucoseStatus(int value) {
     if (value < 70) {
-      return {'text': 'Low', 'bgColor': const Color(0xFFFDFD66), 'textColor': const Color(0xFFB7B726)};
+      return {
+        'text': 'Low',
+        'bgColor': const Color(0xFFFDFD66),
+        'textColor': const Color(0xFFB7B726)
+      };
     } else if (value >= 70 && value <= 140) {
-      return {'text': 'Normal', 'bgColor': const Color(0xFF9CF0A6), 'textColor': const Color(0xFF02A916)};
+      return {
+        'text': 'Normal',
+        'bgColor': const Color(0xFF9CF0A6),
+        'textColor': const Color(0xFF02A916)
+      };
     } else if (value > 140 && value <= 250) {
-      return {'text': 'High', 'bgColor': Colors.orange.shade100, 'textColor': Colors.orange.shade800};
-    } else { // > 250
-      return {'text': 'Diabetes', 'bgColor': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
+      return {
+        'text': 'High',
+        'bgColor': Colors.orange.shade100,
+        'textColor': Colors.orange.shade800
+      };
+    } else {
+      // > 250
+      return {
+        'text': 'Diabetes',
+        'bgColor': const Color(0xFFFA4D5E),
+        'textColor': const Color(0xFFBF070A)
+      };
     }
   }
-  Widget _buildStatusBadge(String text, Color bgColor, Color textColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-    );
-  }
-
-  // --- END OF HELPER FUNCTIONS ---
-
 }
