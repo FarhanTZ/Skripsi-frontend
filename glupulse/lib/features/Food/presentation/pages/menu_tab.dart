@@ -384,9 +384,9 @@ class _MenuTabState extends State<MenuTab> {
                     children: [
                       _buildFoodSection(context, 'Recommendation Food', foods.take(5).toList()),
                       const SizedBox(height: 24),
-                      _buildFoodSection(context, 'Food Menu', foods),
+                      _buildFoodSection(context, 'Food Menu', foods.take(5).toList()),
                       const SizedBox(height: 24),
-                      _buildFoodSection(context, 'Drink Menu', drinks),
+                      _buildFoodSection(context, 'Drink Menu', drinks.take(5).toList()),
                     ],
                   );
                 } else if (state is FoodError) {

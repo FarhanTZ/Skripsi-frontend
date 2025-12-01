@@ -93,7 +93,7 @@ class _MealLogViewState extends State<MealLogView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        DateFormat('MMM').format(date),
+                        DateFormat('EEE').format(date),
                         style: TextStyle(
                           fontSize: 12,
                           color: isSelected ? Colors.white70 : Colors.grey,

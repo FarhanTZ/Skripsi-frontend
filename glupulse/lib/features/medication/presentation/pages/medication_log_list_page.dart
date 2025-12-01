@@ -95,7 +95,7 @@ class _MedicationLogListPageState extends State<MedicationLogListPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        DateFormat('MMM').format(date), // Bulan (Jan, Feb)
+                        DateFormat('EEE').format(date), // Bulan (Jan, Feb)
                         style: TextStyle(
                           fontSize: 12,
                           color: isSelected ? Colors.white70 : Colors.grey,
