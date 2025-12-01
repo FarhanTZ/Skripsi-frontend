@@ -408,7 +408,7 @@ class _MenuTabState extends State<MenuTab> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          child: Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)), // Added primary color
         ),
         const SizedBox(height: 12),
         SizedBox(

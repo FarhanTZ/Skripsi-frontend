@@ -176,6 +176,14 @@ class _AnalyticTabState extends State<AnalyticTab> {
                   children: [
                     _buildQuickActionItem(
                       context,
+                      'Hba1c',
+                      'assets/images/health-rate.svg', // Placeholder
+                      Colors.orange,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const Hba1cListPage())),
+                    ),
+                    _buildQuickActionItem(
+                      context,
                       'Glucose',
                       'assets/images/Blood_Pressure.svg', // Or appropriate icon
                       Colors.redAccent,
@@ -184,11 +192,20 @@ class _AnalyticTabState extends State<AnalyticTab> {
                     ),
                     _buildQuickActionItem(
                       context,
-                      'Hba1c',
-                      'assets/images/health-rate.svg', // Placeholder
-                      Colors.orange,
+                      'Meds',
+                      'assets/images/advanced.svg', // Placeholder
+                      Colors.teal,
                       () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const Hba1cListPage())),
+                          builder: (context) =>
+                              const MedicationLogListPage())),
+                    ),
+                    _buildQuickActionItem(
+                      context,
+                      'Events',
+                      'assets/images/celender.svg',
+                      Colors.amber,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const HealthEventListPage())),
                     ),
                     _buildQuickActionItem(
                       context,
@@ -214,23 +231,6 @@ class _AnalyticTabState extends State<AnalyticTab> {
                       () => Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => const SleepLogListPage())),
                     ),
-                    _buildQuickActionItem(
-                      context,
-                      'Meds',
-                      'assets/images/advanced.svg', // Placeholder
-                      Colors.teal,
-                      () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) =>
-                              const MedicationLogListPage())),
-                    ),
-                    _buildQuickActionItem(
-                      context,
-                      'Events',
-                      'assets/images/celender.svg',
-                      Colors.amber,
-                      () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const HealthEventListPage())),
-                    ),
                   ],
                 ),
               ),
@@ -244,7 +244,8 @@ class _AnalyticTabState extends State<AnalyticTab> {
                   Text(
                     'Health Metrics',
                     style: textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 20, // Standardized font size
+                        color: Theme.of(context).colorScheme.primary, // Changed to primary color
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -382,7 +383,8 @@ class _AnalyticTabState extends State<AnalyticTab> {
                   Text(
                     'Insights',
                     style: textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 20, // Standardized font size
+                        color: Theme.of(context).colorScheme.primary, // Changed to primary color
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
