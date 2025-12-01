@@ -13,6 +13,7 @@ import 'package:glupulse/features/activity/presentation/pages/activity_type_list
 import 'package:glupulse/features/sleep_log/presentation/pages/sleep_log_list_page.dart';
 import 'package:glupulse/features/medication/presentation/pages/medication_log_list_page.dart';
 import 'package:glupulse/features/meal_log/presentation/pages/meal_log_page.dart';
+import 'package:glupulse/features/recommendation/presentation/pages/recommendation_page.dart';
 
 class AnalyticTab extends StatefulWidget {
   const AnalyticTab({super.key});
@@ -28,6 +29,12 @@ class _AnalyticTabState extends State<AnalyticTab> {
     context.read<Hba1cCubit>().getHba1cRecords();
     context.read<GlucoseCubit>().getGlucoseRecords();
     context.read<HealthProfileCubit>().fetchHealthProfile();
+  }
+
+  void _getRecommendation(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const RecommendationPage()),
+    );
   }
 
   @override
@@ -241,11 +248,17 @@ class _AnalyticTabState extends State<AnalyticTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Recommendation Card
+                  _buildRecommendationCard(context),
+                  const SizedBox(height: 24),
+                  
                   Text(
                     'Health Metrics',
                     style: textTheme.titleLarge?.copyWith(
                         fontSize: 20, // Standardized font size
-                        color: Theme.of(context).colorScheme.primary, // Changed to primary color
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary, // Changed to primary color
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -802,5 +815,67 @@ class _AnalyticTabState extends State<AnalyticTab> {
         'textColor': const Color(0xFFBF070A)
       };
     }
+  }
+
+  Widget _buildRecommendationCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _getRecommendation(context),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0F67FE), Color(0xFF4C8CFF)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F67FE).withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Get Recommendation',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'AI-powered health insights',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+          ],
+        ),
+      ),
+    );
   }
 }
