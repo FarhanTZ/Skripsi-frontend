@@ -193,7 +193,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
                     _buildQuickActionItem(
                       context,
                       'Meal',
-                      'assets/images/Home.svg', // Placeholder, consider adding food icon
+                      'assets/images/shopping_cart.svg', // Changed to shopping_cart.svg
                       Colors.green,
                       () => Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => const MealLogPage())),
@@ -209,7 +209,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
                     _buildQuickActionItem(
                       context,
                       'Sleep',
-                      'assets/images/profile_glupulsesvg.svg', // Placeholder
+                      'assets/images/Profile_glupulsesvg.svg',
                       Colors.purple,
                       () => Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => const SleepLogListPage())),

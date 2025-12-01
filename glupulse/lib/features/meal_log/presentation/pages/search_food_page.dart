@@ -4,6 +4,8 @@ import 'package:glupulse/features/Food/domain/entities/food.dart';
 import 'package:glupulse/features/meal_log/domain/entities/meal_log.dart'; // Untuk MealItem
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
 
+import 'package:glupulse/features/meal_log/presentation/pages/manual_food_input_page.dart';
+
 class SearchFoodPage extends StatefulWidget {
   const SearchFoodPage({super.key});
 
@@ -20,6 +22,11 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
     super.initState();
     // Trigger load makanan awal
     context.read<FoodCubit>().fetchFoods();
+    _searchController.addListener(() {
+      setState(() {
+        _query = _searchController.text.toLowerCase();
+      });
+    });
   }
 
   @override
@@ -28,63 +35,117 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
     super.dispose();
   }
 
+  Widget _buildCustomHeader() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+              const Text(
+                'Search Food',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: TextField(
+            controller: _searchController,
+            autofocus: true,
+            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            decoration: InputDecoration(
+              hintText: 'Search food...',
+              hintStyle: TextStyle(color: Colors.grey.shade500),
+              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      onPressed: () {
+                        _searchController.clear();
+                        // setState(() => _query = ''); // Listener will handle this
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade100,
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            ),
+            onChanged: (val) {
+              // setState(() => _query = val.toLowerCase()); // Listener will handle this
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  Future<void> _navigateToManualInput() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ManualFoodInputPage()),
+    );
+
+    if (result != null && mounted) {
+      // Jika ManualFoodInputPage mengembalikan item (MealItem),
+      // langsung tutup SearchFoodPage dan kembalikan item tersebut ke AddMealLogPage
+      Navigator.pop(context, result);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          controller: _searchController,
-          autofocus: true,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            hintText: 'Search food...',
-            hintStyle: TextStyle(color: Colors.white70),
-            border: InputBorder.none,
-          ),
-          onChanged: (val) {
-            setState(() => _query = val.toLowerCase());
-          },
+      backgroundColor: const Color(0xFFF5F7FA), // Match other pages background
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildCustomHeader(),
+            Expanded(
+              child: BlocBuilder<FoodCubit, FoodState>(
+                builder: (context, state) {
+                  if (state is FoodLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is FoodLoaded) {
+                    final foods = state.foods.where((food) {
+                      return food.foodName.toLowerCase().contains(_query);
+                    }).toList();
+
+                    if (foods.isEmpty) {
+                      return _buildEmptyState();
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: foods.length,
+                      itemBuilder: (context, index) {
+                        final food = foods[index];
+                        return _buildFoodItemCard(context, food);
+                      },
+                    );
+                  } else if (state is FoodError) {
+                    return Center(child: Text(state.message));
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_note),
-            tooltip: 'Input Manual',
-            onPressed: () => _showManualInputForm(context),
-          ),
-        ],
-      ),
-      body: BlocBuilder<FoodCubit, FoodState>(
-        builder: (context, state) {
-          if (state is FoodLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is FoodLoaded) {
-            final foods = state.foods.where((food) {
-              return food.foodName.toLowerCase().contains(_query);
-            }).toList();
-
-            if (foods.isEmpty) {
-              return _buildEmptyState();
-            }
-
-            return ListView.builder(
-              itemCount: foods.length,
-              itemBuilder: (context, index) {
-                final food = foods[index];
-                return ListTile(
-                  title: Text(food.foodName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('${food.calories} kcal • ${food.carbsGrams}g carbs'),
-                  trailing: const Icon(Icons.add_circle_outline, color: Colors.green),
-                  onTap: () => _showQuantityDialog(context, food),
-                );
-              },
-            );
-          } else if (state is FoodError) {
-            return Center(child: Text(state.message));
-          }
-          return const SizedBox.shrink();
-        },
       ),
     );
   }
@@ -95,151 +156,235 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Add ${food.foodName}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: quantityController,
-              decoration: const InputDecoration(labelText: 'Quantity (servings)'),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '1 serving = ${food.calories} kcal',
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              final qty = num.tryParse(quantityController.text) ?? 1;
-              
-              final mealItem = MealItem(
-                foodName: food.foodName,
-                foodId: food.foodId,
-                quantity: qty,
-                calories: food.calories,
-                carbsGrams: food.carbsGrams,
-                proteinGrams: food.proteinGrams,
-                fatGrams: food.fatGrams,
-                fiberGrams: food.fiberGrams,
-                sugarGrams: food.sugarGrams,
-                servingSize: '1 serving', 
-                servingSizeGrams: 100, 
-              );
-              Navigator.pop(ctx); 
-              Navigator.pop(context, mealItem); 
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showManualInputForm(BuildContext context) {
-    final nameController = TextEditingController();
-    final qtyController = TextEditingController(text: '1');
-    final calController = TextEditingController();
-    final carbController = TextEditingController();
-    final protController = TextEditingController();
-    final fatController = TextEditingController();
-    final fiberController = TextEditingController();
-    final sugarController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add Custom Food'),
-        content: SingleChildScrollView(
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: Colors.white,
+        insetPadding: const EdgeInsets.all(20),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Food Name *'),
+              Text(
+                'Add Food',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade500,
+                  letterSpacing: 0.5,
+                ),
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: qtyController,
-                decoration: const InputDecoration(labelText: 'Quantity (servings)'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              const SizedBox(height: 4),
+              Text(
+                food.foodName,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 24),
+              
+              // Quantity Input Row
               Row(
                 children: [
-                  Expanded(child: TextField(controller: calController, decoration: const InputDecoration(labelText: 'Calories'), keyboardType: TextInputType.number)),
-                  const SizedBox(width: 8),
-                  Expanded(child: TextField(controller: carbController, decoration: const InputDecoration(labelText: 'Carbs (g)'), keyboardType: TextInputType.number)),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: quantityController,
+                      autofocus: true,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      decoration: InputDecoration(
+                        labelText: 'Quantity',
+                        alignLabelWithHint: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      'Serving(s)',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade700
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(child: TextField(controller: protController, decoration: const InputDecoration(labelText: 'Protein (g)'), keyboardType: TextInputType.number)),
-                  const SizedBox(width: 8),
-                  Expanded(child: TextField(controller: fatController, decoration: const InputDecoration(labelText: 'Fat (g)'), keyboardType: TextInputType.number)),
-                ],
+              
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '1 serving ≈ ${food.calories} kcal',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary, 
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 32),
+              
+              // Actions
               Row(
                 children: [
-                  Expanded(child: TextField(controller: fiberController, decoration: const InputDecoration(labelText: 'Fiber (g)'), keyboardType: TextInputType.number)),
-                  const SizedBox(width: 8),
-                  Expanded(child: TextField(controller: sugarController, decoration: const InputDecoration(labelText: 'Sugar (g)'), keyboardType: TextInputType.number)),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: Text('Cancel', style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        final qty = num.tryParse(quantityController.text) ?? 1;
+                        
+                        final mealItem = MealItem(
+                          foodName: food.foodName,
+                          foodId: food.foodId,
+                          quantity: qty,
+                          calories: food.calories,
+                          carbsGrams: food.carbsGrams,
+                          proteinGrams: food.proteinGrams,
+                          fatGrams: food.fatGrams,
+                          fiberGrams: food.fiberGrams,
+                          sugarGrams: food.sugarGrams,
+                          servingSize: '1 serving', 
+                          servingSizeGrams: 100, 
+                        );
+                        Navigator.pop(ctx); 
+                        Navigator.pop(context, mealItem); 
+                      },
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      child: const Text('Add to Log', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isEmpty) return;
-              
-              final item = MealItem(
-                foodName: nameController.text,
-                // foodId null indicates custom/manual food
-                quantity: num.tryParse(qtyController.text) ?? 1,
-                calories: num.tryParse(calController.text),
-                carbsGrams: num.tryParse(carbController.text),
-                proteinGrams: num.tryParse(protController.text),
-                fatGrams: num.tryParse(fatController.text),
-                fiberGrams: num.tryParse(fiberController.text),
-                sugarGrams: num.tryParse(sugarController.text),
-                servingSize: '1 serving',
-                servingSizeGrams: 100,
-              );
-              Navigator.pop(ctx); // Close dialog
-              Navigator.pop(context, item); // Return item to previous page
-            },
-            child: const Text('Add'),
+      ),
+    );
+  }
+
+  Widget _buildFoodItemCard(BuildContext context, Food food) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 0, // Remove default elevation for a cleaner look
+      color: Colors.white, // Explicit white background
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200), // Subtle border
+      ),
+      child: InkWell(
+        onTap: () => _showQuantityDialog(context, food),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              // Food Icon/Image Placeholder
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.restaurant, color: Colors.green.shade700, size: 30),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      food.foodName,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${food.calories?.toStringAsFixed(0) ?? '0'} kcal • ${food.carbsGrams?.toStringAsFixed(1) ?? '0'}g carbs',
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.add_circle, color: Colors.green, size: 28),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.search_off, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text('No food found', style: TextStyle(color: Colors.grey)),
-          const SizedBox(height: 16),
-          OutlinedButton.icon(
-            onPressed: () => _showManualInputForm(context),
-            icon: const Icon(Icons.edit_note),
-            label: const Text('Add Manually'),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 80, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              _query.isEmpty ? 'Start typing to search for food' : 'No results found for "${_query}"',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: _navigateToManualInput,
+              icon: const Icon(Icons.edit_note_rounded),
+              label: const Text('Input Manually'),
+              style: FilledButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

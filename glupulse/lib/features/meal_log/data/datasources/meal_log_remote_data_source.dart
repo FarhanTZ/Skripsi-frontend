@@ -27,6 +27,8 @@ class MealLogRemoteDataSourceImpl implements MealLogRemoteDataSource {
       
       return response.map((json) {
         try {
+          // Print raw JSON to debug server response
+          print('DEBUG: Raw Meal Log JSON: $json');
           return MealLogModel.fromJson(json);
         } catch (e) {
           print('DEBUG: Error parsing meal log item: $e');

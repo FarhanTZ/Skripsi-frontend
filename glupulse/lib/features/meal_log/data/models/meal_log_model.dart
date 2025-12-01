@@ -40,7 +40,7 @@ class MealLogModel extends MealLog {
     return MealLogModel(
       mealId: json['meal_id'],
       userId: json['user_id'],
-      mealTimestamp: DateTime.parse(json['meal_timestamp']),
+      mealTimestamp: DateTime.parse(json['meal_timestamp']).toLocal(),
       mealTypeId: json['meal_type_id'],
       description: json['description'],
       totalCalories: json['total_calories'],
