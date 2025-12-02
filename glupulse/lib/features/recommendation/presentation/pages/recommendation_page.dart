@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:glupulse/features/recommendation/presentation/pages/add_recommendation_page.dart';
+import 'package:glupulse/features/recommendation/domain/entities/recommendation_entity.dart';
 
 class RecommendationPage extends StatefulWidget {
-  const RecommendationPage({super.key});
+  final RecommendationEntity? recommendation;
+
+  const RecommendationPage({super.key, this.recommendation});
 
   @override
   State<RecommendationPage> createState() => _RecommendationPageState();
@@ -12,11 +15,12 @@ class RecommendationPage extends StatefulWidget {
 class _RecommendationPageState extends State<RecommendationPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  bool _showRecommendations = true; // Changed to true
+  late bool _showRecommendations;
 
   @override
   void initState() {
     super.initState();
+    _showRecommendations = widget.recommendation != null;
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
@@ -65,85 +69,86 @@ class _RecommendationPageState extends State<RecommendationPage>
                 ),
               ),
 
-              const SizedBox(height: 20),
+              if (!_showRecommendations) ...[
+                const SizedBox(height: 20),
 
-              // --- Circle Button ---
-              Center(
-                child: GestureDetector(
-                  onTap: _navigateToAddRecommendation, // Changed onTap
-                  child: SizedBox(
-                    width: 250,
-                    height: 250,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Rotating Dashed Circle
-                        AnimatedBuilder(
-                          animation: _controller,
-                          builder: (context, child) {
-                            return Transform.rotate(
-                              angle: _controller.value * 2 * math.pi,
-                              child: CustomPaint(
-                                size: const Size(250, 250),
-                                painter: DashedCirclePainter(),
-                              ),
-                            );
-                          },
-                        ),
-                        // Inner Circle with Gradient
-                        Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF0F67FE), Color(0xFF4C8CFF)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF0F67FE)
-                                    .withValues(alpha: 0.4),
-                                blurRadius: 20,
-                                spreadRadius: 5,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.touch_app_rounded,
-                                size: 48,
-                                color: Colors.white,
-                              ),
-                              SizedBox(height: 12),
-                              Text(
-                                'Tap to Get\nRecommendation',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                // --- Circle Button ---
+                Center(
+                  child: GestureDetector(
+                    onTap: _navigateToAddRecommendation, // Changed onTap
+                    child: SizedBox(
+                      width: 250,
+                      height: 250,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Rotating Dashed Circle
+                          AnimatedBuilder(
+                            animation: _controller,
+                            builder: (context, child) {
+                              return Transform.rotate(
+                                angle: _controller.value * 2 * math.pi,
+                                child: CustomPaint(
+                                  size: const Size(250, 250),
+                                  painter: DashedCirclePainter(),
                                 ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        ),
-                      ],
+                          // Inner Circle with Gradient
+                          Container(
+                            width: 200,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF0F67FE), Color(0xFF4C8CFF)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF0F67FE)
+                                      .withValues(alpha: 0.4),
+                                  blurRadius: 20,
+                                  spreadRadius: 5,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(
+                                  Icons.touch_app_rounded,
+                                  size: 48,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(height: 12),
+                                Text(
+                                  'Tap to Get\nRecommendation',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
+              ],
 
               // Removed if (!_showRecommendations) block here
-              if (_showRecommendations) ...[
+              if (_showRecommendations && widget.recommendation != null) ...[
                 const SizedBox(height: 20),
-                _buildResultContent(),
+                _buildResultContent(widget.recommendation!),
                 const SizedBox(height: 40),
               ],
             ],
@@ -153,7 +158,7 @@ class _RecommendationPageState extends State<RecommendationPage>
     );
   }
 
-  Widget _buildResultContent() {
+  Widget _buildResultContent(RecommendationEntity recommendation) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -164,30 +169,42 @@ class _RecommendationPageState extends State<RecommendationPage>
           const SizedBox(height: 16),
 
           // 2. Ringkasan Utama (Insight Card)
-          _buildSummaryCard(),
+          _buildSummaryCard(recommendation.analysisSummary),
           const SizedBox(height: 16),
 
           // 3. Insight Detail (Expandable)
-          _buildDetailAccordion(),
+          _buildDetailAccordion(recommendation.insightsResponse),
           const SizedBox(height: 24),
 
           // 4. Activity Recommendation
-          const Text(
-            'Aktivitas yang Disarankan',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          _buildActivityCard(),
-          const SizedBox(height: 24),
+          if (recommendation.activityRecommendations.isNotEmpty) ...[
+            const Text(
+              'Aktivitas yang Disarankan',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ...recommendation.activityRecommendations.map((activity) => 
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: _buildActivityCard(activity),
+              )
+            ),
+            const SizedBox(height: 24),
+          ],
 
-          // 5. Empty State - Food Recommendation
-          _buildFoodEmptyState(),
+          // 5. Food Recommendation (Empty State if empty)
+          if (recommendation.foodRecommendations.isEmpty)
+            _buildFoodEmptyState()
+          else 
+             // Placeholder for food recommendations if they existed
+             const Text('Food recommendations available (not implemented UI)'),
+             
           const SizedBox(height: 24),
 
           // 6. Footer
           Center(
             child: Text(
-              'Sesi dibuat: 1 Dec 2025\nSession ID: hidden-dev-mode',
+              'Sesi dibuat: ${DateTime.now().toString().split('.')[0]}\nSession ID: ${recommendation.sessionId}',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade400, fontSize: 10),
             ),
@@ -250,7 +267,7 @@ class _RecommendationPageState extends State<RecommendationPage>
     );
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildSummaryCard(String summary) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -287,11 +304,11 @@ class _RecommendationPageState extends State<RecommendationPage>
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
-            'HbA1c: 7.5% → Target < 7.0%',
-            style: TextStyle(
+          Text(
+            summary.length > 100 ? '${summary.substring(0, 100)}...' : summary, // Truncate for card title if needed, or show full
+            style: const TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 16, // Reduced font size slightly for potentially long text
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -303,7 +320,7 @@ class _RecommendationPageState extends State<RecommendationPage>
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Text(
-              'Prioritas: Kontrol gula setelah makan & aktivitas rutin',
+              'Prioritas: Kontrol gula setelah makan & aktivitas rutin', // Static for now as it's not clearly in JSON
               style: TextStyle(color: Colors.white, fontSize: 13),
             ),
           ),
@@ -312,7 +329,10 @@ class _RecommendationPageState extends State<RecommendationPage>
     );
   }
 
-  Widget _buildDetailAccordion() {
+  Widget _buildDetailAccordion(String insights) {
+    // Simple split by periods to simulate bullets if the text is a paragraph
+    final List<String> bullets = insights.split('. ').where((s) => s.isNotEmpty).toList();
+
     return Card(
       elevation: 0,
       color: Colors.white,
@@ -324,13 +344,7 @@ class _RecommendationPageState extends State<RecommendationPage>
         ),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildBulletPoint('🍽️ Karbohidrat ≤ 150g/hari'),
-          _buildBulletPoint('🥗 Prioritaskan GL < 10'),
-          _buildBulletPoint('🚶 Jalan kaki 20–30 menit setelah makan besar'),
-          _buildBulletPoint('🍗 Protein target 90g/hari'),
-          _buildBulletPoint('🔥 Kalori harian 1800 kcal'),
-        ],
+        children: bullets.map((text) => _buildBulletPoint(text.trim())).toList(),
       ),
     );
   }
@@ -358,7 +372,7 @@ class _RecommendationPageState extends State<RecommendationPage>
     );
   }
 
-  Widget _buildActivityCard() {
+  Widget _buildActivityCard(ActivityRecommendationEntity activity) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -383,35 +397,37 @@ class _RecommendationPageState extends State<RecommendationPage>
               ),
               child: Icon(Icons.directions_walk, color: Colors.orange.shade700),
             ),
-            title: const Text(
-              'Casual Stroll',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            title: Text(
+              activity.activityName,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 6.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(activity.description, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       Icon(Icons.timer_outlined,
                           size: 14, color: Colors.grey.shade600),
                       const SizedBox(width: 4),
-                      Text('30 menit',
+                      Text('${activity.recommendedDurationMinutes} menit',
                           style: TextStyle(
                               fontSize: 12, color: Colors.grey.shade600)),
                       const SizedBox(width: 12),
                       Icon(Icons.flash_on,
                           size: 14, color: Colors.grey.shade600),
                       const SizedBox(width: 4),
-                      Text('Intensitas: Ringan',
+                      Text('Intensitas: ${activity.recommendedIntensity}',
                           style: TextStyle(
                               fontSize: 12, color: Colors.grey.shade600)),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '✅ Manfaat: Turunkan gula setelah makan',
+                    '✅ Manfaat: ${activity.reason}',
                     style:
                         TextStyle(fontSize: 12, color: Colors.green.shade700),
                   ),
@@ -427,7 +443,7 @@ class _RecommendationPageState extends State<RecommendationPage>
               children: [
                 Expanded(
                   child: Text(
-                    '⚠️ Minum sebelum mulai',
+                    '⚠️ ${activity.safetyNote}',
                     style: TextStyle(
                         fontSize: 12,
                         color: Colors.orange.shade800,

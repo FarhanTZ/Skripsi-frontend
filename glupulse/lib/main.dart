@@ -11,6 +11,7 @@ import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart'
 import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
 import 'package:glupulse/features/medication/presentation/cubit/medication_cubit.dart';
 import 'package:glupulse/features/medication/presentation/cubit/medication_log_cubit.dart';
+import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
 import 'package:glupulse/features/sleep_log/presentation/cubit/sleep_log_cubit.dart';
 import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/injection_container.dart' as di;
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<MedicationLogCubit>()),
         BlocProvider(create: (_) => sl<ActivityCubit>()),
         BlocProvider(create: (_) => sl<MealLogCubit>()),
+        BlocProvider(create: (_) => sl<RecommendationCubit>())
         // Tambah cubit lain yang harus global di sini
       ],
       child: MaterialApp(
@@ -63,7 +65,7 @@ class MyApp extends StatelessWidget {
                 pendingId: state.pendingId,
               );
             }
-            return const HomePage();
+            return const IntroductionScreen();
           },
         ),
       ),

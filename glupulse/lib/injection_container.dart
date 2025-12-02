@@ -110,6 +110,13 @@ import 'package:glupulse/features/meal_log/domain/usecases/get_meal_log.dart';
 import 'package:glupulse/features/meal_log/domain/usecases/get_meal_logs.dart';
 import 'package:glupulse/features/meal_log/domain/usecases/update_meal_log.dart';
 import 'package:glupulse/features/meal_log/presentation/cubit/meal_log_cubit.dart';
+import 'package:glupulse/features/recommendation/data/datasources/recommendation_remote_data_source.dart';
+import 'package:glupulse/features/recommendation/data/repositories/recommendation_repository_impl.dart';
+import 'package:glupulse/features/recommendation/domain/repositories/recommendation_repository.dart';
+import 'package:glupulse/features/recommendation/domain/usecases/get_recommendation.dart';
+import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:glupulse/core/network/network_info.dart';
 
 final sl = GetIt.instance; // sl = Service Locator
 
@@ -155,6 +162,7 @@ Future<void> init() async {
     () => AuthRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -193,6 +201,7 @@ Future<void> init() async {
     () => ProfileRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -224,7 +233,10 @@ Future<void> init() async {
 
   // Repository
   sl.registerLazySingleton<AddressRepository>(
-    () => AddressRepositoryImpl(remoteDataSource: sl()),
+    () => AddressRepositoryImpl(
+      remoteDataSource: sl(),
+      networkInfo: sl(),
+    ),
   );
 
   // Data Sources
@@ -258,6 +270,7 @@ Future<void> init() async {
   // Repository
   sl.registerLazySingleton<FoodRepository>(() => FoodRepositoryImpl(
         remoteDataSource: sl(),
+        networkInfo: sl(),
       ));
 
   // Data sources
@@ -292,6 +305,7 @@ Future<void> init() async {
     () => Hba1cRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -325,6 +339,7 @@ Future<void> init() async {
     () => GlucoseRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -358,6 +373,7 @@ Future<void> init() async {
     () => ActivityRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -385,6 +401,7 @@ Future<void> init() async {
     () => HealthProfileRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -421,6 +438,7 @@ Future<void> init() async {
     () => HealthEventRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -454,6 +472,7 @@ Future<void> init() async {
     () => SleepLogRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -500,6 +519,7 @@ Future<void> init() async {
     () => MedicationRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -533,6 +553,7 @@ Future<void> init() async {
     () => MealLogRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      networkInfo: sl(),
     ),
   );
 
@@ -541,10 +562,34 @@ Future<void> init() async {
     () => MealLogRemoteDataSourceImpl(apiClient: sl()),
   );
 
+  // --- Features - Recommendation ---
+
+  // Cubit
+  sl.registerFactory(
+    () => RecommendationCubit(getRecommendation: sl()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetRecommendation(sl()));
+
+  // Repository
+  sl.registerLazySingleton<RecommendationRepository>(
+    () => RecommendationRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+      networkInfo: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<RecommendationRemoteDataSource>(
+    () => RecommendationRemoteDataSourceImpl(
+      apiClient: sl(),
+    ),
+  );
+
   // --- Core ---
   sl.registerLazySingleton(() => ApiClient());
-
-  // --- External ---
   // Daftarkan SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
@@ -554,4 +599,8 @@ Future<void> init() async {
 
   // Daftarkan GoogleSignIn sebagai lazy singleton
   sl.registerLazySingleton(() => GoogleSignIn());
+
+  // --- Network Info ---
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
+  sl.registerLazySingleton(() => InternetConnectionChecker.instance);
 }
