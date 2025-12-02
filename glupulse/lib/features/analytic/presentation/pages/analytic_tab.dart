@@ -5,6 +5,8 @@ import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart'
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/glucose/presentation/pages/glucose_list_page.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
+import 'package:glupulse/features/HealthData/domain/entities/health_profile.dart'; // New import
+import 'package:glupulse/features/HealthData/presentation/pages/bmi_detail_page.dart'; // New import
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart';
 import 'package:glupulse/features/health_event/presentation/pages/health_event_list_page.dart';
@@ -317,9 +319,10 @@ class _AnalyticTabState extends State<AnalyticTab> {
                               String status = '--';
                               Color statusColor = Colors.grey.shade200;
                               Color statusTextColor = Colors.grey;
+                              HealthProfile? profile; // Declared here
 
                               if (state is HealthProfileLoaded) {
-                                final profile = state.healthProfile;
+                                profile = state.healthProfile; // Assigned here
                                 final bmiInfo = _getBmiStatus(profile.bmi);
                                 value = bmiInfo['value'];
                                 status = bmiInfo['status'];
@@ -338,7 +341,16 @@ class _AnalyticTabState extends State<AnalyticTab> {
                                 statusBgColor: statusColor,
                                 statusTextColor: statusTextColor,
                                 onTap: () {
-                                  // Optional: Navigate to profile or bmi detail
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => BmiDetailPage(
+                                        heightCm: profile?.heightCm,
+                                        currentWeightKg: profile?.currentWeightKg,
+                                        bmi: profile?.bmi,
+                                        targetWeightKg: profile?.targetWeightKg, // Pass targetWeightKg
+                                      ),
+                                    ),
+                                  );
                                 },
                               );
                             },
@@ -846,7 +858,8 @@ class _AnalyticTabState extends State<AnalyticTab> {
                 color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+              child:
+                  const Icon(Icons.auto_awesome, color: Colors.white, size: 24),
             ),
             const SizedBox(width: 16),
             const Expanded(
