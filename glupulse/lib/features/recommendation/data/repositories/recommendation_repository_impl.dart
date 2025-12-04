@@ -19,13 +19,13 @@ class RecommendationRepositoryImpl implements RecommendationRepository {
   });
 
   @override
-  Future<Either<Failure, RecommendationEntity>> getRecommendation(
+  Future<Either<Failure, RecommendationEntity>> postRecommendation(
       Map<String, dynamic> requestData) async {
     if (await networkInfo.isConnected) {
       try {
         final token = await localDataSource.getLastToken();
         final recommendation =
-            await remoteDataSource.getRecommendation(requestData, token);
+            await remoteDataSource.postRecommendation(requestData, token);
         return Right(recommendation);
       } on ServerException catch (e) {
         return Left(ServerFailure(e.message));

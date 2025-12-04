@@ -113,7 +113,7 @@ import 'package:glupulse/features/meal_log/presentation/cubit/meal_log_cubit.dar
 import 'package:glupulse/features/recommendation/data/datasources/recommendation_remote_data_source.dart';
 import 'package:glupulse/features/recommendation/data/repositories/recommendation_repository_impl.dart';
 import 'package:glupulse/features/recommendation/domain/repositories/recommendation_repository.dart';
-import 'package:glupulse/features/recommendation/domain/usecases/get_recommendation.dart';
+import 'package:glupulse/features/recommendation/domain/usecases/post_recommendation.dart';
 import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:glupulse/core/network/network_info.dart';
@@ -566,11 +566,11 @@ Future<void> init() async {
 
   // Cubit
   sl.registerFactory(
-    () => RecommendationCubit(getRecommendation: sl()),
+    () => RecommendationCubit(postRecommendation: sl()),
   );
 
   // Use Cases
-  sl.registerLazySingleton(() => GetRecommendation(sl()));
+  sl.registerLazySingleton(() => PostRecommendation(sl()));
 
   // Repository
   sl.registerLazySingleton<RecommendationRepository>(

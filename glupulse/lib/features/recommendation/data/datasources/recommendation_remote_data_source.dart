@@ -3,7 +3,7 @@ import '../../../../core/error/exceptions.dart';
 import '../models/recommendation_model.dart';
 
 abstract class RecommendationRemoteDataSource {
-  Future<RecommendationModel> getRecommendation(Map<String, dynamic> requestData, String token);
+  Future<RecommendationModel> postRecommendation(Map<String, dynamic> requestData, String token);
 }
 
 class RecommendationRemoteDataSourceImpl implements RecommendationRemoteDataSource {
@@ -14,7 +14,7 @@ class RecommendationRemoteDataSourceImpl implements RecommendationRemoteDataSour
   });
 
   @override
-  Future<RecommendationModel> getRecommendation(Map<String, dynamic> requestData, String token) async {
+  Future<RecommendationModel> postRecommendation(Map<String, dynamic> requestData, String token) async {
     try {
       final response = await apiClient.post(
         '/recommendations',
