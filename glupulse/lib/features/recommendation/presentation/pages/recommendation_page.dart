@@ -195,10 +195,20 @@ class _RecommendationPageState extends State<RecommendationPage>
           // 5. Food Recommendation (Empty State if empty)
           if (recommendation.foodRecommendations.isEmpty)
             _buildFoodEmptyState()
-          else 
-             // Placeholder for food recommendations if they existed
-             const Text('Food recommendations available (not implemented UI)'),
-             
+          else ...[
+            const Text(
+              'Rekomendasi Makanan',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ...recommendation.foodRecommendations.map((food) => 
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: _buildFoodCard(food),
+              )
+            ),
+          ],
+
           const SizedBox(height: 24),
 
           // 6. Footer
@@ -467,6 +477,114 @@ class _RecommendationPageState extends State<RecommendationPage>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFoodCard(FoodRecommendationEntity food) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.restaurant, color: Colors.green.shade700),
+            ),
+            title: Text(
+              food.foodName,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (food.nutritionHighlight.isNotEmpty)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        food.nutritionHighlight,
+                        style: TextStyle(fontSize: 10, color: Colors.blue.shade700, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  Text(
+                    food.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildMacroItem('Kalori', '${food.calories.toInt()} kcal'),
+                      _buildMacroItem('Protein', '${food.proteinGrams}g'),
+                      _buildMacroItem('Carbs', '${food.carbsGrams}g'),
+                      _buildMacroItem('Fat', '${food.fatGrams}g'),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '✅ ${food.reason}',
+                    style: TextStyle(fontSize: 12, color: Colors.green.shade700),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                 Expanded(
+                  child: Text(
+                    'Saran Porsi: ${food.portionSuggestion}',
+                     style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade800,
+                        fontStyle: FontStyle.italic),
+                  ),
+                ),
+                Text(
+                  '${food.currency} ${food.price.toInt()}', // Simple formatting
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMacroItem(String label, String value) {
+    return Column(
+      children: [
+        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+        Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+      ],
     );
   }
 

@@ -30,7 +30,7 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
   List<String> _selectedFoodCategories = [];
   List<String> _selectedActivityTypes = [];
 
-  final List<String> _allFoodCategories = ['MEDITERRANEAN', 'VEGETABLES', 'LOW_CARB', 'HIGH_PROTEIN', 'DAIRY_FREE', 'GLUTEN_FREE'];
+  final List<String> _allFoodCategories = ['Mediterranean', 'Vegetables', 'Low Carb', 'High Protein', 'Dairy Free', 'Gluten Free', 'European', 'Dairy & Cheese'];
   final List<String> _allActivityTypes = ['YOGA', 'WALKING', 'SWIMMING', 'RUNNING', 'STRENGTH', 'CYCLING'];
 
   @override
@@ -58,8 +58,8 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
 
       final data = {
         "type": selectedTypes,
-        "meal_type": _selectedMealType ?? "Any",
-        "food_category_code": _selectedFoodCategories,
+        "meal_type": _selectedMealType?.toLowerCase() ?? "any",
+        "food_category": _selectedFoodCategories,
         "food_preferences": _foodPreferencesController.text,
         "activity_type_code": _selectedActivityTypes,
         "activity_preferences": _activityPreferencesController.text,

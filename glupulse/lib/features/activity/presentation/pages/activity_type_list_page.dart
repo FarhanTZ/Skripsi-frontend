@@ -4,7 +4,6 @@ import 'package:glupulse/features/activity/domain/entities/activity_type.dart';
 import 'package:glupulse/features/activity/presentation/cubit/activity_cubit.dart';
 import 'package:glupulse/features/activity/presentation/cubit/activity_state.dart';
 import 'package:glupulse/features/activity/presentation/pages/activity_log_list_page.dart';
-import 'package:glupulse/injection_container.dart';
 
 class ActivityTypeListPage extends StatefulWidget {
   const ActivityTypeListPage({super.key});

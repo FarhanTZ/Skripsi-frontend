@@ -5,7 +5,6 @@ import 'package:glupulse/features/activity/domain/entities/activity_type.dart';
 import 'package:glupulse/features/activity/presentation/cubit/activity_cubit.dart';
 import 'package:glupulse/features/activity/presentation/cubit/activity_state.dart';
 import 'package:glupulse/features/activity/presentation/pages/input_activity_page.dart';
-import 'package:glupulse/injection_container.dart';
 import 'package:intl/intl.dart';
 
 class ActivityHistoryPage extends StatefulWidget {
