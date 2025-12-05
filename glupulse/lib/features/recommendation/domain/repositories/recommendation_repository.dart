@@ -4,4 +4,5 @@ import '../entities/recommendation_entity.dart';
 
 abstract class RecommendationRepository {
   Future<Either<Failure, RecommendationEntity>> postRecommendation(Map<String, dynamic> requestData);
+  Future<Either<Failure, RecommendationEntity>> getLatestRecommendation();
 }

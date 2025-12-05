@@ -86,7 +86,7 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
           Navigator.of(context).pop(); // Dismiss loading dialog
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => RecommendationPage(recommendation: state.recommendation),
+              builder: (context) => const RecommendationPage(),
             ),
           );
         } else if (state is RecommendationError) {

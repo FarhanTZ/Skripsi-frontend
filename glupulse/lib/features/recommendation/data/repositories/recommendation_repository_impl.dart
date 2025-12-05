@@ -36,4 +36,25 @@ class RecommendationRepositoryImpl implements RecommendationRepository {
       return Left(ConnectionFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, RecommendationEntity>> getLatestRecommendation() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final token = await localDataSource.getLastToken();
+        final recommendation = await remoteDataSource.getLatestRecommendation(token);
+        if (recommendation != null) {
+          return Right(recommendation);
+        } else {
+          return Left(CacheFailure('No latest recommendation found.'));
+        }
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
 }

@@ -774,3 +774,241 @@ recomendatio by id ini untuk ambil 1 recomednation terbarunya
 }
 
 
+I/flutter (30310): DEBUG: Fetching list from /recommendations
+I/flutter (30310): DEBUG: List response count: 10
+I/flutter (30310): DEBUG: Latest Session ID: 52f6aa47-f084-4009-afad-bdf5dd998d65
+I/flutter (30310): DEBUG: List item keys: [session_id, created_at, expires_at, is_expired, requested_types, meal_type, food_category_codes, activity_type_codes, insights_question, analysis_summary, insights_response, latest_glucose_value, latest_hba1c, user_condition_id, was_viewed, viewed_at, foods_count, activities_count, foods_purchased, activities_completed]
+I/flutter (30310): DEBUG: Attempting to fetch details from /recommendations/52f6aa47-f084-4009-afad-bdf5dd998d65
+I/flutter (30310): DEBUG: Detail fetch FAILED: Not Found
+I/flutter (30310): DEBUG: Falling back to list item data.
+I/flutter (30310): DEBUG: Fallback Food Key MISSING
+I/flutter (30310): DEBUG: RemoteDataSource returned data.
+I/flutter (30310): DEBUG: Cubit received SUCCESS. Data: 52f6aa47-f084-4009-afad-bdf5dd998d65
+
+
+I/flutter (30310): DEBUG: Network connected. Fetching token...
+I/flutter (30310): DEBUG: Token retrieved (len: 311). Calling RemoteDataSource...
+I/flutter (30310): DEBUG: Fetching list from /recommendations
+I/flutter (30310): DEBUG: List response count: 10
+I/flutter (30310): DEBUG: Latest Session ID: 52f6aa47-f084-4009-afad-bdf5dd998d65
+I/flutter (30310): DEBUG: Attempting to fetch details from /recommendation/52f6aa47-f084-4009-afad-bdf5dd998d65
+I/flutter (30310): DEBUG: Detail fetch SUCCESS. Keys: [activities, foods, session]
+I/flutter (30310): DEBUG: RemoteDataSource returned data.
+I/flutter (30310): DEBUG: Cubit received SUCCESS. Data:
+
+
+{
+    "activities": [
+        {
+            "activity_code": "WALKING",
+            "activity_id": 1,
+            "activity_name": "Casual Stroll",
+            "actual_duration_minutes": 0,
+            "best_time_of_day": "evening",
+            "completed_at": "0001-01-01T00:00:00Z",
+            "description": "Slow walking on a level surface, perfect for recovery or beginners.",
+            "feedback": "",
+            "glucose_change_after_activity": 0,
+            "glucose_management_tip": "",
+            "image_url": "https://s3.example.com/act/walk_slow.jpg",
+            "measurement_unit": "TIME",
+            "met_value": 2,
+            "reason": "Low-impact walking in the evening is perfect for helping lower post-dinner glucose spikes and fits your preference for evening exercise.",
+            "recommendation_activity_id": "bb5643d7-0307-40db-be2e-9dd01144607a",
+            "recommendation_rank": 1,
+            "recommended_duration_minutes": 30,
+            "recommended_intensity": "light",
+            "safety_notes": "A light activity like this is safe and beneficial for glucose management after meals.",
+            "user_rating": 0,
+            "was_completed": false,
+            "was_viewed": false
+        },
+        {
+            "activity_code": "WALKING",
+            "activity_id": 2,
+            "activity_name": "Brisk Walking",
+            "actual_duration_minutes": 0,
+            "best_time_of_day": "afternoon",
+            "completed_at": "0001-01-01T00:00:00Z",
+            "description": "Walking at a pace where you breathe heavier but can still talk.",
+            "feedback": "",
+            "glucose_change_after_activity": 0,
+            "glucose_management_tip": "",
+            "image_url": "https://s3.example.com/act/walk_brisk.jpg",
+            "measurement_unit": "STEPS",
+            "met_value": 4.3,
+            "reason": "Moderate brisk walking improves insulin sensitivity and supports your calorie deficit required for achieving your weight and HbA1c goals.",
+            "recommendation_activity_id": "6254bdf2-3eb4-42d1-b26f-44cafe9fb279",
+            "recommendation_rank": 2,
+            "recommended_duration_minutes": 35,
+            "recommended_intensity": "moderate",
+            "safety_notes": "Try to integrate this activity 30-60 minutes after a meal for maximum glucose-lowering benefit.",
+            "user_rating": 0,
+            "was_completed": false,
+            "was_viewed": false
+        }
+    ],
+    "foods": [
+        {
+            "calories": 71,
+            "carbs_grams": 0.6,
+            "currency": "IDR",
+            "description": "Keju Parmesan: Rendah Karbo, Tinggi Protein, Pilihan Cerdas untuk Gula Darah!\n\nNikmati cita rasa keju Parmesan yang kaya dan gurih tanpa khawatir! Dengan Indeks Glikemik yang sangat rendah (hanya 15) dan Beban Glikemik yang dapat diabaikan (0.09), keju ini adalah tambahan yang fantastis untuk diet diabetes Anda.\n\nSangat rendah karbohidrat (hanya 0.6 gram) dan gula (0.046 gram), Keju Parmesan kami kaya akan protein (6.4 gram) dan lemak sehat (4.5 gram) yang membantu menjaga rasa kenyang dan menstabilkan kadar gula darah Anda.\n\nCocok untuk camilan sehat, taburan pasta rendah karbo, atau sebagai penambah rasa dalam masakan Anda. Jaga kesehatan, tetap nikmat!",
+            "fat_grams": 4.5,
+            "feedback": "",
+            "fiber_grams": 0,
+            "food_id": "d41dc48e-02be-45e9-b386-81b8cb72643b",
+            "food_name": "parmesan cheese",
+            "glucose_spike_after_eating": 0,
+            "glycemic_index": 15,
+            "glycemic_load": 0.09,
+            "is_available": true,
+            "nutrition_highlight": "Extremely Low Carb, Low GI 0",
+            "photo_url": "",
+            "price": 15000,
+            "protein_grams": 6.4,
+            "reason": "This is a very low-carb European hard cheese that aligns with your low-carb diet and low-lactose needs, making it safe for glucose control during dinner.",
+            "recommendation_food_id": "d375693a-489f-4e16-80df-a9af421f0d18",
+            "recommendation_rank": 1,
+            "serving_size": "1 tbsp",
+            "sodium_mg": 0.2,
+            "sugar_grams": 0.05,
+            "suggested_meal_type": "dinner",
+            "suggested_portion_size": "1 oz (28g)",
+            "tags": [
+                "Cheese",
+                "Dairy",
+                "Low Carb",
+                "High Protein",
+                "Low Glycemic Index",
+                "Keto Friendly",
+                "Healthy Fats",
+                "Diabetes Diet"
+            ],
+            "thumbnail_url": "",
+            "user_rating": 0,
+            "was_added_to_cart": false,
+            "was_purchased": false,
+            "was_viewed": false
+        },
+        {
+            "calories": 310,
+            "carbs_grams": 4,
+            "currency": "IDR",
+            "description": "Keju Provolone Rendah Lemak: Pilihan Lezat dan Sehat!\n\nNikmati kelezatan keju provolone dengan rasa yang kaya, kini dengan kandungan lemak yang lebih rendah! Ideal untuk Anda yang menjalani pola makan sehat, terutama penderita diabetes.\n\nSetiap porsi mengandung nutrisi istimewa:  * Karbohidrat dan Gula Sangat Rendah: Hanya 4g karbohidrat dan 0.6g gula, membantu menjaga kadar gula darah stabil.\n  * Protein Tinggi: Dengan 27.9g protein, membantu Anda kenyang lebih lama dan mendukung kesehatan otot.\n  * Sodium Rendah: Hanya 1mg sodium per porsi.\n  * Bebas Indeks Glikemik (GI = 0, GL = 0): Pilihan aman tanpa perlu khawatir lonjakan gula darah.Cocok untuk camilan sehat, tambahan sandwich, atau bahan masakan favorit Anda. Jadikan Keju Provolone Rendah Lemak ini bagian dari diet harian Anda!",
+            "fat_grams": 19.9,
+            "feedback": "",
+            "fiber_grams": 0,
+            "food_id": "e94bb8cd-6255-42cd-b4d0-91b0ed9acc0e",
+            "food_name": "provolone cheese reduced fat",
+            "glucose_spike_after_eating": 0,
+            "glycemic_index": 0,
+            "glycemic_load": 0,
+            "is_available": true,
+            "nutrition_highlight": "Reduced Fat, Low Carb",
+            "photo_url": "",
+            "price": 80000,
+            "protein_grams": 27.9,
+            "reason": "Reduced-fat cheese is a good low-carb source of protein and fat that supports your weight loss goal and adherence to the low-carb diet for dinner.",
+            "recommendation_food_id": "1d17959b-04e1-47c0-83a4-a824c3e81a9f",
+            "recommendation_rank": 2,
+            "serving_size": "1 slice",
+            "sodium_mg": 1,
+            "sugar_grams": 0.6,
+            "suggested_meal_type": "dinner",
+            "suggested_portion_size": "1.5 oz (42g)",
+            "tags": [
+                "Provolone Cheese",
+                "Reduced Fat",
+                "Low Carb",
+                "Low Sugar",
+                "High Protein",
+                "Low Sodium",
+                "Diabetes Friendly",
+                "Zero GI",
+                "Zero GL"
+            ],
+            "thumbnail_url": "",
+            "user_rating": 0,
+            "was_added_to_cart": false,
+            "was_purchased": false,
+            "was_viewed": false
+        },
+        {
+            "calories": 230,
+            "carbs_grams": 8,
+            "currency": "IDR",
+            "description": "Souffle Bayam Sehat (Rendah GI)\n\nNikmati kelezatan klasik Eropa dengan Souffle Bayam! Dibuat dengan bayam segar, hidangan ini kaya akan protein (10,7g) untuk membantu Anda kenyang lebih lama. Dengan Indeks Glikemik (GI) sangat rendah yaitu 35 dan Beban Glikemik (GL) hanya 2,45, Souffle Bayam adalah pilihan cerdas untuk menjaga kadar gula darah tetap stabil. Rendah karbohidrat (8g) dan mengandung serat (1g). Cocok sebagai hidangan utama sehat Anda.",
+            "fat_grams": 17.6,
+            "feedback": "",
+            "fiber_grams": 1,
+            "food_id": "400e40a2-80cf-431f-afc9-f24845e6249b",
+            "food_name": "spinach souffle",
+            "glucose_spike_after_eating": 0,
+            "glycemic_index": 35,
+            "glycemic_load": 2.45,
+            "is_available": true,
+            "nutrition_highlight": "Potential high protein, Low Carb (assuming no flour)",
+            "photo_url": "",
+            "price": 69000,
+            "protein_grams": 10.7,
+            "reason": "A properly prepared spinach souffle can serve as a satisfying, protein-forward component of a low-carb European dinner, helping with satiety and calorie goals.",
+            "recommendation_food_id": "17a3ee54-a8a0-44b6-872f-1e08118fdd5a",
+            "recommendation_rank": 3,
+            "serving_size": "1/2 cup",
+            "sodium_mg": 0.8,
+            "sugar_grams": 2.5,
+            "suggested_meal_type": "dinner",
+            "suggested_portion_size": "1 small serving",
+            "tags": [
+                "spinach souffle",
+                "souffle",
+                "French",
+                "European",
+                "high protein",
+                "low GI",
+                "low glycemic index",
+                "low carb",
+                "healthy main dish",
+                "bayam"
+            ],
+            "thumbnail_url": "",
+            "user_rating": 0,
+            "was_added_to_cart": false,
+            "was_purchased": false,
+            "was_viewed": false
+        }
+    ],
+    "session": {
+        "session_id": "dd81dec6-0030-46ff-aa62-96451815b3e1",
+        "created_at": "2025-12-04T13:50:03.576988+07:00",
+        "expires_at": "2025-12-11T13:50:03.576988+07:00",
+        "is_expired": false,
+        "requested_types": [
+            "food",
+            "activity",
+            "insights"
+        ],
+        "meal_type": "dinner",
+        "food_category_codes": [
+            "European"
+        ],
+        "activity_type_codes": [
+            "YOGA",
+            "WALKING"
+        ],
+        "activity_preferences": "low-impact evening exercise",
+        "insights_question": "How can I lower my HbA1c from 7.5% to 6.5% in 3 months?",
+        "analysis_summary": "Your recent HbA1c of 7.5% shows improvement but remains above your target, indicating a continued need for strict glucose control and consistent adherence to your low-carb plan. Focusing on low glycemic load foods and structured activity will be key to achieving your 6.5% goal and managing co-occurring hypertension.",
+        "insights_response": "Lowering your HbA1c from 7.5% to 6.5% in three months requires stricter consistency across diet, physical activity, and medication adherence. Focus intensely on keeping carbohydrate intake consistently below your 150g target, prioritizing whole, low-GI foods, and carefully monitoring portion sizes, especially as you also manage hypertension. Incorporate at least 30 minutes of moderate activity, such as brisk walking, daily, ideally 30-60 minutes after your largest meal, as this greatly improves postprandial glucose control. Since your BMI is 30, achieving your target weight loss will be the most potent way to improve insulin sensitivity; aim for a sustainable calorie deficit (targeting your 1800 kcal limit) while ensuring adequate protein intake (90g) to maintain satiety and muscle mass. Finally, ensure timely administration of your Metformin and Novolog doses as prescribed.",
+        "latest_glucose_value": 180,
+        "latest_hba1c": 7.5,
+        "user_condition_id": 1,
+        "was_viewed": false,
+        "viewed_at": "0001-01-01T00:00:00Z",
+        "foods_count": 0,
+        "activities_count": 0,
+        "foods_purchased": 0,
+        "activities_completed": 0
+    }
+}

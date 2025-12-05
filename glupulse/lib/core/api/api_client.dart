@@ -79,7 +79,7 @@ class ApiClient {
             url,
             headers: headers,
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 60));
 
       if (_isTokenExpired(response)) {
         await _refreshToken();
@@ -121,7 +121,7 @@ class ApiClient {
             url,
             headers: headers,
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 60));
 
       if (_isTokenExpired(response)) {
         await _refreshToken();
@@ -257,7 +257,7 @@ class ApiClient {
             headers: headers,
             body: jsonEncode(body),
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 60));
 
       if (_isTokenExpired(response)) {
         await _refreshToken();
@@ -311,7 +311,7 @@ class ApiClient {
             headers: headers,
             body: body != null ? jsonEncode(body) : null, // Kirim body jika ada
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 60));
 
       if (_isTokenExpired(response)) {
         await _refreshToken();
@@ -351,7 +351,7 @@ class ApiClient {
             url,
             headers: headers,
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 60));
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return response;
