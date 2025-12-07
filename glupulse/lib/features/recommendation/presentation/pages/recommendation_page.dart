@@ -430,95 +430,193 @@ class _RecommendationPageState extends State<RecommendationPage>
   }
 
   Widget _buildActivityCard(ActivityRecommendationEntity activity) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
+    final imageAsset = _getImageAssetForActivity(activity.activityCode);
+    final cardColor = _getColorForActivity(activity.activityCode);
+
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(Icons.directions_run, color: Colors.orange.shade400, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        activity.activityName,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _buildTag('${activity.recommendedDurationMinutes} min', Colors.blue),
-                          _buildTag(activity.recommendedIntensity, Colors.orange),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  activity.description,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13, height: 1.4),
-                ),
-                const SizedBox(height: 12),
-                Row(
+      color: Colors.white,
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        height: 180,
+        child: Row(
+          children: [
+            // LEFT SIDE: Content
+            Expanded(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.verified, size: 16, color: Colors.green.shade400),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        activity.reason,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.green.shade700,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    // Icon Container
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: cardColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      child: Icon(
+                        _getIconForActivity(activity.activityCode),
+                        size: 24,
+                        color: cardColor,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Activity Name
+                    Text(
+                      activity.activityName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    // Tags (Duration & Intensity)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        _buildTag('${activity.recommendedDurationMinutes} min', Colors.blue),
+                        _buildTag(activity.recommendedIntensity, Colors.orange),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+            
+            // RIGHT SIDE: Image or Fallback
+            Expanded(
+              flex: 2,
+              child: Container(
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  color: cardColor.withOpacity(0.05),
+                ),
+                child: imageAsset != null
+                    ? Image.asset(
+                          imageAsset,
+                          fit: BoxFit.cover, 
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Icon(
+                                _getIconForActivity(activity.activityCode),
+                                size: 50,
+                                color: cardColor.withOpacity(0.5),
+                              ),
+                            );
+                          },
+                        )
+                    : Center(
+                        child: Icon(
+                          _getIconForActivity(activity.activityCode),
+                          size: 60,
+                          color: cardColor.withOpacity(0.3),
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  String? _getImageAssetForActivity(String code) {
+    if (code == 'CALISTHENICS') {
+      return 'assets/images/aktivity/Calisthenics.png';
+    } else if (code == 'DANCE') {
+      return 'assets/images/aktivity/Dancing.png';
+    } else if (code == 'CYCLING_LIGHT' || code == 'CYCLING_INTENSE') {
+      return 'assets/images/aktivity/Cyling.png';
+    } else if (code == 'HIIT') {
+      return 'assets/images/aktivity/High_Intensity_Interval_Training.jpg';
+    } else if (code == 'HIKING') {
+      return 'assets/images/aktivity/Hiking.png';
+    } else if (code == 'HOUSEWORK') {
+      return 'assets/images/aktivity/Household_Chores.png';
+    } else if (code == 'MARTIAL_ARTS') {
+      return 'assets/images/aktivity/Martial_arts _Boxing.png';
+    } else if (code == 'OCCUPATIONAL') {
+      return 'assets/images/aktivity/Occupational_Labor.png';
+    } else if (code == 'RACKET_SPORTS') {
+      return 'assets/images/aktivity/Raket Sports (Badminton, Tenis).png';
+    }
+    return null;
+  }
+
+  IconData _getIconForActivity(String code) {
+    switch (code) {
+      case 'RUNNING':
+        return Icons.directions_run;
+      case 'WALKING':
+        return Icons.directions_walk;
+      case 'CYCLING_LIGHT':
+      case 'CYCLING_INTENSE':
+        return Icons.directions_bike;
+      case 'SWIMMING':
+        return Icons.pool;
+      case 'YOGA_PILATES':
+        return Icons.self_improvement;
+      case 'WEIGHT_LIFTING':
+        return Icons.fitness_center;
+      case 'HIIT':
+        return Icons.timer;
+      case 'DANCE':
+        return Icons.music_note;
+      case 'HIKING':
+        return Icons.hiking;
+      case 'TEAM_SPORTS':
+        return Icons.sports_basketball;
+      case 'RACKET_SPORTS':
+        return Icons.sports_tennis;
+      case 'MARTIAL_ARTS':
+        return Icons.sports_mma;
+      case 'HOUSEWORK':
+        return Icons.cleaning_services;
+      case 'OCCUPATIONAL':
+        return Icons.work;
+      case 'CALISTHENICS':
+        return Icons.accessibility_new;
+      default:
+        return Icons.sports;
+    }
+  }
+  
+  Color _getColorForActivity(String code) {
+      switch (code) {
+      case 'RUNNING':
+      case 'HIIT':
+      case 'MARTIAL_ARTS':
+        return Colors.red;
+      case 'WALKING':
+      case 'YOGA_PILATES':
+      case 'HOUSEWORK':
+        return Colors.green;
+      case 'CYCLING_LIGHT':
+      case 'CYCLING_INTENSE':
+      case 'RACKET_SPORTS':
+        return Colors.orange;
+      case 'SWIMMING':
+      case 'TEAM_SPORTS':
+        return Colors.blue;
+      case 'WEIGHT_LIFTING':
+      case 'CALISTHENICS':
+      case 'HIKING':
+        return Colors.brown;
+      case 'DANCE':
+        return Colors.purple;
+      default:
+        return Colors.blueGrey;
+    }
   }
 
   Widget _buildTag(String text, MaterialColor color) {

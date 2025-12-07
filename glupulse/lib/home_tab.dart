@@ -1,10 +1,12 @@
+import 'package:glupulse/features/recommendation/domain/entities/recommendation_entity.dart';
+import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
 import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
-import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
+// import 'package:glupulse/features/Food/presentation/widgets/food_card.dart'; // Removed as we use local helper
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/activity/presentation/pages/activity_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
@@ -34,6 +36,7 @@ class _HomeTabState extends State<HomeTab> {
     context.read<Hba1cCubit>().getHba1cRecords();
     context.read<GlucoseCubit>().getGlucoseRecords();
     context.read<HealthProfileCubit>().fetchHealthProfile();
+    context.read<RecommendationCubit>().fetchLatestRecommendation();
   }
 
   @override
@@ -469,95 +472,92 @@ class _HomeTabState extends State<HomeTab> {
               ],
             ),
           ), // End of Smart Health Metrix ListView
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
-            // --- Recommendation Food Title ---
-            Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Recommendation Food',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
+              // --- Recommendation Food Section ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Recommendation Food',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
-            ),
-          ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // --- Recommendation Food Cards ---
-          SizedBox(
-            height: 191,
-            child: _buildRecommendationFoodList(),
-          ),
+              BlocBuilder<RecommendationCubit, RecommendationState>(
+                builder: (context, recommendationState) {
+                  if (recommendationState is RecommendationLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (recommendationState is RecommendationLoaded && recommendationState.recommendation.foodRecommendations.isNotEmpty) {
+                    final foodRecommendations = recommendationState.recommendation.foodRecommendations;
+                    return SizedBox(
+                      height: 170, // Adjusted height for food cards
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        itemCount: foodRecommendations.length,
+                        separatorBuilder: (context, index) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final food = foodRecommendations[index];
+                          return _buildFoodCard(food);
+                        },
+                      ),
+                    );
+                  } else if (recommendationState is RecommendationError) {
+                    return Center(child: Text('Error loading food recommendations: ${recommendationState.message}'));
+                  }
+                  return const SizedBox.shrink(); // No food recommendations or initial state
+                },
+              ),
             const SizedBox(height: 24),
 
-            // --- Recommendation Activity Title ---
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Recommendation Activity',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
+              // --- Recommendation Activity Section ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Recommendation Activity',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
-            ),
-          ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // --- Recommendation Activity Cards ---
-          SizedBox(
-            height: 191, // Menyamakan tinggi dengan Smart Health Metrix
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24.0), // Menggunakan padding horizontal
-              children: [
-                _buildRecommendationCard(
-                  context: context,
-                  title: 'Walking Class',
-                  price: 'Rp 50.000',
-                  icon: Icons.directions_walk,
-                  color: Colors.lightBlue,
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ActivityDetailPage(activityName: 'Walking'),
-                    ));
-                  },
-                ),
-                const SizedBox(width: 12),
-                _buildRecommendationCard(
-                  context: context,
-                  title: 'Yoga Class',
-                  price: 'Rp 65.000',
-                  icon: Icons.self_improvement,
-                  color: Colors.purpleAccent,
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ActivityDetailPage(activityName: 'Yoga'),
-                    ));
-                  },
-                ),
-                const SizedBox(width: 12),
-                _buildRecommendationCard(
-                  context: context,
-                  title: 'Cycling Tour',
-                  price: 'Rp 80.000',
-                  icon: Icons.directions_bike,
-                  color: Colors.orange,
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ActivityDetailPage(activityName: 'Cycling'),
-                    ));
-                  },
-                ),
-              ],
-            ),
-          ),
+              BlocBuilder<RecommendationCubit, RecommendationState>(
+                builder: (context, recommendationState) {
+                  if (recommendationState is RecommendationLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (recommendationState is RecommendationLoaded && recommendationState.recommendation.activityRecommendations.isNotEmpty) {
+                    final activityRecommendations = recommendationState.recommendation.activityRecommendations;
+                    return SizedBox(
+                      height: 180, // Adjusted height for activity cards
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        itemCount: activityRecommendations.length,
+                        separatorBuilder: (context, index) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final activity = activityRecommendations[index];
+                          return _buildActivityCard(activity);
+                        },
+                      ),
+                    );
+                  } else if (recommendationState is RecommendationError) {
+                    return Center(child: Text('Error loading activity recommendations: ${recommendationState.message}'));
+                  }
+                  return const SizedBox.shrink(); // No activity recommendations or initial state
+                },
+              ),
           const SizedBox(height: 24), // Menambahkan spasi di bagian bawah
             ],
           ),
@@ -613,46 +613,7 @@ class _HomeTabState extends State<HomeTab> {
     }
   }
 
-  // Widget baru untuk membangun daftar rekomendasi makanan dari API
-  Widget _buildRecommendationFoodList() {
-    return BlocBuilder<FoodCubit, FoodState>(
-      builder: (context, state) {
-        if (state is FoodLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is FoodLoaded) {
-          // Ambil hanya makanan (bukan minuman) dan batasi 5 item untuk rekomendasi
-          final recommendedFoods = state.foods
-              .where((f) => f.tags?.contains('drink') == false)
-              .take(5)
-              .toList();
 
-          return ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            itemCount: recommendedFoods.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final food = recommendedFoods[index];
-              // Gunakan FoodCard yang sudah ada
-              return FoodCard(
-                food: food,
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => FoodDetailPage(food: food)));
-                },
-              );
-            },
-          );
-        } else if (state is FoodError) {
-          return Center(child: Text('Error: ${state.message}'));
-        }
-        // State awal atau jika tidak ada data
-        return const Center(
-          child: Text('No food recommendations available.'),
-        );
-      },
-    );
-  }
 
   // Widget helper untuk membuat card metrik agar kode tidak berulang
   Widget _buildHealthMetricCard({
@@ -727,58 +688,111 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  // Widget helper untuk membuat card rekomendasi (makanan & aktivitas)
-  Widget _buildRecommendationCard({
-    required BuildContext context,
-    required String title, // Kembalikan parameter title
-    required String price, // Kembalikan parameter price
-    required IconData icon,
-    required Color color,
-    VoidCallback? onTap, // Menambahkan parameter onTap opsional
-  }) {
+
+  // --- Helper Methods for Recommendations ---
+
+
+
+
+
+  Widget _buildActivityCard(ActivityRecommendationEntity activity) {
+
+
+    final imageAsset = _getImageAssetForActivity(activity.activityCode);
+
+
+    final cardColor = _getColorForActivity(activity.activityCode);
+
+
+
+
+
     return SizedBox(
-      width: 170, // Menyamakan lebar dengan card lain
+      width: 320, // Fixed width to prevent layout overflow in horizontal list
       child: Card(
-        elevation: 1,
+        elevation: 2,
         margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        clipBehavior: Clip.antiAlias, // Ensures InkWell ripple effect is clipped
-        child: InkWell(
-          onTap: onTap, // Gunakan onTap yang diberikan dari pemanggil
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          height: 180,
+          child: Row(
             children: [
-              // Bagian Gambar/Ikon
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
-                  ),
-                  child: Center(
-                    child: Icon(icon, color: color, size: 40),
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: cardColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          _getIconForActivity(activity.activityCode),
+                          size: 24,
+                          color: cardColor,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        activity.activityName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          _buildTag('${activity.recommendedDurationMinutes} min', Colors.blue),
+                          _buildTag(activity.recommendedIntensity, Colors.orange),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
-              // Bagian Teks (Judul dan Harga)
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                        title,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        maxLines: 2, // Batasi judul hingga 2 baris
-                        overflow: TextOverflow.ellipsis, // Tampilkan '...' jika lebih dari 2 baris
-                      ),
-                    const SizedBox(height: 4),
-                    Text(price, style: TextStyle(
-                        fontSize: 14, 
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold
-                    )),
-                  ],
+              
+              Expanded(
+                flex: 2,
+                child: Container(
+                  height: double.infinity,
+                  decoration: BoxDecoration(
+                    color: cardColor.withOpacity(0.05),
+                  ),
+                  child: imageAsset != null
+                      ? Image.asset(
+                            imageAsset,
+                            fit: BoxFit.cover, 
+                            errorBuilder: (context, error, stackTrace) {
+                              return Center(
+                                child: Icon(
+                                  _getIconForActivity(activity.activityCode),
+                                  size: 50,
+                                  color: cardColor.withOpacity(0.5),
+                                ),
+                              );
+                            },
+                          )
+                      : Center(
+                          child: Icon(
+                            _getIconForActivity(activity.activityCode),
+                            size: 60,
+                            color: cardColor.withOpacity(0.3),
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -786,7 +800,548 @@ class _HomeTabState extends State<HomeTab> {
         ),
       ),
     );
-  }
-}
 
-// Hapus extension AppThemeRandomColor karena tidak lagi digunakan di sini
+
+  }
+
+
+
+
+
+  Widget _buildFoodCard(FoodRecommendationEntity food) {
+
+
+    return Container(
+      width: 280, // Fixed width to prevent layout overflow in horizontal list
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+
+
+          Padding(
+
+
+            padding: const EdgeInsets.all(20),
+
+
+            child: Row(
+
+
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+
+              children: [
+
+
+                Container(
+
+
+                  padding: const EdgeInsets.all(16),
+
+
+                  decoration: BoxDecoration(
+
+
+                    color: Colors.green.shade50,
+
+
+                    borderRadius: BorderRadius.circular(16),
+
+
+                  ),
+
+
+                  child: Icon(Icons.restaurant, color: Colors.green.shade400, size: 28),
+
+
+                ),
+
+
+                const SizedBox(width: 16),
+
+
+                Expanded(
+
+
+                  child: Column(
+
+
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+
+                    children: [
+
+
+                      Text(
+
+
+                        food.foodName,
+
+
+                        style: const TextStyle(
+
+
+                          fontWeight: FontWeight.bold,
+
+
+                          fontSize: 16,
+
+
+                        ),
+
+
+                      ),
+
+
+                      const SizedBox(height: 6),
+
+
+                      if (food.nutritionHighlight.isNotEmpty)
+
+
+                        Text(
+
+
+                          food.nutritionHighlight,
+
+
+                          style: TextStyle(
+
+
+                            fontSize: 12,
+
+
+                            color: Colors.blue.shade700,
+
+
+                            fontWeight: FontWeight.w600,
+
+
+                          ),
+
+
+                        ),
+
+
+                      const SizedBox(height: 12),
+
+
+                      Row(
+
+
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+
+                        children: [
+
+
+                          _buildCompactMacro('Cal', '${food.calories.toInt()}'),
+
+
+                          _buildCompactMacro('Prot', '${food.proteinGrams}g'),
+
+
+                          _buildCompactMacro('Carb', '${food.carbsGrams}g'),
+
+
+                          _buildCompactMacro('Fat', '${food.fatGrams}g'),
+
+
+                        ],
+
+
+                      ),
+
+
+                    ],
+
+
+                  ),
+
+
+                ),
+
+
+              ],
+
+
+            ),
+
+
+                    ),
+
+
+                  ],
+
+
+                ),
+
+
+              );
+
+
+            }
+
+
+
+
+
+  Widget _buildCompactMacro(String label, String value) {
+
+
+    return Column(
+
+
+      children: [
+
+
+        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+
+
+        const SizedBox(height: 2),
+
+
+        Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade800)),
+
+
+      ],
+
+
+    );
+
+
+  }
+
+
+
+
+
+  String? _getImageAssetForActivity(String code) {
+
+
+    if (code == 'CALISTHENICS') {
+
+
+      return 'assets/images/aktivity/Calisthenics.png';
+
+
+    } else if (code == 'DANCE') {
+
+
+      return 'assets/images/aktivity/Dancing.png';
+
+
+    } else if (code == 'CYCLING_LIGHT' || code == 'CYCLING_INTENSE') {
+
+
+      return 'assets/images/aktivity/Cyling.png';
+
+
+    } else if (code == 'HIIT') {
+
+
+      return 'assets/images/aktivity/High_Intensity_Interval_Training.jpg';
+
+
+    } else if (code == 'HIKING') {
+
+
+      return 'assets/images/aktivity/Hiking.png';
+
+
+    } else if (code == 'HOUSEWORK') {
+
+
+      return 'assets/images/aktivity/Household_Chores.png';
+
+
+    } else if (code == 'MARTIAL_ARTS') {
+
+
+      return 'assets/images/aktivity/Martial_arts _Boxing.png';
+
+
+    } else if (code == 'OCCUPATIONAL') {
+
+
+      return 'assets/images/aktivity/Occupational_Labor.png';
+
+
+    } else if (code == 'RACKET_SPORTS') {
+
+
+      return 'assets/images/aktivity/Raket Sports (Badminton, Tenis).png';
+
+
+    }
+
+
+    return null;
+
+
+  }
+
+
+
+
+
+  IconData _getIconForActivity(String code) {
+
+
+    switch (code) {
+
+
+      case 'RUNNING':
+
+
+        return Icons.directions_run;
+
+
+      case 'WALKING':
+
+
+        return Icons.directions_walk;
+
+
+      case 'CYCLING_LIGHT':
+
+
+      case 'CYCLING_INTENSE':
+
+
+        return Icons.directions_bike;
+
+
+      case 'SWIMMING':
+
+
+        return Icons.pool;
+
+
+      case 'YOGA_PILATES':
+
+
+        return Icons.self_improvement;
+
+
+      case 'WEIGHT_LIFTING':
+
+
+        return Icons.fitness_center;
+
+
+      case 'HIIT':
+
+
+        return Icons.timer;
+
+
+      case 'DANCE':
+
+
+        return Icons.music_note;
+
+
+      case 'HIKING':
+
+
+        return Icons.hiking;
+
+
+      case 'TEAM_SPORTS':
+
+
+        return Icons.sports_basketball;
+
+
+      case 'RACKET_SPORTS':
+
+
+        return Icons.sports_tennis;
+
+
+      case 'MARTIAL_ARTS':
+
+
+        return Icons.sports_mma;
+
+
+      case 'HOUSEWORK':
+
+
+        return Icons.cleaning_services;
+
+
+      case 'OCCUPATIONAL':
+
+
+        return Icons.work;
+
+
+      case 'CALISTHENICS':
+
+
+        return Icons.accessibility_new;
+
+
+      default:
+
+
+        return Icons.sports;
+
+
+    }
+
+
+  }
+
+
+  
+
+
+  Color _getColorForActivity(String code) {
+
+
+      switch (code) {
+
+
+      case 'RUNNING':
+
+
+      case 'HIIT':
+
+
+      case 'MARTIAL_ARTS':
+
+
+        return Colors.red;
+
+
+      case 'WALKING':
+
+
+      case 'YOGA_PILATES':
+
+
+      case 'HOUSEWORK':
+
+
+        return Colors.green;
+
+
+      case 'CYCLING_LIGHT':
+
+
+      case 'CYCLING_INTENSE':
+
+
+      case 'RACKET_SPORTS':
+
+
+        return Colors.orange;
+
+
+      case 'SWIMMING':
+
+
+      case 'TEAM_SPORTS':
+
+
+        return Colors.blue;
+
+
+      case 'WEIGHT_LIFTING':
+
+
+      case 'CALISTHENICS':
+
+
+      case 'HIKING':
+
+
+        return Colors.brown;
+
+
+      case 'DANCE':
+
+
+        return Colors.purple;
+
+
+      default:
+
+
+        return Colors.blueGrey;
+
+
+    }
+
+
+  }
+
+
+
+
+
+  Widget _buildTag(String text, MaterialColor color) {
+
+
+    return Container(
+
+
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+
+
+      decoration: BoxDecoration(
+
+
+        color: color.shade50,
+
+
+        borderRadius: BorderRadius.circular(12),
+
+
+      ),
+
+
+      child: Text(
+
+
+        text,
+
+
+        style: TextStyle(
+
+
+          fontSize: 11,
+
+
+          fontWeight: FontWeight.bold,
+
+
+          color: color.shade700,
+
+
+        ),
+
+
+      ),
+
+
+    );
+
+
+  }
+
+
+}
