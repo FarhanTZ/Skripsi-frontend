@@ -22,7 +22,9 @@ class FoodCubit extends Cubit<FoodState> {
   }
 
   String _mapFailureToMessage(Failure failure) {
-    // Anda bisa menambahkan logika untuk pesan error yang lebih spesifik
+    if (failure is ServerFailure) {
+      return failure.message;
+    }
     return 'Gagal memuat data. Periksa koneksi internet Anda.';
   }
 }

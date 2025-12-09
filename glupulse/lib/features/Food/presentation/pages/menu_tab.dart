@@ -8,6 +8,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
+import 'package:glupulse/features/Food/presentation/pages/all_menu_page.dart'; // Import AllMenuPage
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:glupulse/injection_container.dart';
@@ -382,11 +383,11 @@ class _MenuTabState extends State<MenuTab> {
 
                   return Column(
                     children: [
-                      _buildFoodSection(context, 'Recommendation Food', foods.take(5).toList()),
+                      _buildFoodSection(context, 'Recommendation Food', foods), // Pass full list
                       const SizedBox(height: 24),
-                      _buildFoodSection(context, 'Food Menu', foods.take(5).toList()),
+                      _buildFoodSection(context, 'Food Menu', foods), // Pass full list
                       const SizedBox(height: 24),
-                      _buildFoodSection(context, 'Drink Menu', drinks.take(5).toList()),
+                      _buildFoodSection(context, 'Drink Menu', drinks), // Pass full list
                     ],
                   );
                 } else if (state is FoodError) {
@@ -402,34 +403,73 @@ class _MenuTabState extends State<MenuTab> {
   }
 
   // Widget baru untuk membangun setiap seksi menu
-  Widget _buildFoodSection(BuildContext context, String title, List<dynamic> items) {
+  Widget _buildFoodSection(BuildContext context, String title, List<dynamic> fullItems) {
+    // Only display first 5 items in the horizontal preview
+    final previewItems = fullItems.take(5).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)), // Added primary color
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 180, // Sesuaikan tinggi sesuai kebutuhan FoodCard
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final food = items[index];
-              return FoodCard(
-                food: food,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title, 
+                style: TextStyle(
+                  fontSize: 20, 
+                  fontWeight: FontWeight.bold, 
+                  color: Theme.of(context).colorScheme.primary
+                )
+              ),
+              InkWell(
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => FoodDetailPage(food: food),
+                    builder: (context) => AllMenuPage(
+                      title: title, 
+                      foods: fullItems
+                    ),
                   ));
                 },
-              );
-            },
+                child: Text(
+                  'See All',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
+        const SizedBox(height: 12),
+        if (previewItems.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.0),
+            child: Text("No items available."),
+          )
+        else
+          SizedBox(
+            height: 180, // Sesuaikan tinggi sesuai kebutuhan FoodCard
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              itemCount: previewItems.length,
+              itemBuilder: (context, index) {
+                final food = previewItems[index];
+                return FoodCard(
+                  food: food,
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => FoodDetailPage(food: food),
+                    ));
+                  },
+                );
+              },
+            ),
+          ),
       ],
     );
   }

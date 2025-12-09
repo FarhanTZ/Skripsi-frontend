@@ -24,6 +24,9 @@ class FoodRepositoryImpl implements FoodRepository {
         return Right(remoteFoods);
       } on ServerException catch (e) {
         return Left(ServerFailure(e.message));
+      } catch (e) {
+        // Catch parsing errors or other unexpected exceptions
+        return Left(ServerFailure('Data processing error: ${e.toString()}'));
       }
     } else {
       return Left(ConnectionFailure());

@@ -31,33 +31,57 @@ class FoodModel extends Food {
   });
 
   factory FoodModel.fromJson(Map<String, dynamic> json) {
+    // Helper function for safe numeric parsing
+    num? parseNum(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value;
+      if (value is String) return num.tryParse(value);
+      return null;
+    }
+
+    // Helper function for safe string parsing
+    String? parseString(dynamic value) {
+      if (value == null) return null;
+      if (value is String) return value;
+      return value.toString(); // Convert other types (like List or int) to String safely
+    }
+
+    // Helper specifically for non-nullable strings to avoid "null" string
+    String parseStringReq(dynamic value) {
+      if (value == null) return '';
+      if (value is String) return value;
+      return value.toString();
+    }
+
     return FoodModel(
-      foodId: json['food_id'],
-      sellerId: json['seller_id'],
-      foodName: json['food_name'],
-      description: json['description'],
-      price: (json['price'] as num).toInt(),
-      currency: json['currency'],
-      photoUrl: json['photo_url'],
-      thumbnailUrl: json['thumbnail_url'],
-      isAvailable: json['is_available'],
-      stockCount: (json['stock_count'] as num?)?.toInt(),
-      tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      servingSize: json['serving_size'],
-      servingSizeGrams: json['serving_size_grams'],
-      quantity: json['quantity'],
-      calories: json['calories'],
-      carbsGrams: json['carbs_grams'],
-      fiberGrams: json['fiber_grams'],
-      proteinGrams: json['protein_grams'],
-      fatGrams: json['fat_grams'],
-      sugarGrams: json['sugar_grams'],
-      sodiumMg: json['sodium_mg'],
-      glycemicIndex: json['glycemic_index'],
-      glycemicLoad: json['glycemic_load'],
-      foodCategory: json['food_category'],
+      foodId: parseStringReq(json['food_id']),
+      sellerId: parseStringReq(json['seller_id']),
+      foodName: parseStringReq(json['food_name']),
+      description: parseStringReq(json['description']),
+      price: parseNum(json['price'])?.toInt() ?? 0,
+      currency: parseStringReq(json['currency']),
+      photoUrl: parseString(json['photo_url']),
+      thumbnailUrl: parseString(json['thumbnail_url']),
+      isAvailable: json['is_available'] == true, // Safe boolean check
+      stockCount: parseNum(json['stock_count'])?.toInt(),
+      tags: json['tags'] != null 
+          ? (json['tags'] as List).map((e) => e.toString()).toList() 
+          : null,
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
+      servingSize: parseString(json['serving_size']),
+      servingSizeGrams: parseNum(json['serving_size_grams']),
+      quantity: parseNum(json['quantity']),
+      calories: parseNum(json['calories']),
+      carbsGrams: parseNum(json['carbs_grams']),
+      fiberGrams: parseNum(json['fiber_grams']),
+      proteinGrams: parseNum(json['protein_grams']),
+      fatGrams: parseNum(json['fat_grams']),
+      sugarGrams: parseNum(json['sugar_grams']),
+      sodiumMg: parseNum(json['sodium_mg']),
+      glycemicIndex: parseNum(json['glycemic_index']),
+      glycemicLoad: parseNum(json['glycemic_load']),
+      foodCategory: parseString(json['food_category']),
     );
   }
 
