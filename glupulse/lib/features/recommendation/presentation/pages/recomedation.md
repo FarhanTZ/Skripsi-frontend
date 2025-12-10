@@ -1012,3 +1012,29 @@ I/flutter (30310): DEBUG: Cubit received SUCCESS. Data:
         "activities_completed": 0
     }
 }
+
+
+
+/recommendation/feedback/8af2b457-4d2f-4832-8c25-8d7c07e613f6
+{
+    "overall_feedback": "very_helpful", //Constraint = ["very_helpful", "helpful", "neutral", "helpful"]
+    "notes": "Good Job"
+}
+
+
+/recommendation/feedback/food/8af2b457-4d2f-4832-8c25-8d7c07e613f6
+{
+    "food_id": "400e40a2-80cf-431f-afc9-f24845e6249b",
+    "rating": 4,
+    "notes": "Very Good",
+    "glucose_spike": 15
+}
+
+
+recommendation/feedback/activity/8af2b457-4d2f-4832-8c25-8d7c07e613f6
+{
+    "activity_id": 1,
+    "rating": 4,
+    "notes": "Very Good",
+    "glucose_change": -13
+}

@@ -57,4 +57,55 @@ class RecommendationRepositoryImpl implements RecommendationRepository {
       return Left(ConnectionFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, void>> submitFeedback(String sessionId, Map<String, dynamic> feedbackData) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final token = await localDataSource.getLastToken();
+        await remoteDataSource.submitFeedback(sessionId, feedbackData, token);
+        return const Right(null);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> submitFoodFeedback(String recommendationFoodId, Map<String, dynamic> feedbackData) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final token = await localDataSource.getLastToken();
+        await remoteDataSource.submitFoodFeedback(recommendationFoodId, feedbackData, token);
+        return const Right(null);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> submitActivityFeedback(String recommendationActivityId, Map<String, dynamic> feedbackData) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final token = await localDataSource.getLastToken();
+        await remoteDataSource.submitActivityFeedback(recommendationActivityId, feedbackData, token);
+        return const Right(null);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
 }

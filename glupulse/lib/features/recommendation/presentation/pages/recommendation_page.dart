@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
+import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_feedback_cubit.dart';
 import 'package:glupulse/features/recommendation/presentation/pages/add_recommendation_page.dart';
 import 'package:glupulse/features/recommendation/domain/entities/recommendation_entity.dart';
+import 'package:glupulse/injection_container.dart' as di;
 
 class RecommendationPage extends StatefulWidget {
   final RecommendationEntity? recommendation;
@@ -49,6 +51,36 @@ class _RecommendationPageState extends State<RecommendationPage>
 
   Future<void> _onRefresh() async {
     await context.read<RecommendationCubit>().fetchLatestRecommendation();
+  }
+
+  void _showFeedbackDialog(BuildContext context, String sessionId) {
+    showDialog(
+      context: context,
+      builder: (_) => BlocProvider(
+        create: (context) => di.sl<RecommendationFeedbackCubit>(),
+        child: _FeedbackDialog(sessionId: sessionId),
+      ),
+    );
+  }
+
+  void _showFoodFeedbackDialog(BuildContext context, String recommendationFoodId, String foodName) {
+    showDialog(
+      context: context,
+      builder: (_) => BlocProvider(
+        create: (context) => di.sl<RecommendationFeedbackCubit>(),
+        child: _FoodFeedbackDialog(recommendationFoodId: recommendationFoodId, foodName: foodName),
+      ),
+    );
+  }
+
+  void _showActivityFeedbackDialog(BuildContext context, String recommendationActivityId, String activityName) {
+    showDialog(
+      context: context,
+      builder: (_) => BlocProvider(
+        create: (context) => di.sl<RecommendationFeedbackCubit>(),
+        child: _ActivityFeedbackDialog(recommendationActivityId: recommendationActivityId, activityName: activityName),
+      ),
+    );
   }
 
   @override
@@ -251,9 +283,21 @@ class _RecommendationPageState extends State<RecommendationPage>
             ),
           ],
 
+          // 6. Footer (Feedback Button & Session Info)
           const SizedBox(height: 24),
-
-          // 6. Footer
+          Center(
+            child: OutlinedButton.icon(
+              onPressed: () => _showFeedbackDialog(context, recommendation.sessionId),
+              icon: const Icon(Icons.feedback_outlined),
+              label: const Text('Give Feedback'),
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           Center(
             child: Text(
               'Session ID: ${recommendation.sessionId.split('-').first}...',
@@ -488,6 +532,22 @@ class _RecommendationPageState extends State<RecommendationPage>
                         _buildTag(activity.recommendedIntensity, Colors.orange),
                       ],
                     ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => _showActivityFeedbackDialog(
+                        context,
+                        activity.recommendationActivityId,
+                        activity.activityName,
+                      ),
+                      icon: const Icon(Icons.feedback_outlined, size: 18),
+                      label: const Text('Feedback', style: TextStyle(fontSize: 12)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -707,6 +767,7 @@ class _RecommendationPageState extends State<RecommendationPage>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
@@ -719,6 +780,22 @@ class _RecommendationPageState extends State<RecommendationPage>
                   ),
                 ),
                 const SizedBox(width: 12),
+                OutlinedButton.icon(
+                  onPressed: () => _showFoodFeedbackDialog(
+                    context,
+                    food.recommendationFoodId,
+                    food.foodName,
+                  ),
+                  icon: const Icon(Icons.feedback_outlined, size: 18),
+                  label: const Text('Feedback', style: TextStyle(fontSize: 12)),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Text(
                   '${food.currency} ${food.price.toInt()}',
                   style: const TextStyle(
@@ -808,4 +885,386 @@ class DashedCirclePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class _FeedbackDialog extends StatefulWidget {
+  final String sessionId;
+
+  const _FeedbackDialog({required this.sessionId});
+
+  @override
+  State<_FeedbackDialog> createState() => _FeedbackDialogState();
+}
+
+class _FeedbackDialogState extends State<_FeedbackDialog> {
+  String _overallFeedback = 'helpful';
+  final TextEditingController _notesController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<RecommendationFeedbackCubit, RecommendationFeedbackState>(
+      listener: (context, state) {
+        if (state is RecommendationFeedbackSuccess) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Feedback submitted successfully!')),
+          );
+        } else if (state is RecommendationFeedbackError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is RecommendationFeedbackLoading;
+
+        return AlertDialog(
+          title: const Text('Give Overall Feedback'),
+          content: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('How was this recommendation?'),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _overallFeedback,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'very_helpful', child: Text('Very Helpful')),
+                      DropdownMenuItem(value: 'helpful', child: Text('Helpful')),
+                      DropdownMenuItem(value: 'neutral', child: Text('Neutral')),
+                      DropdownMenuItem(value: 'unhelpful', child: Text('Unhelpful')),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _overallFeedback = value;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Notes (Optional)'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _notesController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Any specific feedback?',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      if (_formKey.currentState!.validate()) {
+                        context.read<RecommendationFeedbackCubit>().submitOverallFeedback(
+                              widget.sessionId,
+                              _overallFeedback,
+                              _notesController.text,
+                            );
+                      }
+                    },
+              child: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FoodFeedbackDialog extends StatefulWidget {
+  final String recommendationFoodId;
+  final String foodName;
+
+  const _FoodFeedbackDialog({required this.recommendationFoodId, required this.foodName});
+
+  @override
+  State<_FoodFeedbackDialog> createState() => _FoodFeedbackDialogState();
+}
+
+class _FoodFeedbackDialogState extends State<_FoodFeedbackDialog> {
+  int _rating = 3; // Default rating
+  final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _glucoseSpikeController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    _glucoseSpikeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<RecommendationFeedbackCubit, RecommendationFeedbackState>(
+      listener: (context, state) {
+        if (state is RecommendationFeedbackSuccess) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Food feedback submitted successfully!')),
+          );
+        } else if (state is RecommendationFeedbackError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is RecommendationFeedbackLoading;
+
+        return AlertDialog(
+          title: Text('Feedback for ${widget.foodName}'),
+          content: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Your rating:'),
+                  Slider(
+                    value: _rating.toDouble(),
+                    min: 1,
+                    max: 5,
+                    divisions: 4,
+                    label: _rating.toString(),
+                    onChanged: isLoading
+                        ? null
+                        : (value) {
+                            setState(() {
+                              _rating = value.toInt();
+                            });
+                          },
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Glucose Spike after eating (mg/dL):'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _glucoseSpikeController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'e.g., 15',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter glucose spike';
+                      }
+                      if (int.tryParse(value) == null) {
+                        return 'Please enter a valid number';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Notes (Optional):'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _notesController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'e.g., Very tasty and didn\'t spike my sugar much!',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      if (_formKey.currentState!.validate()) {
+                        context.read<RecommendationFeedbackCubit>().submitFoodFeedbackEntry(
+                              widget.recommendationFoodId,
+                              _rating,
+                              _notesController.text,
+                              int.parse(_glucoseSpikeController.text),
+                            );
+                      }
+                    },
+              child: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ActivityFeedbackDialog extends StatefulWidget {
+  final String recommendationActivityId;
+  final String activityName;
+
+  const _ActivityFeedbackDialog({required this.recommendationActivityId, required this.activityName});
+
+  @override
+  State<_ActivityFeedbackDialog> createState() => _ActivityFeedbackDialogState();
+}
+
+class _ActivityFeedbackDialogState extends State<_ActivityFeedbackDialog> {
+  int _rating = 3; // Default rating
+  final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _glucoseChangeController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    _glucoseChangeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<RecommendationFeedbackCubit, RecommendationFeedbackState>(
+      listener: (context, state) {
+        if (state is RecommendationFeedbackSuccess) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Activity feedback submitted successfully!')),
+          );
+        } else if (state is RecommendationFeedbackError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is RecommendationFeedbackLoading;
+
+        return AlertDialog(
+          title: Text('Feedback for ${widget.activityName}'),
+          content: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Your rating:'),
+                  Slider(
+                    value: _rating.toDouble(),
+                    min: 1,
+                    max: 5,
+                    divisions: 4,
+                    label: _rating.toString(),
+                    onChanged: isLoading
+                        ? null
+                        : (value) {
+                            setState(() {
+                              _rating = value.toInt();
+                            });
+                          },
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Glucose Change after activity (mg/dL):'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _glucoseChangeController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'e.g., -13 (for a drop) or 5 (for a rise)',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter glucose change';
+                      }
+                      if (int.tryParse(value) == null) {
+                        return 'Please enter a valid number';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Notes (Optional):'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _notesController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'e.g., Felt great after this walk!',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      if (_formKey.currentState!.validate()) {
+                        context.read<RecommendationFeedbackCubit>().submitActivityFeedbackEntry(
+                              widget.recommendationActivityId,
+                              _rating,
+                              _notesController.text,
+                              int.parse(_glucoseChangeController.text),
+                            );
+                      }
+                    },
+              child: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

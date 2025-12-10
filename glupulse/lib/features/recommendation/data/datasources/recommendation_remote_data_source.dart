@@ -5,6 +5,9 @@ import '../models/recommendation_model.dart';
 abstract class RecommendationRemoteDataSource {
   Future<RecommendationModel> postRecommendation(Map<String, dynamic> requestData, String token);
   Future<RecommendationModel?> getLatestRecommendation(String token);
+  Future<void> submitFeedback(String sessionId, Map<String, dynamic> feedbackData, String token);
+  Future<void> submitFoodFeedback(String recommendationFoodId, Map<String, dynamic> feedbackData, String token);
+  Future<void> submitActivityFeedback(String recommendationActivityId, Map<String, dynamic> feedbackData, String token);
 }
 
 class RecommendationRemoteDataSourceImpl implements RecommendationRemoteDataSource {
@@ -23,6 +26,45 @@ class RecommendationRemoteDataSourceImpl implements RecommendationRemoteDataSour
         token: token,
       );
       return RecommendationModel.fromJson(response);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> submitFeedback(String sessionId, Map<String, dynamic> feedbackData, String token) async {
+    try {
+      await apiClient.post(
+        '/recommendation/feedback/$sessionId',
+        body: feedbackData,
+        token: token,
+      );
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> submitFoodFeedback(String recommendationFoodId, Map<String, dynamic> feedbackData, String token) async {
+    try {
+      await apiClient.post(
+        '/recommendation/feedback/food/$recommendationFoodId',
+        body: feedbackData,
+        token: token,
+      );
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> submitActivityFeedback(String recommendationActivityId, Map<String, dynamic> feedbackData, String token) async {
+    try {
+      await apiClient.post(
+        '/recommendation/feedback/activity/$recommendationActivityId',
+        body: feedbackData,
+        token: token,
+      );
     } catch (e) {
       throw ServerException(e.toString());
     }

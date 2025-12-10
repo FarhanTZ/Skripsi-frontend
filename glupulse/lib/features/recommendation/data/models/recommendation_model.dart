@@ -44,6 +44,7 @@ class RecommendationModel extends RecommendationEntity {
 class ActivityRecommendationModel extends ActivityRecommendationEntity {
   const ActivityRecommendationModel({
     required super.activityId,
+    required super.recommendationActivityId,
     required super.activityCode,
     required super.activityName,
     required super.description,
@@ -62,6 +63,7 @@ class ActivityRecommendationModel extends ActivityRecommendationEntity {
   factory ActivityRecommendationModel.fromJson(Map<String, dynamic> json) {
     return ActivityRecommendationModel(
       activityId: json['activity_id'] ?? 0,
+      recommendationActivityId: json['recommendation_activity_id'] ?? '',
       activityCode: json['activity_code'] ?? '',
       activityName: json['activity_name'] ?? '',
       description: json['description'] ?? '',
@@ -82,6 +84,7 @@ class ActivityRecommendationModel extends ActivityRecommendationEntity {
 class FoodRecommendationModel extends FoodRecommendationEntity {
   const FoodRecommendationModel({
     required super.foodId,
+    required super.recommendationFoodId,
     required super.foodName,
     required super.description,
     required super.price,
@@ -99,6 +102,7 @@ class FoodRecommendationModel extends FoodRecommendationEntity {
   factory FoodRecommendationModel.fromJson(Map<String, dynamic> json) {
     return FoodRecommendationModel(
       foodId: json['food_id'] ?? '',
+      recommendationFoodId: json['recommendation_food_id'] ?? '',
       foodName: json['food_name'] ?? '',
       description: json['description'] ?? '',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,

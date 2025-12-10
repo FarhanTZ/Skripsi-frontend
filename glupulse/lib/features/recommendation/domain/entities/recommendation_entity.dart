@@ -29,6 +29,7 @@ class RecommendationEntity extends Equatable {
 
 class ActivityRecommendationEntity extends Equatable {
   final int activityId;
+  final String recommendationActivityId;
   final String activityCode;
   final String activityName;
   final String description;
@@ -45,6 +46,7 @@ class ActivityRecommendationEntity extends Equatable {
 
   const ActivityRecommendationEntity({
     required this.activityId,
+    required this.recommendationActivityId,
     required this.activityCode,
     required this.activityName,
     required this.description,
@@ -63,6 +65,7 @@ class ActivityRecommendationEntity extends Equatable {
   @override
   List<Object?> get props => [
         activityId,
+        recommendationActivityId,
         activityCode,
         activityName,
         description,
@@ -81,6 +84,7 @@ class ActivityRecommendationEntity extends Equatable {
 
 class FoodRecommendationEntity extends Equatable {
   final String foodId;
+  final String recommendationFoodId;
   final String foodName;
   final String description;
   final double price;
@@ -96,6 +100,7 @@ class FoodRecommendationEntity extends Equatable {
 
   const FoodRecommendationEntity({
     required this.foodId,
+    required this.recommendationFoodId,
     required this.foodName,
     required this.description,
     required this.price,
@@ -113,6 +118,7 @@ class FoodRecommendationEntity extends Equatable {
   @override
   List<Object?> get props => [
         foodId,
+        recommendationFoodId,
         foodName,
         description,
         price,

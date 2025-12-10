@@ -115,7 +115,11 @@ import 'package:glupulse/features/recommendation/data/repositories/recommendatio
 import 'package:glupulse/features/recommendation/domain/repositories/recommendation_repository.dart';
 import 'package:glupulse/features/recommendation/domain/usecases/post_recommendation.dart';
 import 'package:glupulse/features/recommendation/domain/usecases/get_latest_recommendation.dart';
+import 'package:glupulse/features/recommendation/domain/usecases/submit_recommendation_feedback.dart';
+import 'package:glupulse/features/recommendation/domain/usecases/submit_food_feedback.dart';
+import 'package:glupulse/features/recommendation/domain/usecases/submit_activity_feedback.dart';
 import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
+import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_feedback_cubit.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:glupulse/core/network/network_info.dart';
 
@@ -572,10 +576,20 @@ Future<void> init() async {
       getLatestRecommendation: sl(),
     ),
   );
+  sl.registerFactory(
+    () => RecommendationFeedbackCubit(
+      submitRecommendationFeedback: sl(),
+      submitFoodFeedback: sl(),
+      submitActivityFeedback: sl(),
+    ),
+  );
 
   // Use Cases
   sl.registerLazySingleton(() => PostRecommendation(sl()));
   sl.registerLazySingleton(() => GetLatestRecommendation(sl()));
+  sl.registerLazySingleton(() => SubmitRecommendationFeedback(sl()));
+  sl.registerLazySingleton(() => SubmitFoodFeedback(sl()));
+  sl.registerLazySingleton(() => SubmitActivityFeedback(sl()));
 
   // Repository
   sl.registerLazySingleton<RecommendationRepository>(
