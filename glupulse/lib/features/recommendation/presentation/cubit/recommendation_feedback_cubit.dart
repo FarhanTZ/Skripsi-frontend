@@ -33,10 +33,11 @@ class RecommendationFeedbackCubit extends Cubit<RecommendationFeedbackState> {
     );
   }
 
-  Future<void> submitFoodFeedbackEntry(String recommendationFoodId, int rating, String notes, int glucoseSpike) async {
+  Future<void> submitFoodFeedbackEntry(String recommendationFoodId, String foodId, int rating, String notes, int glucoseSpike) async {
     emit(RecommendationFeedbackLoading());
 
     final feedbackData = {
+      "food_id": foodId,
       "rating": rating,
       "notes": notes,
       "glucose_spike": glucoseSpike,
@@ -50,10 +51,11 @@ class RecommendationFeedbackCubit extends Cubit<RecommendationFeedbackState> {
     );
   }
 
-  Future<void> submitActivityFeedbackEntry(String recommendationActivityId, int rating, String notes, int glucoseChange) async {
+  Future<void> submitActivityFeedbackEntry(String recommendationActivityId, int activityId, int rating, String notes, int glucoseChange) async {
     emit(RecommendationFeedbackLoading());
 
     final feedbackData = {
+      "activity_id": activityId,
       "rating": rating,
       "notes": notes,
       "glucose_change": glucoseChange,

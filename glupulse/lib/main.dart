@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
                 pendingId: state.pendingId,
               );
             }
-            return const HomePage();
+            return const IntroductionScreen();
           },
         ),
       ),

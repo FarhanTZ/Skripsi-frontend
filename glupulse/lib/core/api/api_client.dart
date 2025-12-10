@@ -204,7 +204,7 @@ class ApiClient {
         url,
         headers: headers,
         body: body != null ? jsonEncode(body) : null,
-      ).timeout(const Duration(seconds: 15));
+      ).timeout(const Duration(seconds: 60));
 
       // Periksa apakah status code berada dalam rentang sukses (2xx)
       if (response.statusCode >= 200 && response.statusCode < 300) {

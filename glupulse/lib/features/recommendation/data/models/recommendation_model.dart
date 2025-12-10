@@ -63,7 +63,7 @@ class ActivityRecommendationModel extends ActivityRecommendationEntity {
   factory ActivityRecommendationModel.fromJson(Map<String, dynamic> json) {
     return ActivityRecommendationModel(
       activityId: json['activity_id'] ?? 0,
-      recommendationActivityId: json['recommendation_activity_id'] ?? '',
+      recommendationActivityId: json['recommendation_activity_id'] ?? json['id'] ?? '',
       activityCode: json['activity_code'] ?? '',
       activityName: json['activity_name'] ?? '',
       description: json['description'] ?? '',
@@ -102,7 +102,7 @@ class FoodRecommendationModel extends FoodRecommendationEntity {
   factory FoodRecommendationModel.fromJson(Map<String, dynamic> json) {
     return FoodRecommendationModel(
       foodId: json['food_id'] ?? '',
-      recommendationFoodId: json['recommendation_food_id'] ?? '',
+      recommendationFoodId: json['recommendation_food_id'] ?? json['id'] ?? '',
       foodName: json['food_name'] ?? '',
       description: json['description'] ?? '',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,

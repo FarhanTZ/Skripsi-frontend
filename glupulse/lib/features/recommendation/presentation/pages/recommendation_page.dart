@@ -63,22 +63,22 @@ class _RecommendationPageState extends State<RecommendationPage>
     );
   }
 
-  void _showFoodFeedbackDialog(BuildContext context, String recommendationFoodId, String foodName) {
+  void _showFoodFeedbackDialog(BuildContext context, String recommendationFoodId, String foodId, String foodName) {
     showDialog(
       context: context,
       builder: (_) => BlocProvider(
         create: (context) => di.sl<RecommendationFeedbackCubit>(),
-        child: _FoodFeedbackDialog(recommendationFoodId: recommendationFoodId, foodName: foodName),
+        child: _FoodFeedbackDialog(recommendationFoodId: recommendationFoodId, foodId: foodId, foodName: foodName),
       ),
     );
   }
 
-  void _showActivityFeedbackDialog(BuildContext context, String recommendationActivityId, String activityName) {
+  void _showActivityFeedbackDialog(BuildContext context, String recommendationActivityId, int activityId, String activityName) {
     showDialog(
       context: context,
       builder: (_) => BlocProvider(
         create: (context) => di.sl<RecommendationFeedbackCubit>(),
-        child: _ActivityFeedbackDialog(recommendationActivityId: recommendationActivityId, activityName: activityName),
+        child: _ActivityFeedbackDialog(recommendationActivityId: recommendationActivityId, activityId: activityId, activityName: activityName),
       ),
     );
   }
@@ -487,101 +487,116 @@ class _RecommendationPageState extends State<RecommendationPage>
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
         height: 180,
-        child: Row(
+        child: Stack(
           children: [
-            // LEFT SIDE: Content
-            Expanded(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Icon Container
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: cardColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        _getIconForActivity(activity.activityCode),
-                        size: 24,
-                        color: cardColor,
-                      ),
-                    ),
-                    const Spacer(),
-                    // Activity Name
-                    Text(
-                      activity.activityName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    // Tags (Duration & Intensity)
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
+            Row(
+              children: [
+                // LEFT SIDE: Content
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildTag('${activity.recommendedDurationMinutes} min', Colors.blue),
-                        _buildTag(activity.recommendedIntensity, Colors.orange),
+                        // Icon Container
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: cardColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            _getIconForActivity(activity.activityCode),
+                            size: 24,
+                            color: cardColor,
+                          ),
+                        ),
+                        const Spacer(),
+                        // Activity Name
+                        Text(
+                          activity.activityName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        // Tags (Duration & Intensity)
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            _buildTag('${activity.recommendedDurationMinutes} min', Colors.blue),
+                            _buildTag(activity.recommendedIntensity, Colors.orange),
+                          ],
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: () => _showActivityFeedbackDialog(
-                        context,
-                        activity.recommendationActivityId,
-                        activity.activityName,
-                      ),
-                      icon: const Icon(Icons.feedback_outlined, size: 18),
-                      label: const Text('Feedback', style: TextStyle(fontSize: 12)),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
+                  ),
+                ),
+                
+                // RIGHT SIDE: Image or Fallback
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      color: cardColor.withOpacity(0.05),
                     ),
-                  ],
+                    child: imageAsset != null
+                        ? Image.asset(
+                              imageAsset,
+                              fit: BoxFit.cover, 
+                              errorBuilder: (context, error, stackTrace) {
+                                return Center(
+                                  child: Icon(
+                                    _getIconForActivity(activity.activityCode),
+                                    size: 50,
+                                    color: cardColor.withOpacity(0.5),
+                                  ),
+                                );
+                              },
+                            )
+                        : Center(
+                            child: Icon(
+                              _getIconForActivity(activity.activityCode),
+                              size: 60,
+                              color: cardColor.withOpacity(0.3),
+                            ),
+                          ),
+                  ),
                 ),
-              ),
+              ],
             ),
-            
-            // RIGHT SIDE: Image or Fallback
-            Expanded(
-              flex: 2,
-              child: Container(
-                height: double.infinity,
-                decoration: BoxDecoration(
-                  color: cardColor.withOpacity(0.05),
+            // Feedback Button Overlay
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Material(
+                color: Colors.white.withOpacity(0.9),
+                shape: const CircleBorder(),
+                elevation: 2,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => _showActivityFeedbackDialog(
+                    context,
+                    activity.recommendationActivityId,
+                    activity.activityId,
+                    activity.activityName,
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.feedback_outlined,
+                      size: 18,
+                      color: Colors.black54,
+                    ),
+                  ),
                 ),
-                child: imageAsset != null
-                    ? Image.asset(
-                          imageAsset,
-                          fit: BoxFit.cover, 
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
-                              child: Icon(
-                                _getIconForActivity(activity.activityCode),
-                                size: 50,
-                                color: cardColor.withOpacity(0.5),
-                              ),
-                            );
-                          },
-                        )
-                    : Center(
-                        child: Icon(
-                          _getIconForActivity(activity.activityCode),
-                          size: 60,
-                          color: cardColor.withOpacity(0.3),
-                        ),
-                      ),
               ),
             ),
           ],
@@ -784,6 +799,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                   onPressed: () => _showFoodFeedbackDialog(
                     context,
                     food.recommendationFoodId,
+                    food.foodId,
                     food.foodName,
                   ),
                   icon: const Icon(Icons.feedback_outlined, size: 18),
@@ -914,19 +930,42 @@ class _FeedbackDialogState extends State<_FeedbackDialog> {
         if (state is RecommendationFeedbackSuccess) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Feedback submitted successfully!')),
+            const SnackBar(
+              content: Text('Feedback submitted successfully!'),
+              backgroundColor: Colors.green,
+            ),
           );
         } else if (state is RecommendationFeedbackError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
       builder: (context, state) {
         final isLoading = state is RecommendationFeedbackLoading;
+        final primaryColor = Theme.of(context).colorScheme.primary;
 
         return AlertDialog(
-          title: const Text('Give Overall Feedback'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.thumb_up_alt_outlined, color: primaryColor),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Session Feedback',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
           content: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -934,19 +973,31 @@ class _FeedbackDialogState extends State<_FeedbackDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('How was this recommendation?'),
-                  const SizedBox(height: 8),
+                  const Text(
+                    'How helpful was this session?',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
                     value: _overallFeedback,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'very_helpful', child: Text('Very Helpful')),
-                      DropdownMenuItem(value: 'helpful', child: Text('Helpful')),
-                      DropdownMenuItem(value: 'neutral', child: Text('Neutral')),
-                      DropdownMenuItem(value: 'unhelpful', child: Text('Unhelpful')),
+                      DropdownMenuItem(value: 'very_helpful', child: Text('🌟 Very Helpful')),
+                      DropdownMenuItem(value: 'helpful', child: Text('👍 Helpful')),
+                      DropdownMenuItem(value: 'neutral', child: Text('😐 Neutral')),
+                      DropdownMenuItem(value: 'unhelpful', child: Text('👎 Unhelpful')),
                     ],
                     onChanged: (value) {
                       if (value != null) {
@@ -956,24 +1007,43 @@ class _FeedbackDialogState extends State<_FeedbackDialog> {
                       }
                     },
                   ),
-                  const SizedBox(height: 16),
-                  const Text('Notes (Optional)'),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Additional Notes',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey),
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _notesController,
                     maxLines: 3,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
                       hintText: 'Any specific feedback?',
+                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: primaryColor),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           actions: [
             TextButton(
               onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(foregroundColor: Colors.grey),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
@@ -988,11 +1058,17 @@ class _FeedbackDialogState extends State<_FeedbackDialog> {
                             );
                       }
                     },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
               child: isLoading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
                   : const Text('Submit'),
             ),
@@ -1005,16 +1081,17 @@ class _FeedbackDialogState extends State<_FeedbackDialog> {
 
 class _FoodFeedbackDialog extends StatefulWidget {
   final String recommendationFoodId;
+  final String foodId;
   final String foodName;
 
-  const _FoodFeedbackDialog({required this.recommendationFoodId, required this.foodName});
+  const _FoodFeedbackDialog({required this.recommendationFoodId, required this.foodId, required this.foodName});
 
   @override
   State<_FoodFeedbackDialog> createState() => _FoodFeedbackDialogState();
 }
 
 class _FoodFeedbackDialogState extends State<_FoodFeedbackDialog> {
-  int _rating = 3; // Default rating
+  int _rating = 0;
   final TextEditingController _notesController = TextEditingController();
   final TextEditingController _glucoseSpikeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -1033,19 +1110,44 @@ class _FoodFeedbackDialogState extends State<_FoodFeedbackDialog> {
         if (state is RecommendationFeedbackSuccess) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Food feedback submitted successfully!')),
+            const SnackBar(
+              content: Text('Food feedback submitted successfully!'),
+              backgroundColor: Colors.green,
+            ),
           );
         } else if (state is RecommendationFeedbackError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
       builder: (context, state) {
         final isLoading = state is RecommendationFeedbackLoading;
+        final primaryColor = Theme.of(context).colorScheme.primary;
 
         return AlertDialog(
-          title: Text('Feedback for ${widget.foodName}'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.restaurant, color: Colors.orange),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.foodName,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
           content: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -1053,79 +1155,127 @@ class _FoodFeedbackDialogState extends State<_FoodFeedbackDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Your rating:'),
-                  Slider(
-                    value: _rating.toDouble(),
-                    min: 1,
-                    max: 5,
-                    divisions: 4,
-                    label: _rating.toString(),
-                    onChanged: isLoading
-                        ? null
-                        : (value) {
-                            setState(() {
-                              _rating = value.toInt();
-                            });
-                          },
+                  const Center(
+                    child: Text(
+                      'Rate this food',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey),
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  const Text('Glucose Spike after eating (mg/dL):'),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: _StarRating(
+                      rating: _rating,
+                      onRatingChanged: (rating) => setState(() => _rating = rating),
+                      color: Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Glucose Spike (mg/dL)',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _glucoseSpikeController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'e.g., 15',
+                    decoration: InputDecoration(
+                      hintText: 'e.g. 15',
+                      suffixText: 'mg/dL',
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      prefixIcon: const Icon(Icons.trending_up, color: Colors.redAccent, size: 20),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.orange),
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter glucose spike';
+                        return 'Required';
                       }
                       if (int.tryParse(value) == null) {
-                        return 'Please enter a valid number';
+                        return 'Invalid number';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-                  const Text('Notes (Optional):'),
+                  const Text(
+                    'Notes',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _notesController,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'e.g., Very tasty and didn\'t spike my sugar much!',
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: 'Did you enjoy it?',
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.orange),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           actions: [
             TextButton(
               onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(foregroundColor: Colors.grey),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: isLoading
                   ? null
                   : () {
+                      if (_rating == 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please select a rating')),
+                        );
+                        return;
+                      }
                       if (_formKey.currentState!.validate()) {
                         context.read<RecommendationFeedbackCubit>().submitFoodFeedbackEntry(
                               widget.recommendationFoodId,
+                              widget.foodId,
                               _rating,
                               _notesController.text,
                               int.parse(_glucoseSpikeController.text),
                             );
                       }
                     },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
               child: isLoading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
                   : const Text('Submit'),
             ),
@@ -1138,16 +1288,17 @@ class _FoodFeedbackDialogState extends State<_FoodFeedbackDialog> {
 
 class _ActivityFeedbackDialog extends StatefulWidget {
   final String recommendationActivityId;
+  final int activityId;
   final String activityName;
 
-  const _ActivityFeedbackDialog({required this.recommendationActivityId, required this.activityName});
+  const _ActivityFeedbackDialog({required this.recommendationActivityId, required this.activityId, required this.activityName});
 
   @override
   State<_ActivityFeedbackDialog> createState() => _ActivityFeedbackDialogState();
 }
 
 class _ActivityFeedbackDialogState extends State<_ActivityFeedbackDialog> {
-  int _rating = 3; // Default rating
+  int _rating = 0;
   final TextEditingController _notesController = TextEditingController();
   final TextEditingController _glucoseChangeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -1166,11 +1317,14 @@ class _ActivityFeedbackDialogState extends State<_ActivityFeedbackDialog> {
         if (state is RecommendationFeedbackSuccess) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Activity feedback submitted successfully!')),
+            const SnackBar(
+              content: Text('Activity feedback submitted successfully!'),
+              backgroundColor: Colors.green,
+            ),
           );
         } else if (state is RecommendationFeedbackError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
@@ -1178,7 +1332,28 @@ class _ActivityFeedbackDialogState extends State<_ActivityFeedbackDialog> {
         final isLoading = state is RecommendationFeedbackLoading;
 
         return AlertDialog(
-          title: Text('Feedback for ${widget.activityName}'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.directions_run, color: Colors.blue),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.activityName,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
           content: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -1186,85 +1361,170 @@ class _ActivityFeedbackDialogState extends State<_ActivityFeedbackDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Your rating:'),
-                  Slider(
-                    value: _rating.toDouble(),
-                    min: 1,
-                    max: 5,
-                    divisions: 4,
-                    label: _rating.toString(),
-                    onChanged: isLoading
-                        ? null
-                        : (value) {
-                            setState(() {
-                              _rating = value.toInt();
-                            });
-                          },
+                  const Center(
+                    child: Text(
+                      'Rate this activity',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey),
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  const Text('Glucose Change after activity (mg/dL):'),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: _StarRating(
+                      rating: _rating,
+                      onRatingChanged: (rating) => setState(() => _rating = rating),
+                      color: Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Glucose Change (mg/dL)',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Use negative (-) for drop, positive (+) for rise',
+                    style: TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _glucoseChangeController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'e.g., -13 (for a drop) or 5 (for a rise)',
+                    keyboardType: const TextInputType.numberWithOptions(signed: true),
+                    decoration: InputDecoration(
+                      hintText: 'e.g. -15',
+                      suffixText: 'mg/dL',
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      prefixIcon: const Icon(Icons.show_chart, color: Colors.blueAccent, size: 20),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter glucose change';
+                        return 'Required';
                       }
                       if (int.tryParse(value) == null) {
-                        return 'Please enter a valid number';
+                        return 'Invalid number';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-                  const Text('Notes (Optional):'),
+                  const Text(
+                    'Notes',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _notesController,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'e.g., Felt great after this walk!',
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: 'How did you feel?',
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           actions: [
             TextButton(
               onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(foregroundColor: Colors.grey),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: isLoading
                   ? null
                   : () {
+                      if (_rating == 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please select a rating')),
+                        );
+                        return;
+                      }
                       if (_formKey.currentState!.validate()) {
                         context.read<RecommendationFeedbackCubit>().submitActivityFeedbackEntry(
                               widget.recommendationActivityId,
+                              widget.activityId,
                               _rating,
                               _notesController.text,
                               int.parse(_glucoseChangeController.text),
                             );
                       }
                     },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
               child: isLoading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
                   : const Text('Submit'),
             ),
           ],
         );
       },
+    );
+  }
+}
+
+class _StarRating extends StatelessWidget {
+  final int rating;
+  final ValueChanged<int> onRatingChanged;
+  final Color color;
+
+  const _StarRating({
+    required this.rating,
+    required this.onRatingChanged,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (index) {
+        return GestureDetector(
+          onTap: () => onRatingChanged(index + 1),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: Icon(
+              index < rating ? Icons.star_rounded : Icons.star_outline_rounded,
+              color: index < rating ? color : Colors.grey.shade400,
+              size: 36,
+            ),
+          ),
+        );
+      }),
     );
   }
 }
