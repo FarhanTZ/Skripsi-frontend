@@ -84,11 +84,7 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
           );
         } else if (state is RecommendationLoaded) {
           Navigator.of(context).pop(); // Dismiss loading dialog
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const RecommendationPage(),
-            ),
-          );
+          Navigator.of(context).pop(); // Return to RecommendationPage with new data
         } else if (state is RecommendationError) {
           Navigator.of(context).pop(); // Dismiss loading dialog
           ScaffoldMessenger.of(context).showSnackBar(

@@ -16,7 +16,7 @@ class RecommendationModel extends RecommendationEntity {
         : json;
 
     return RecommendationModel(
-      sessionId: sessionData['session_id'] ?? '',
+      sessionId: sessionData['session_id'] ?? sessionData['id'] ?? '',
       analysisSummary: sessionData['analysis_summary'] ?? '',
       insightsResponse: sessionData['insights_response'] ?? '',
       
