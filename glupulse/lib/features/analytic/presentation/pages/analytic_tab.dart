@@ -18,6 +18,7 @@ import 'package:glupulse/features/sleep_log/presentation/pages/sleep_log_list_pa
 import 'package:glupulse/features/medication/presentation/pages/medication_log_list_page.dart';
 import 'package:glupulse/features/meal_log/presentation/pages/meal_log_page.dart';
 import 'package:glupulse/features/recommendation/presentation/pages/recommendation_page.dart';
+import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
 
 class AnalyticTab extends StatefulWidget {
   const AnalyticTab({super.key});
@@ -35,6 +36,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
     context.read<HealthProfileCubit>().fetchHealthProfile();
     context.read<SleepLogCubit>().getSleepLogs();
     context.read<MealLogCubit>().getMealLogs();
+    context.read<RecommendationCubit>().fetchLatestRecommendation();
   }
 
   void _getRecommendation(BuildContext context) {
@@ -574,12 +576,230 @@ class _AnalyticTabState extends State<AnalyticTab> {
                       );
                     },
                   ),
+                  const SizedBox(height: 12),
+
+                  // Sleep Insight
+                  BlocBuilder<SleepLogCubit, SleepLogState>(
+                    builder: (context, state) {
+                      String description = 'No recent sleep data.';
+                      Color color = Colors.grey;
+
+                      if (state is SleepLogLoaded && state.sleepLogs.isNotEmpty) {
+                        final latestLog = state.sleepLogs.first;
+                        final duration = latestLog.wakeTime.difference(latestLog.bedTime);
+                        final hours = duration.inHours;
+                        
+                        if (hours >= 7 && hours <= 9) {
+                          description = 'You slept well ($hours hrs). Good recovery!';
+                          color = Colors.indigo;
+                        } else if (hours < 7) {
+                          description = 'Short sleep duration ($hours hrs). Aim for 7-9 hours.';
+                          color = Colors.orange;
+                        } else {
+                          description = 'Long sleep duration ($hours hrs).';
+                          color = Colors.blue;
+                        }
+                      }
+
+                      return _buildInsightCard(
+                        context: context,
+                        title: 'Sleep Analysis',
+                        description: description,
+                        icon: Icons.bedtime_rounded,
+                        color: color == Colors.grey ? Colors.blueGrey : color,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Meal Insight
+                  BlocBuilder<MealLogCubit, MealLogState>(
+                    builder: (context, state) {
+                      String description = 'No recent meal logged.';
+                      Color color = Colors.grey;
+
+                      if (state is MealLogLoaded && state.mealLogs.isNotEmpty) {
+                        final latestLog = state.mealLogs.first;
+                        final cals = latestLog.totalCalories?.toInt() ?? 0;
+                        if (cals > 0) {
+                           description = 'Last meal was $cals kcal. Keep tracking for better insights.';
+                           color = Colors.teal;
+                        }
+                      }
+
+                      return _buildInsightCard(
+                        context: context,
+                        title: 'Dietary Analysis',
+                        description: description,
+                        icon: Icons.restaurant_rounded,
+                        color: color == Colors.grey ? Colors.blueGrey : color,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // --- Recommendation Insights ---
+                  BlocBuilder<RecommendationCubit, RecommendationState>(
+                    builder: (context, state) {
+                      if (state is RecommendationLoaded) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Insights Recommendation',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildSummaryCard(state.recommendation.analysisSummary),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Plan',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildDetailAccordion(state.recommendation.insightsResponse),
+                            const SizedBox(height: 24),
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                   const SizedBox(height: 40),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(String summary) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4C8CFF), Color(0xFF0F67FE)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F67FE).withOpacity(0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          childrenPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          iconColor: Colors.white,
+          collapsedIconColor: Colors.white,
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Key Focus',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          children: [
+            Text(
+              summary,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailAccordion(String insights) {
+    final List<String> bullets = insights.split('. ').where((s) => s.isNotEmpty).toList();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.purple.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.lightbulb_outline, color: Colors.purple.shade400, size: 20),
+          ),
+          title: const Text(
+            'Detailed Plan',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          iconColor: Colors.grey,
+          children: bullets.map((text) => _buildBulletPoint(text.trim())).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBulletPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 4.0),
+            child: Icon(Icons.check, size: 16, color: Color(0xFF0F67FE)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.4),
+            ),
+          ),
+        ],
       ),
     );
   }

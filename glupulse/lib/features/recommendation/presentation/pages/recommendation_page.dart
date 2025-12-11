@@ -404,7 +404,6 @@ class _RecommendationPageState extends State<RecommendationPage>
   Widget _buildSummaryCard(String summary) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF4C8CFF), Color(0xFF0F67FE)],
@@ -420,10 +419,14 @@ class _RecommendationPageState extends State<RecommendationPage>
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          childrenPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          iconColor: Colors.white,
+          collapsedIconColor: Colors.white,
+          title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -444,17 +447,18 @@ class _RecommendationPageState extends State<RecommendationPage>
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            summary,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              height: 1.5,
-              fontWeight: FontWeight.w500,
+          children: [
+            Text(
+              summary,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
