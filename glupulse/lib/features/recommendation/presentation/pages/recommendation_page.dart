@@ -6,6 +6,9 @@ import 'package:glupulse/features/recommendation/presentation/cubit/recommendati
 import 'package:glupulse/features/recommendation/presentation/pages/add_recommendation_page.dart';
 import 'package:glupulse/features/recommendation/domain/entities/recommendation_entity.dart';
 import 'package:glupulse/injection_container.dart' as di;
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
+import 'package:glupulse/features/Food/domain/entities/food.dart';
 
 class RecommendationPage extends StatefulWidget {
   final RecommendationEntity? recommendation;
@@ -19,6 +22,8 @@ class RecommendationPage extends StatefulWidget {
 class _RecommendationPageState extends State<RecommendationPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  final PageController _activityPageController = PageController();
+  final PageController _foodPageController = PageController();
   // late bool _showRecommendations; // Removed
 
   @override
@@ -40,6 +45,8 @@ class _RecommendationPageState extends State<RecommendationPage>
   @override
   void dispose() {
     _controller.dispose();
+    _activityPageController.dispose();
+    _foodPageController.dispose();
     super.dispose();
   }
 
@@ -253,11 +260,31 @@ class _RecommendationPageState extends State<RecommendationPage>
               ),
             ),
             const SizedBox(height: 16),
-            ...recommendation.activityRecommendations.map((activity) => 
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: _buildActivityCard(activity),
-              )
+            SizedBox(
+              height: 200,
+              child: PageView.builder(
+                controller: _activityPageController,
+                itemCount: recommendation.activityRecommendations.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: _buildActivityCard(recommendation.activityRecommendations[index]),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: SmoothPageIndicator(
+                controller: _activityPageController,
+                count: recommendation.activityRecommendations.length,
+                effect: ExpandingDotsEffect(
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  activeDotColor: Theme.of(context).colorScheme.primary,
+                  dotColor: Colors.grey.shade300,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
           ],
@@ -275,11 +302,31 @@ class _RecommendationPageState extends State<RecommendationPage>
               ),
             ),
             const SizedBox(height: 16),
-            ...recommendation.foodRecommendations.map((food) => 
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: _buildFoodCard(food),
-              )
+            SizedBox(
+              height: 280,
+              child: PageView.builder(
+                controller: _foodPageController,
+                itemCount: recommendation.foodRecommendations.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: _buildFoodCard(recommendation.foodRecommendations[index]),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: SmoothPageIndicator(
+                controller: _foodPageController,
+                count: recommendation.foodRecommendations.length,
+                effect: ExpandingDotsEffect(
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  activeDotColor: Theme.of(context).colorScheme.primary,
+                  dotColor: Colors.grey.shade300,
+                ),
+              ),
             ),
           ],
 
@@ -477,13 +524,18 @@ class _RecommendationPageState extends State<RecommendationPage>
     final imageAsset = _getImageAssetForActivity(activity.activityCode);
     final cardColor = _getColorForActivity(activity.activityCode);
 
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      color: Colors.white,
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
         height: 180,
@@ -725,52 +777,109 @@ class _RecommendationPageState extends State<RecommendationPage>
           ),
         ],
       ),
-      child: Column(
+      child: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          GestureDetector(
+            onTap: () {
+              final foodEntity = Food(
+                foodId: food.foodId,
+                sellerId: 'recommendation', 
+                foodName: food.foodName,
+                description: food.description,
+                price: food.price.toInt(),
+                currency: food.currency,
+                photoUrl: null, 
+                isAvailable: true,
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+                calories: food.calories,
+                carbsGrams: food.carbsGrams,
+                proteinGrams: food.proteinGrams,
+                fatGrams: food.fatGrams,
+              );
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => FoodDetailPage(food: foodEntity),
+              ));
+            },
+            child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(Icons.restaurant, color: Colors.green.shade400, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(Icons.restaurant, color: Colors.green.shade400, size: 28),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 24.0),
+                              child: Text(
+                                food.foodName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            if (food.nutritionHighlight.isNotEmpty)
+                              Text(
+                                food.nutritionHighlight,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade700,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildCompactMacro('Cal', '${food.calories.toInt()}'),
+                                _buildCompactMacro('Prot', '${food.proteinGrams}g'),
+                                _buildCompactMacro('Carb', '${food.carbsGrams}g'),
+                                _buildCompactMacro('Fat', '${food.fatGrams}g'),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          food.reason,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Text(
-                        food.foodName,
+                        '${food.currency} ${food.price.toInt()}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      if (food.nutritionHighlight.isNotEmpty)
-                        Text(
-                          food.nutritionHighlight,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.blue.shade700,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildCompactMacro('Cal', '${food.calories.toInt()}'),
-                          _buildCompactMacro('Prot', '${food.proteinGrams}g'),
-                          _buildCompactMacro('Carb', '${food.carbsGrams}g'),
-                          _buildCompactMacro('Fat', '${food.fatGrams}g'),
-                        ],
                       ),
                     ],
                   ),
@@ -778,48 +887,29 @@ class _RecommendationPageState extends State<RecommendationPage>
               ],
             ),
           ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    food.reason,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                      fontStyle: FontStyle.italic,
-                    ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Material(
+              color: Colors.transparent,
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () => _showFoodFeedbackDialog(
+                  context,
+                  food.recommendationFoodId,
+                  food.foodId,
+                  food.foodName,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.feedback_outlined,
+                    size: 20,
+                    color: Colors.grey.shade400,
                   ),
                 ),
-                const SizedBox(width: 12),
-                OutlinedButton.icon(
-                  onPressed: () => _showFoodFeedbackDialog(
-                    context,
-                    food.recommendationFoodId,
-                    food.foodId,
-                    food.foodName,
-                  ),
-                  icon: const Icon(Icons.feedback_outlined, size: 18),
-                  label: const Text('Feedback', style: TextStyle(fontSize: 12)),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${food.currency} ${food.price.toInt()}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],

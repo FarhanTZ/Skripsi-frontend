@@ -10,18 +10,24 @@ class RecommendationModel extends RecommendationEntity {
   });
 
   factory RecommendationModel.fromJson(Map<String, dynamic> json) {
+    // Handle potential 'data' wrapper
+    var data = json;
+    if (json.containsKey('data') && json['data'] is Map<String, dynamic>) {
+      data = json['data'];
+    }
+
     // Determine if we are dealing with a detail response (has 'session' key) or a direct session object
-    final sessionData = json.containsKey('session') 
-        ? (json['session'] as Map<String, dynamic>) 
-        : json;
+    final sessionData = data.containsKey('session') 
+        ? (data['session'] as Map<String, dynamic>) 
+        : data;
 
     return RecommendationModel(
-      sessionId: sessionData['session_id'] ?? sessionData['id'] ?? '',
+      sessionId: sessionData['session_id'] ?? sessionData['id'] ?? sessionData['recommendation_id'] ?? sessionData['uuid'] ?? '',
       analysisSummary: sessionData['analysis_summary'] ?? '',
       insightsResponse: sessionData['insights_response'] ?? '',
       
       // Try to find activities in 'activities' (detail) OR 'activity_recommendations' (list/legacy)
-      activityRecommendations: (json['activities'] as List<dynamic>?)
+      activityRecommendations: (data['activities'] as List<dynamic>?)
               ?.map((e) => ActivityRecommendationModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           (sessionData['activity_recommendations'] as List<dynamic>?)
@@ -30,7 +36,7 @@ class RecommendationModel extends RecommendationEntity {
           [],
 
       // Try to find foods in 'foods' (detail) OR 'food_recommendations' (list/legacy)
-      foodRecommendations: (json['foods'] as List<dynamic>?)
+      foodRecommendations: (data['foods'] as List<dynamic>?)
               ?.map((e) => FoodRecommendationModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           (sessionData['food_recommendations'] as List<dynamic>?)

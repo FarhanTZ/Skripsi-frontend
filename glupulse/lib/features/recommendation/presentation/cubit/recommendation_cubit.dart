@@ -21,7 +21,7 @@ class RecommendationCubit extends Cubit<RecommendationState> {
     
     failureOrRecommendation.fold(
       (failure) => emit(RecommendationError(failure.message)),
-      (recommendation) => emit(RecommendationLoaded(recommendation)),
+      (_) => fetchLatestRecommendation(),
     );
   }
 

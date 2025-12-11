@@ -12,6 +12,8 @@ import 'package:glupulse/features/Food/presentation/pages/all_menu_page.dart'; /
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:glupulse/injection_container.dart';
+import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
+import 'package:glupulse/features/Food/domain/entities/food.dart';
 
 import 'order_history_page.dart';
 
@@ -25,15 +27,6 @@ class MenuTab extends StatefulWidget {
 class _MenuTabState extends State<MenuTab> {
   // Controller untuk PageView promo
   final _promoPageController = PageController();
-
-  // Data untuk kategori
-  final List<String> categories = const [
-    'Main',
-    'Salads',
-    'Sides',
-    'Desert',
-    'Drink'
-  ];
 
   // State untuk alamat yang sedang aktif
   AddressModel _currentAddress = const AddressModel(
@@ -51,6 +44,7 @@ class _MenuTabState extends State<MenuTab> {
     super.initState();
     _getCurrentLocationAndAddress();
     context.read<FoodCubit>().fetchFoods();
+    context.read<RecommendationCubit>().fetchLatestRecommendation();
   }
 
   @override
@@ -339,61 +333,94 @@ class _MenuTabState extends State<MenuTab> {
               ),
             ),
             const SizedBox(height: 24),
-            // Menu Categories
-            SizedBox(
-              height: 32, // Reducing the height of the category list area
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        categories[index],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(
-                height: 20), // Additional space below the category list
             
+            // --- Recommendation Food Section ---
+            _buildSectionHeader(
+              context,
+              'Recommendation Food',
+              onTap: () {
+                // Navigate to see all
+              },
+            ),
+            const SizedBox(height: 12),
+            BlocBuilder<RecommendationCubit, RecommendationState>(
+              builder: (context, recommendationState) {
+                if (recommendationState is RecommendationLoading) {
+                  return const SizedBox(
+                    height: 180,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                } else if (recommendationState is RecommendationLoaded &&
+                    recommendationState.recommendation.foodRecommendations.isNotEmpty) {
+                  final recommendationFoods = recommendationState.recommendation.foodRecommendations.map((rec) => Food(
+                        foodId: rec.foodId,
+                        sellerId: 'recommendation',
+                        foodName: rec.foodName,
+                        description: rec.description,
+                        price: rec.price.toInt(),
+                        currency: rec.currency,
+                        photoUrl: null, // Recommendations might not have photoUrl
+                        isAvailable: true,
+                        createdAt: DateTime.now(),
+                        updatedAt: DateTime.now(),
+                        calories: rec.calories,
+                        carbsGrams: rec.carbsGrams,
+                        proteinGrams: rec.proteinGrams,
+                        fatGrams: rec.fatGrams,
+                      )).toList();
+
+                  return _buildHorizontalFoodList(recommendationFoods);
+                } else if (recommendationState is RecommendationError) {
+                  return SizedBox(
+                    height: 100,
+                    child: Center(child: Text(recommendationState.message)),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            const SizedBox(height: 24),
+
             // --- Food Menu from API ---
+            _buildSectionHeader(
+              context,
+              'Food Menu',
+              onTap: () {
+                 // Navigate to see all
+                 // We need access to the full list here, which might be tricky if it's inside the BlocBuilder below.
+                 // Ideally, we'd pass the current state's foods if available, or navigate to a page that fetches its own data.
+                 // For now, let's assume we can navigate to AllMenuPage and it will handle fetching or we pass empty and let it fetch.
+                 // However, AllMenuPage expects a list.
+                 // Let's grab the current state from the cubit if possible or just navigate.
+                 final state = context.read<FoodCubit>().state;
+                 if (state is FoodLoaded) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => AllMenuPage(
+                        title: 'Food Menu', 
+                        foods: state.foods
+                      ),
+                    ));
+                 }
+              },
+            ),
+            const SizedBox(height: 12),
             BlocBuilder<FoodCubit, FoodState>(
               builder: (context, state) {
                 if (state is FoodLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is FoodLoaded) {
-                  // Pisahkan makanan dan minuman berdasarkan tags
-                  final foods = state.foods.where((f) => f.tags?.contains('drink') == false).toList();
-                  final drinks = state.foods.where((f) => f.tags?.contains('drink') == true).toList();
-
-                  return Column(
-                    children: [
-                      _buildFoodSection(context, 'Recommendation Food', foods), // Pass full list
-                      const SizedBox(height: 24),
-                      _buildFoodSection(context, 'Food Menu', foods), // Pass full list
-                      const SizedBox(height: 24),
-                      _buildFoodSection(context, 'Drink Menu', drinks), // Pass full list
-                    ],
+                  return const SizedBox(
+                    height: 180,
+                    child: Center(child: CircularProgressIndicator()),
                   );
+                } else if (state is FoodLoaded) {
+                  final foods = state.foods.where((f) => f.tags?.contains('drink') == false).toList();
+                  return _buildHorizontalFoodList(foods);
                 } else if (state is FoodError) {
-                  return Center(child: Text(state.message));
+                  return SizedBox(
+                    height: 100,
+                    child: Center(child: Text(state.message)),
+                  );
                 }
-                return const SizedBox.shrink(); // Initial state
+                return const SizedBox.shrink();
               },
             ),
             const SizedBox(height: 24), // Space below
@@ -402,75 +429,63 @@ class _MenuTabState extends State<MenuTab> {
     );
   }
 
-  // Widget baru untuk membangun setiap seksi menu
-  Widget _buildFoodSection(BuildContext context, String title, List<dynamic> fullItems) {
-    // Only display first 5 items in the horizontal preview
-    final previewItems = fullItems.take(5).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title, 
-                style: TextStyle(
-                  fontSize: 20, 
-                  fontWeight: FontWeight.bold, 
-                  color: Theme.of(context).colorScheme.primary
-                )
-              ),
-              InkWell(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => AllMenuPage(
-                      title: title, 
-                      foods: fullItems
-                    ),
-                  ));
-                },
-                child: Text(
-                  'See All',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ],
+  Widget _buildSectionHeader(BuildContext context, String title, {required VoidCallback onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary),
           ),
-        ),
-        const SizedBox(height: 12),
-        if (previewItems.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.0),
-            child: Text("No items available."),
-          )
-        else
-          SizedBox(
-            height: 180, // Sesuaikan tinggi sesuai kebutuhan FoodCard
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              itemCount: previewItems.length,
-              itemBuilder: (context, index) {
-                final food = previewItems[index];
-                return FoodCard(
-                  food: food,
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => FoodDetailPage(food: food),
-                    ));
-                  },
-                );
-              },
+          InkWell(
+            onTap: onTap,
+            child: Text(
+              'See All',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
-      ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalFoodList(List<Food> foods) {
+    if (foods.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.0),
+        child: Text("No items available."),
+      );
+    }
+    // Only display first 5 items in the horizontal preview
+    final previewItems = foods.take(5).toList();
+    
+    return SizedBox(
+      height: 180,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        itemCount: previewItems.length,
+        itemBuilder: (context, index) {
+          final food = previewItems[index];
+          return FoodCard(
+            food: food,
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => FoodDetailPage(food: food),
+              ));
+            },
+          );
+        },
+      ),
     );
   }
 

@@ -8,7 +8,6 @@ import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart'
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
 // import 'package:glupulse/features/Food/presentation/widgets/food_card.dart'; // Removed as we use local helper
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:glupulse/features/activity/presentation/pages/activity_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
 import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
@@ -17,6 +16,7 @@ import 'package:glupulse/features/notification/presentation/pages/notification_p
 import 'package:glupulse/features/HealthData/presentation/pages/health_metric_detail_page.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
+import 'package:glupulse/features/Food/domain/entities/food.dart';
 import 'package:intl/intl.dart';
 
 
@@ -211,98 +211,7 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Health Score',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          InkWell(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute( // Diubah untuk mengarah ke halaman list HbA1c
-                builder: (context) => const Hba1cListPage(),
-              ));
-            },
-            child: Card(
-              elevation: 2,
-              color: Colors.white,
-              clipBehavior: Clip.antiAlias, // Penting agar child mengikuti lengkungan Card
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: SizedBox(
-                width: 385,
-                height: 105,
-                child: Row(
-                  children: [
-                    Container(
-                      width: 120,
-                      color: const Color(0xFF0F67FE),
-                      child: Center(
-                        child: BlocBuilder<Hba1cCubit, Hba1cState>(
-                          builder: (context, state) {
-                            String hba1cValue = '0.0%';
-                            if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
-                              // Urutkan data dari yang terbaru
-                              final sortedRecords = List.from(state.hba1cRecords)
-                                ..sort((a, b) => b.testDate.compareTo(a.testDate));
-                              hba1cValue = '${sortedRecords.first.hba1cPercentage.toStringAsFixed(1)}%';
-                            }
-                            return Text(
-                              hba1cValue,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.bold),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: BlocBuilder<Hba1cCubit, Hba1cState>(
-                          builder: (context, state) { // Kurung kurawal pembuka
-                            String statusMessage = 'No data available. Please input your Hba1c record.';
-                            if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
-                              final latestRecord = state.hba1cRecords.first;
-                              statusMessage = _getHba1cStatusMessage(latestRecord.hba1cPercentage);
-                            }
-                            return Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               mainAxisAlignment: MainAxisAlignment.center,
-                               children: [
-                                 const Text('Last Hba1c',
-                                     style: TextStyle(
-                                         fontWeight: FontWeight.bold, fontSize: 16)),
-                                 const SizedBox(height: 4),
-                                 Text(
-                                  statusMessage,
-                                   style: const TextStyle(fontSize: 14, color: Colors.grey),
-                                   maxLines: 3,
-                                 ),
-                               ],
-                             );
-                          }, // Kurung kurawal penutup
-                        ), // Penutup untuk BlocBuilder
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Align(
@@ -361,36 +270,7 @@ class _HomeTabState extends State<HomeTab> {
                     );
                   },
                 ),
-                const SizedBox(width: 12),
-                // --- Card Tekanan Darah ---
-                _buildHealthMetricCard(
-                  context: context,
-                  category: 'Blood Pressure',
-                  iconWidget: SvgPicture.asset(
-                    'assets/images/Blood_Pressure.svg', // Menggunakan SVG asset
-                    colorFilter: const ColorFilter.mode(Color(0xFF4043FD), BlendMode.srcIn),
-                    width: 24,
-                  ),
-                  iconColor: const Color(0xFF4043FD),
-                  value: '120/80',
-                  unit: 'mmHg',
-                  status: 'Low',
-                  statusText: 'Low', // Status baru
-                  statusColor: const Color(0xFFFDFD66), // Warna BG Kuning
-                  statusTextColor: const Color(0xFFB7B726), // Warna Teks Kuning
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const HealthMetricDetailPage(
-                        title: 'Blood Pressure',
-                        value: '120/80',
-                        unit: 'mmHg',
-                        status: 'Low',
-                        icon: Icons.favorite_border,
-                        iconColor: const Color(0xFF4043FD),
-                      ),
-                    ));
-                  },
-                ),
+
                 const SizedBox(width: 12),
                 // --- Card BMI ---
                 BlocBuilder<HealthProfileCubit, HealthProfileState>(
@@ -440,64 +320,92 @@ class _HomeTabState extends State<HomeTab> {
                   },
                 ),
                 const SizedBox(width: 12),
-                // --- Card Heart Rate ---
-                _buildHealthMetricCard(
-                  context: context,
-                  category: 'Heart Rate',
-                  iconWidget: SvgPicture.asset(
-                    'assets/images/health-rate.svg', // Menggunakan SVG asset yang sama
-                    colorFilter: const ColorFilter.mode(Colors.orangeAccent, BlendMode.srcIn),
-                    width: 24,
-                  ),
-                  iconColor: Colors.orangeAccent,
-                  value: '72',
-                  unit: 'BPM',
-                  status: 'Resting',
-                  statusText: 'Normal',
-                  statusColor: const Color(0xFF9CF0A6),
-                  statusTextColor: const Color(0xFF02A916),
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const HealthMetricDetailPage(
-                        title: 'Heart Rate',
-                        value: '72',
-                        unit: 'BPM',
-                        status: 'Resting',
-                        icon: Icons.monitor_heart_outlined,
-                        iconColor: Colors.orangeAccent,
+                // --- Card HbA1c ---
+                BlocBuilder<Hba1cCubit, Hba1cState>(
+                  builder: (context, state) {
+                    String value = 'N/A';
+                    String status = 'No Data';
+                    Color statusColor = Colors.grey.shade300;
+                    Color statusTextColor = Colors.black54;
+
+                    if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
+                      final sortedRecords = List.from(state.hba1cRecords)
+                        ..sort((a, b) => b.testDate.compareTo(a.testDate));
+                      final latestRecord = sortedRecords.first;
+                      value = '${latestRecord.hba1cPercentage.toStringAsFixed(1)}';
+                      final statusInfo = _getHba1cStatus(latestRecord.hba1cPercentage);
+                      status = statusInfo['text'];
+                      statusColor = statusInfo['bgColor'];
+                      statusTextColor = statusInfo['textColor'];
+                    }
+
+                    return _buildHealthMetricCard(
+                      context: context,
+                      category: 'HbA1c',
+                      iconWidget: SvgPicture.asset(
+                        'assets/images/health-rate.svg',
+                        colorFilter: const ColorFilter.mode(Colors.purple, BlendMode.srcIn),
+                        width: 24,
                       ),
-                    ));
+                      iconColor: Colors.purple,
+                      value: value,
+                      unit: '%',
+                      status: status,
+                      statusText: status,
+                      statusColor: statusColor,
+                      statusTextColor: statusTextColor,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Hba1cListPage()));
+                      },
+                    );
                   },
                 ),
               ],
             ),
           ), // End of Smart Health Metrix ListView
-          const SizedBox(height: 16),
+
+                    
+          const SizedBox(height: 32),
 
               // --- Recommendation Food Section ---
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Recommendation Food',
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Recommendation Food',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        // Navigate to see all, potentially passing the list
+                      },
+                      child: Text(
+                        'See All',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12), // Separator between title and list/loading indicator
 
               BlocBuilder<RecommendationCubit, RecommendationState>(
                 builder: (context, recommendationState) {
                   if (recommendationState is RecommendationLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator()); // Show loading
                   } else if (recommendationState is RecommendationLoaded && recommendationState.recommendation.foodRecommendations.isNotEmpty) {
                     final foodRecommendations = recommendationState.recommendation.foodRecommendations;
                     return SizedBox(
-                      height: 170, // Adjusted height for food cards
+                      height: 180, // Adjusted height for food cards
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -512,35 +420,54 @@ class _HomeTabState extends State<HomeTab> {
                   } else if (recommendationState is RecommendationError) {
                     return Center(child: Text('Error loading food recommendations: ${recommendationState.message}'));
                   }
-                  return const SizedBox.shrink(); // No food recommendations or initial state
+                  // Handle empty state explicitly
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text('No food recommendations available.'),
+                  );
                 },
               ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
               // --- Recommendation Activity Section ---
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Recommendation Activity',
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Recommendation Activity',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        // Navigate to see all
+                      },
+                      child: Text(
+                        'See All',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12), // Separator between title and list/loading indicator
 
               BlocBuilder<RecommendationCubit, RecommendationState>(
                 builder: (context, recommendationState) {
                   if (recommendationState is RecommendationLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator()); // Show loading
                   } else if (recommendationState is RecommendationLoaded && recommendationState.recommendation.activityRecommendations.isNotEmpty) {
                     final activityRecommendations = recommendationState.recommendation.activityRecommendations;
                     return SizedBox(
-                      height: 180, // Adjusted height for activity cards
+                      height: 180,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -555,10 +482,14 @@ class _HomeTabState extends State<HomeTab> {
                   } else if (recommendationState is RecommendationError) {
                     return Center(child: Text('Error loading activity recommendations: ${recommendationState.message}'));
                   }
-                  return const SizedBox.shrink(); // No activity recommendations or initial state
+                  // Handle empty state explicitly
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text('No activity recommendations available.'),
+                  );
                 },
               ),
-          const SizedBox(height: 24), // Menambahkan spasi di bagian bawah
+          const SizedBox(height: 32), // Menambahkan spasi di bagian bawah
             ],
           ),
         );
@@ -610,6 +541,28 @@ class _HomeTabState extends State<HomeTab> {
       return {'value': value, 'status': 'Overweight', 'description': 'Your BMI is in the overweight range. Consider more activity.', 'color': Colors.orange.shade100, 'textColor': Colors.orange.shade800};
     } else {
       return {'value': value, 'status': 'Obesity', 'description': 'Your BMI is in the obesity range. Please consult a doctor.', 'color': const Color(0xFFFA4D5E), 'textColor': const Color(0xFFBF070A)};
+    }
+  }
+
+  Map<String, dynamic> _getHba1cStatus(double value) {
+    if (value < 5.7) {
+      return {
+        'text': 'Normal',
+        'bgColor': const Color(0xFF9CF0A6),
+        'textColor': const Color(0xFF02A916)
+      };
+    } else if (value >= 5.7 && value <= 6.4) {
+      return {
+        'text': 'Prediabetes',
+        'bgColor': const Color(0xFFFDFD66),
+        'textColor': const Color(0xFFB7B726)
+      };
+    } else {
+      return {
+        'text': 'Diabetes',
+        'bgColor': const Color(0xFFFA4D5E),
+        'textColor': const Color(0xFFBF070A)
+      };
     }
   }
 
@@ -707,17 +660,22 @@ class _HomeTabState extends State<HomeTab> {
 
 
 
-    return SizedBox(
+    return Container(
       width: 320, // Fixed width to prevent layout overflow in horizontal list
-      child: Card(
-        elevation: 2,
-        margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+      margin: const EdgeInsets.symmetric(vertical: 8), // Add margin to allow shadow to show
+      decoration: BoxDecoration(
         color: Colors.white,
-        clipBehavior: Clip.antiAlias,
-        child: SizedBox(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
           height: 180,
           child: Row(
             children: [
@@ -798,7 +756,6 @@ class _HomeTabState extends State<HomeTab> {
             ],
           ),
         ),
-      ),
     );
 
 
@@ -809,218 +766,91 @@ class _HomeTabState extends State<HomeTab> {
 
 
   Widget _buildFoodCard(FoodRecommendationEntity food) {
-
-
-    return Container(
-      width: 280, // Fixed width to prevent layout overflow in horizontal list
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-
-
-          Padding(
-
-
-            padding: const EdgeInsets.all(20),
-
-
-            child: Row(
-
-
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-
-              children: [
-
-
-                Container(
-
-
-                  padding: const EdgeInsets.all(16),
-
-
-                  decoration: BoxDecoration(
-
-
-                    color: Colors.green.shade50,
-
-
-                    borderRadius: BorderRadius.circular(16),
-
-
-                  ),
-
-
-                  child: Icon(Icons.restaurant, color: Colors.green.shade400, size: 28),
-
-
-                ),
-
-
-                const SizedBox(width: 16),
-
-
-                Expanded(
-
-
-                  child: Column(
-
-
-                    crossAxisAlignment: CrossAxisAlignment.start,
-
-
-                    children: [
-
-
-                      Text(
-
-
-                        food.foodName,
-
-
-                        style: const TextStyle(
-
-
-                          fontWeight: FontWeight.bold,
-
-
-                          fontSize: 16,
-
-
-                        ),
-
-
-                      ),
-
-
-                      const SizedBox(height: 6),
-
-
-                      if (food.nutritionHighlight.isNotEmpty)
-
-
-                        Text(
-
-
-                          food.nutritionHighlight,
-
-
-                          style: TextStyle(
-
-
-                            fontSize: 12,
-
-
-                            color: Colors.blue.shade700,
-
-
-                            fontWeight: FontWeight.w600,
-
-
-                          ),
-
-
-                        ),
-
-
-                      const SizedBox(height: 12),
-
-
-                      Row(
-
-
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-
-                        children: [
-
-
-                          _buildCompactMacro('Cal', '${food.calories.toInt()}'),
-
-
-                          _buildCompactMacro('Prot', '${food.proteinGrams}g'),
-
-
-                          _buildCompactMacro('Carb', '${food.carbsGrams}g'),
-
-
-                          _buildCompactMacro('Fat', '${food.fatGrams}g'),
-
-
-                        ],
-
-
-                      ),
-
-
-                    ],
-
-
-                  ),
-
-
-                ),
-
-
-              ],
-
-
-            ),
-
-
-                    ),
-
-
-                  ],
-
-
-                ),
-
-
-              );
-
-
-            }
-
-
-
-
-
-  Widget _buildCompactMacro(String label, String value) {
-
-
-    return Column(
-
-
-      children: [
-
-
-        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
-
-
-        const SizedBox(height: 2),
-
-
-        Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade800)),
-
-
-      ],
-
-
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
     );
 
+    return GestureDetector(
+      onTap: () {
+        // Map FoodRecommendationEntity to Food entity
+        final foodEntity = Food(
+          foodId: food.foodId,
+          sellerId: 'recommendation', // Placeholder or use appropriate ID
+          foodName: food.foodName,
+          description: food.description,
+          price: food.price.toInt(),
+          currency: food.currency,
+          photoUrl: null, // Placeholder as recommendation entity might not have it
+          isAvailable: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          calories: food.calories,
+          carbsGrams: food.carbsGrams,
+          proteinGrams: food.proteinGrams,
+          fatGrams: food.fatGrams,
+        );
 
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => FoodDetailPage(food: foodEntity),
+        ));
+      },
+      child: Container(
+        width: 160,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              child: Container(
+                  height: 100,
+                  width: double.infinity,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  child: const Center(child: Icon(Icons.fastfood_outlined, color: Colors.grey, size: 40))),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    food.foodName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    currencyFormatter.format(food.price),
+                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
+
+
+
+
+
+
 
 
 
