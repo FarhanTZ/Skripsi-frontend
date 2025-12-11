@@ -641,34 +641,48 @@ class _AnalyticTabState extends State<AnalyticTab> {
                   // --- Recommendation Insights ---
                   BlocBuilder<RecommendationCubit, RecommendationState>(
                     builder: (context, state) {
-                      if (state is RecommendationLoaded) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Insights Recommendation',
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Insights Recommendation',
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                            const SizedBox(height: 12),
-                            _buildSummaryCard(state.recommendation.analysisSummary),
-                            const SizedBox(height: 20),
-                            Text(
-                              'Plan',
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                          ),
+                          const SizedBox(height: 12),
+                          if (state is RecommendationLoading)
+                            const Center(child: CircularProgressIndicator())
+                          else if (state is RecommendationLoaded)
+                            _buildSummaryCard(state.recommendation.analysisSummary)
+                          else if (state is RecommendationError)
+                            Text('Error: ${state.message}')
+                          else
+                            const SizedBox.shrink(), // Initial or empty
+
+                          const SizedBox(height: 20),
+                          
+                          Text(
+                            'Plan',
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                            const SizedBox(height: 12),
-                            _buildDetailAccordion(state.recommendation.insightsResponse),
-                            const SizedBox(height: 24),
-                          ],
-                        );
-                      }
-                      return const SizedBox.shrink();
+                          ),
+                          const SizedBox(height: 12),
+                          if (state is RecommendationLoading)
+                            const Center(child: CircularProgressIndicator())
+                          else if (state is RecommendationLoaded)
+                            _buildDetailAccordion(state.recommendation.insightsResponse)
+                          else if (state is RecommendationError)
+                            const SizedBox.shrink() // Don't show error twice
+                          else
+                            const SizedBox.shrink(),
+
+                          const SizedBox(height: 24),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 40),
