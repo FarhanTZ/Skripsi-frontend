@@ -18,6 +18,10 @@ import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_c
 import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_state.dart';
 import 'package:glupulse/features/Food/domain/entities/food.dart';
 import 'package:intl/intl.dart';
+import 'package:glupulse/features/sleep_log/presentation/cubit/sleep_log_cubit.dart';
+import 'package:glupulse/features/meal_log/presentation/cubit/meal_log_cubit.dart';
+import 'package:glupulse/features/sleep_log/presentation/pages/sleep_log_list_page.dart';
+import 'package:glupulse/features/meal_log/presentation/pages/meal_log_page.dart';
 
 
 class HomeTab extends StatefulWidget {
@@ -36,6 +40,8 @@ class _HomeTabState extends State<HomeTab> {
     context.read<Hba1cCubit>().getHba1cRecords();
     context.read<GlucoseCubit>().getGlucoseRecords();
     context.read<HealthProfileCubit>().fetchHealthProfile();
+    context.read<SleepLogCubit>().getSleepLogs();
+    context.read<MealLogCubit>().getMealLogs();
     context.read<RecommendationCubit>().fetchLatestRecommendation();
   }
 
@@ -356,6 +362,100 @@ class _HomeTabState extends State<HomeTab> {
                       statusTextColor: statusTextColor,
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Hba1cListPage()));
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(width: 12),
+                // --- Card Sleep ---
+                BlocBuilder<SleepLogCubit, SleepLogState>(
+                  builder: (context, state) {
+                    String value = 'N/A';
+                    String status = 'No Data';
+                    Color statusColor = Colors.grey.shade300;
+                    Color statusTextColor = Colors.black54;
+
+                    if (state is SleepLogLoaded && state.sleepLogs.isNotEmpty) {
+                      final latestLog = state.sleepLogs.first;
+                      final duration = latestLog.wakeTime.difference(latestLog.bedTime);
+                      final hours = duration.inHours;
+                      final minutes = duration.inMinutes.remainder(60);
+                      value = '${hours}h ${minutes}m';
+                      
+                      if (hours >= 7 && hours <= 9) {
+                        status = 'Good';
+                        statusColor = const Color(0xFF9CF0A6);
+                        statusTextColor = const Color(0xFF02A916);
+                      } else if (hours < 7) {
+                        status = 'Short';
+                        statusColor = const Color(0xFFFDFD66);
+                        statusTextColor = const Color(0xFFB7B726);
+                      } else {
+                        status = 'Long';
+                        statusColor = Colors.orange.shade100;
+                        statusTextColor = Colors.orange.shade800;
+                      }
+                    }
+
+                    return _buildHealthMetricCard(
+                      context: context,
+                      category: 'Sleep',
+                      iconWidget: SvgPicture.asset(
+                        'assets/images/Profile_glupulsesvg.svg',
+                        colorFilter: const ColorFilter.mode(Colors.indigo, BlendMode.srcIn),
+                        width: 24,
+                      ),
+                      iconColor: Colors.indigo,
+                      value: value,
+                      unit: '',
+                      status: status,
+                      statusText: status,
+                      statusColor: statusColor,
+                      statusTextColor: statusTextColor,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SleepLogListPage()));
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(width: 12),
+                // --- Card Meal ---
+                BlocBuilder<MealLogCubit, MealLogState>(
+                  builder: (context, state) {
+                    String value = 'N/A';
+                    String status = 'No Data';
+                    Color statusColor = Colors.grey.shade300;
+                    Color statusTextColor = Colors.black54;
+
+                    if (state is MealLogLoaded && state.mealLogs.isNotEmpty) {
+                      final latestLog = state.mealLogs.first;
+                      value = '${latestLog.totalCalories?.toInt() ?? 0}';
+                      
+                      final cals = latestLog.totalCalories ?? 0;
+                      if (cals > 0) {
+                         status = 'Logged';
+                         statusColor = Colors.blue.shade100;
+                         statusTextColor = Colors.blue.shade800;
+                      }
+                    }
+
+                    return _buildHealthMetricCard(
+                      context: context,
+                      category: 'Last Meal',
+                      iconWidget: SvgPicture.asset(
+                        'assets/images/shopping_cart.svg',
+                        colorFilter: const ColorFilter.mode(Colors.orange, BlendMode.srcIn),
+                        width: 24,
+                      ),
+                      iconColor: Colors.orange,
+                      value: value,
+                      unit: 'kcal',
+                      status: status,
+                      statusText: status,
+                      statusColor: statusColor,
+                      statusTextColor: statusTextColor,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const MealLogPage()));
                       },
                     );
                   },

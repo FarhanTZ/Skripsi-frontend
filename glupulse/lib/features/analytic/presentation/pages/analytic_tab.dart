@@ -12,6 +12,8 @@ import 'package:glupulse/features/hba1c/presentation/pages/hba1c_list_page.dart'
 import 'package:glupulse/features/health_event/presentation/pages/health_event_list_page.dart';
 import 'package:glupulse/features/activity/presentation/pages/activity_type_list_page.dart';
 
+import 'package:glupulse/features/sleep_log/presentation/cubit/sleep_log_cubit.dart';
+import 'package:glupulse/features/meal_log/presentation/cubit/meal_log_cubit.dart';
 import 'package:glupulse/features/sleep_log/presentation/pages/sleep_log_list_page.dart';
 import 'package:glupulse/features/medication/presentation/pages/medication_log_list_page.dart';
 import 'package:glupulse/features/meal_log/presentation/pages/meal_log_page.dart';
@@ -31,6 +33,8 @@ class _AnalyticTabState extends State<AnalyticTab> {
     context.read<Hba1cCubit>().getHba1cRecords();
     context.read<GlucoseCubit>().getGlucoseRecords();
     context.read<HealthProfileCubit>().fetchHealthProfile();
+    context.read<SleepLogCubit>().getSleepLogs();
+    context.read<MealLogCubit>().getMealLogs();
   }
 
   void _getRecommendation(BuildContext context) {
@@ -396,6 +400,99 @@ class _AnalyticTabState extends State<AnalyticTab> {
                                     MaterialPageRoute(
                                         builder: (context) =>
                                             const Hba1cListPage())),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: BlocBuilder<SleepLogCubit, SleepLogState>(
+                            builder: (context, state) {
+                              String value = 'N/A';
+                              String status = '--';
+                              Color statusColor = Colors.grey.shade200;
+                              Color statusTextColor = Colors.grey;
+
+                              if (state is SleepLogLoaded && state.sleepLogs.isNotEmpty) {
+                                // Assuming sorted by date descending, take first
+                                final latestLog = state.sleepLogs.first;
+                                final duration = latestLog.wakeTime.difference(latestLog.bedTime);
+                                final hours = duration.inHours;
+                                final minutes = duration.inMinutes.remainder(60);
+                                value = '${hours}h ${minutes}m';
+                                
+                                // Simple status logic
+                                if (hours >= 7 && hours <= 9) {
+                                  status = 'Good';
+                                  statusColor = const Color(0xFF9CF0A6);
+                                  statusTextColor = const Color(0xFF02A916);
+                                } else if (hours < 7) {
+                                  status = 'Short';
+                                  statusColor = const Color(0xFFFDFD66);
+                                  statusTextColor = const Color(0xFFB7B726);
+                                } else {
+                                  status = 'Long';
+                                  statusColor = Colors.orange.shade100;
+                                  statusTextColor = Colors.orange.shade800;
+                                }
+                              }
+
+                              return _buildGridMetricCard(
+                                context: context,
+                                title: 'Sleep',
+                                value: value,
+                                unit: '',
+                                iconPath: 'assets/images/Profile_glupulsesvg.svg',
+                                iconColor: Colors.indigo,
+                                status: status,
+                                statusBgColor: statusColor,
+                                statusTextColor: statusTextColor,
+                                onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SleepLogListPage())),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: BlocBuilder<MealLogCubit, MealLogState>(
+                            builder: (context, state) {
+                              String value = 'N/A';
+                              String status = '--';
+                              Color statusColor = Colors.grey.shade200;
+                              Color statusTextColor = Colors.grey;
+
+                              if (state is MealLogLoaded && state.mealLogs.isNotEmpty) {
+                                final latestLog = state.mealLogs.first;
+                                value = '${latestLog.totalCalories?.toInt() ?? 0}';
+                                
+                                // Simple calorie logic (placeholder)
+                                final cals = latestLog.totalCalories ?? 0;
+                                if (cals > 0) {
+                                   status = 'Logged';
+                                   statusColor = Colors.blue.shade100;
+                                   statusTextColor = Colors.blue.shade800;
+                                }
+                              }
+
+                              return _buildGridMetricCard(
+                                context: context,
+                                title: 'Last Meal',
+                                value: value,
+                                unit: 'kcal',
+                                iconPath: 'assets/images/shopping_cart.svg',
+                                iconColor: Colors.orange,
+                                status: status,
+                                statusBgColor: statusColor,
+                                statusTextColor: statusTextColor,
+                                onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MealLogPage())),
                               );
                             },
                           ),
