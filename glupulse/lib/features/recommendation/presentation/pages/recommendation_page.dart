@@ -94,14 +94,7 @@ class _RecommendationPageState extends State<RecommendationPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F5F9),
-      body: BlocConsumer<RecommendationCubit, RecommendationState>(
-        listener: (context, state) {
-          if (state is RecommendationError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          }
-        },
+      body: BlocBuilder<RecommendationCubit, RecommendationState>(
         builder: (context, state) {
           // Always display the header and the permanent "Tap to Get Recommendation" button
           return SingleChildScrollView(
@@ -209,7 +202,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                   else if (state is RecommendationLoaded)
                     _buildResultContent(state.recommendation)
                   else if (state is RecommendationError)
-                    Text('Error: ${state.message}', style: const TextStyle(color: Colors.red))
+                    Text('Belum ada data recommendation, silakan get recommendation terlebih dahulu', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600, fontSize: 16))
                   else if (state is RecommendationInitial)
                     const SizedBox.shrink(), // Nothing below the button for initial state
                   
@@ -228,6 +221,28 @@ class _RecommendationPageState extends State<RecommendationPage>
       //   backgroundColor: Theme.of(context).colorScheme.primary,
       //   foregroundColor: Colors.white,
       // ),
+    );
+  }
+
+  Widget _buildActivityEmptyState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.directions_run_rounded, size: 48, color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+          Text(
+            'Belum ada rekomendasi aktivitas',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey.shade700),
+          ),
+        ],
+      ),
     );
   }
 
@@ -250,16 +265,16 @@ class _RecommendationPageState extends State<RecommendationPage>
           const SizedBox(height: 30),
 
           // 4. Activity Recommendation
-          if (recommendation.activityRecommendations.isNotEmpty) ...[
-            Text(
-              'Recommended Activities',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueGrey.shade800,
-              ),
+          Text(
+            'Recommended Activities',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.blueGrey.shade800,
             ),
-            const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
+          if (recommendation.activityRecommendations.isNotEmpty) ...[
             SizedBox(
               height: 200,
               child: PageView.builder(
@@ -286,22 +301,23 @@ class _RecommendationPageState extends State<RecommendationPage>
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-          ],
+          ] else
+            _buildActivityEmptyState(),
+          const SizedBox(height: 20),
 
           // 5. Food Recommendation (Empty State if empty)
+          Text(
+            'Recommended Foods',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.blueGrey.shade800,
+            ),
+          ),
+          const SizedBox(height: 16),
           if (recommendation.foodRecommendations.isEmpty)
             _buildFoodEmptyState()
           else ...[
-            Text(
-              'Recommended Foods',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueGrey.shade800,
-              ),
-            ),
-            const SizedBox(height: 16),
             SizedBox(
               height: 280,
               child: PageView.builder(
@@ -945,14 +961,8 @@ class _RecommendationPageState extends State<RecommendationPage>
           Icon(Icons.restaurant_menu_rounded, size: 48, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           Text(
-            'No Food Suggestions Yet',
+            'Belum ada rekomendasi makanan',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey.shade700),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Log your meals to get personalized food recommendations.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
           ),
         ],
       ),

@@ -125,54 +125,59 @@ class _Hba1cListPageState extends State<Hba1cListPage> {
               // --- WIDGET UNTUK HBA1C TERAKHIR (BENTUK TEKS) ---
               BlocBuilder<Hba1cCubit, Hba1cState>(
                 builder: (context, state) {
+                  String percentage = 'N/A';
+                  String? trend = 'stable';
+
                   if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
                     final latestRecord = state.hba1cRecords.first;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Column(
-                        children: [                          
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  // Style default untuk semua TextSpan di dalamnya
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
-                                  ),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                      text: latestRecord.hba1cPercentage.toStringAsFixed(1),
-                                      style: const TextStyle(fontSize: 75),
-                                    ),
-                                    TextSpan(
-                                      text: '%',
-                                      style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w500), // Ukuran lebih kecil untuk '%'
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Icon(_trendIcon(latestRecord.trend), color: _trendColor(latestRecord.trend), size: 28),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Last Hba1c',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
+                    percentage = latestRecord.hba1cPercentage.toStringAsFixed(1);
+                    trend = latestRecord.trend;
                   }
-                  return const SizedBox.shrink(); // Tidak menampilkan apa-apa jika tidak ada data
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Column(
+                      children: [                          
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
+                                ),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: percentage,
+                                    style: const TextStyle(fontSize: 75),
+                                  ),
+                                  if (percentage != 'N/A')
+                                    const TextSpan(
+                                      text: '%',
+                                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Icon(_trendIcon(trend), color: _trendColor(trend), size: 28),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Last Hba1c',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
               // --- Dekorasi Garis Bawah (Kanan ke Tengah) ---
@@ -209,59 +214,61 @@ class _Hba1cListPageState extends State<Hba1cListPage> {
                 builder: (context, healthProfileState) {
                   return BlocBuilder<Hba1cCubit, Hba1cState>(
                     builder: (context, hba1cState) {
+                      String eAgValue = 'N/A';
+                      String hba1cTargetValue = '< 7.0'; // Nilai default
+
                       if (hba1cState is Hba1cLoaded && hba1cState.hba1cRecords.isNotEmpty) {
                         final latestHba1cRecord = hba1cState.hba1cRecords.first;
-                        String hba1cTargetValue = '< 7.0'; // Nilai default
+                        eAgValue = latestHba1cRecord.estimatedAvgGlucose?.toString() ?? 'N/A';
+                      }
 
-                        if (healthProfileState is HealthProfileLoaded) {
-                          final hba1cTarget = healthProfileState.healthProfile.hba1cTarget;
-                          if (hba1cTarget != null) {
-                            hba1cTargetValue = '< ${hba1cTarget.toStringAsFixed(1)}';
-                          }
+                      if (healthProfileState is HealthProfileLoaded) {
+                        final hba1cTarget = healthProfileState.healthProfile.hba1cTarget;
+                        if (hba1cTarget != null) {
+                          hba1cTargetValue = '< ${hba1cTarget.toStringAsFixed(1)}';
                         }
+                      }
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                          child: IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(
-                                  child: _buildInfoCard(
-                                    context,
-                                    icon: Icons.water_drop_outlined,
-                                    title: 'Estimasi Glukosa\nRata-Rata',
-                                    value: latestHba1cRecord.estimatedAvgGlucose?.toString() ?? 'N/A',
-                                    unit: 'mg/dL',
-                                    backgroundColor: Colors.white,
-                                    valueColor: Colors.redAccent,
-                                    iconBackgroundColor: Colors.redAccent.withOpacity(0.1),
-                                    textColor: Colors.black87,
-                                  ),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: _buildInfoCard(
+                                  context,
+                                  icon: Icons.water_drop_outlined,
+                                  title: 'Estimasi Glukosa\nRata-Rata',
+                                  value: eAgValue,
+                                  unit: 'mg/dL',
+                                  backgroundColor: Colors.white,
+                                  valueColor: Colors.redAccent,
+                                  iconBackgroundColor: Colors.redAccent.withOpacity(0.1),
+                                  textColor: Colors.black87,
                                 ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildInfoCard(
-                                    context,
-                                    icon: Icons.flag_outlined,
-                                    title: 'Hba1c Target',
-                                    value: hba1cTargetValue,
-                                    unit: '%',
-                                    backgroundColor: Colors.white,
-                                    iconBackgroundColor: Colors.green.shade50,
-                                    valueColor: Colors.green.shade800,
-                                    textColor: Colors.black87,
-                                  ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildInfoCard(
+                                  context,
+                                  icon: Icons.flag_outlined,
+                                  title: 'Hba1c Target',
+                                  value: hba1cTargetValue,
+                                  unit: '%',
+                                  backgroundColor: Colors.white,
+                                  iconBackgroundColor: Colors.green.shade50,
+                                  valueColor: Colors.green.shade800,
+                                  textColor: Colors.black87,
                                 ),
+                              ),
                             ],
                           ),
                         ),
                       );
-                    }
-                    return const SizedBox.shrink(); // Sembunyikan jika tidak ada data
-                  },
-                );
-              },
+                    },
+                  );
+                },
               ),
               // --- Judul untuk Riwayat ---
               Padding(
@@ -430,7 +437,7 @@ class _Hba1cListPageState extends State<Hba1cListPage> {
                     );
                   }
 
-                  return const Center(child: Text('Terjadi kesalahan'));
+                  return const Center(child: Text('Belum ada data HbA1c'));
                 },
               ),
             ],

@@ -627,17 +627,6 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                 listener: (context, state) {
                   if (state is GlucoseAdded || state is GlucoseUpdated || state is GlucoseDeleted) {
                     _fetchGlucoseRecords();
-                    // Tampilkan snackbar sesuai event (kode lama)
-                     String msg = 'Success';
-                     if (state is GlucoseAdded) msg = 'Glucose data added successfully';
-                     else if (state is GlucoseUpdated) msg = 'Glucose data updated successfully';
-                     else if (state is GlucoseDeleted) msg = 'Glucose data deleted successfully';
-                     
-                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-                  } else if (state is GlucoseError) {
-                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.message)),
-                    );
                   }
                 },
                 builder: (context, state) {

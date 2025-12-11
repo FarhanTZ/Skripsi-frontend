@@ -22,6 +22,7 @@ import 'package:glupulse/features/sleep_log/presentation/cubit/sleep_log_cubit.d
 import 'package:glupulse/features/meal_log/presentation/cubit/meal_log_cubit.dart';
 import 'package:glupulse/features/sleep_log/presentation/pages/sleep_log_list_page.dart';
 import 'package:glupulse/features/meal_log/presentation/pages/meal_log_page.dart';
+import 'package:glupulse/features/recommendation/presentation/pages/recommendation_page.dart';
 
 
 class HomeTab extends StatefulWidget {
@@ -214,6 +215,96 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                   const SizedBox(height: 24), // Padding bawah di dalam container
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Health Score',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const Hba1cListPage(),
+              ));
+            },
+            child: Card(
+              elevation: 2,
+              color: Colors.white,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: SizedBox(
+                width: 385,
+                height: 105,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 120,
+                      color: const Color(0xFF0F67FE),
+                      child: Center(
+                        child: BlocBuilder<Hba1cCubit, Hba1cState>(
+                          builder: (context, state) {
+                            String hba1cValue = '0.0%';
+                            if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
+                              final sortedRecords = List.from(state.hba1cRecords)
+                                ..sort((a, b) => b.testDate.compareTo(a.testDate));
+                              hba1cValue = '${sortedRecords.first.hba1cPercentage.toStringAsFixed(1)}%';
+                            }
+                            return Text(
+                              hba1cValue,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: BlocBuilder<Hba1cCubit, Hba1cState>(
+                          builder: (context, state) {
+                            String statusMessage = 'No data available. Please input your Hba1c record.';
+                            if (state is Hba1cLoaded && state.hba1cRecords.isNotEmpty) {
+                              final latestRecord = state.hba1cRecords.first;
+                              statusMessage = _getHba1cStatusMessage(latestRecord.hba1cPercentage);
+                            }
+                            return Column(
+                               crossAxisAlignment: CrossAxisAlignment.start,
+                               mainAxisAlignment: MainAxisAlignment.center,
+                               children: [
+                                 const Text('Last Hba1c',
+                                     style: TextStyle(
+                                         fontWeight: FontWeight.bold, fontSize: 16)),
+                                 const SizedBox(height: 4),
+                                 Text(
+                                  statusMessage,
+                                   style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                   maxLines: 3,
+                                 ),
+                               ],
+                             );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -517,14 +608,9 @@ class _HomeTabState extends State<HomeTab> {
                         },
                       ),
                     );
-                  } else if (recommendationState is RecommendationError) {
-                    return Center(child: Text('Error loading food recommendations: ${recommendationState.message}'));
                   }
-                  // Handle empty state explicitly
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Text('No food recommendations available.'),
-                  );
+                  // Handle empty state or error explicitly
+                  return _buildEmptyRecommendationState(context);
                 },
               ),
             const SizedBox(height: 32),
@@ -579,14 +665,9 @@ class _HomeTabState extends State<HomeTab> {
                         },
                       ),
                     );
-                  } else if (recommendationState is RecommendationError) {
-                    return Center(child: Text('Error loading activity recommendations: ${recommendationState.message}'));
                   }
-                  // Handle empty state explicitly
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Text('No activity recommendations available.'),
-                  );
+                  // Handle empty state or error explicitly
+                  return _buildEmptyRecommendationState(context);
                 },
               ),
           const SizedBox(height: 32), // Menambahkan spasi di bagian bawah
@@ -594,6 +675,39 @@ class _HomeTabState extends State<HomeTab> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildEmptyRecommendationState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Text(
+              'Belum ada data recommendation, silakan get recommendation terlebih dahulu',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const RecommendationPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: const Text('Get Recommendation'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

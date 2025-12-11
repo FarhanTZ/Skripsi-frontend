@@ -641,6 +641,61 @@ class _AnalyticTabState extends State<AnalyticTab> {
                   // --- Recommendation Insights ---
                   BlocBuilder<RecommendationCubit, RecommendationState>(
                     builder: (context, state) {
+                      if (state is RecommendationLoading) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Insights Recommendation',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Center(child: CircularProgressIndicator()),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Plan',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Center(child: CircularProgressIndicator()),
+                            const SizedBox(height: 24),
+                          ],
+                        );
+                      } else if (state is RecommendationLoaded) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Insights Recommendation',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildSummaryCard(state.recommendation.analysisSummary),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Plan',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildDetailAccordion(state.recommendation.insightsResponse),
+                            const SizedBox(height: 24),
+                          ],
+                        );
+                      }
+                      
+                      // Empty or Error State
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -652,34 +707,7 @@ class _AnalyticTabState extends State<AnalyticTab> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          if (state is RecommendationLoading)
-                            const Center(child: CircularProgressIndicator())
-                          else if (state is RecommendationLoaded)
-                            _buildSummaryCard(state.recommendation.analysisSummary)
-                          else if (state is RecommendationError)
-                            Text('Error: ${state.message}')
-                          else
-                            const SizedBox.shrink(), // Initial or empty
-
-                          const SizedBox(height: 20),
-                          
-                          Text(
-                            'Plan',
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          if (state is RecommendationLoading)
-                            const Center(child: CircularProgressIndicator())
-                          else if (state is RecommendationLoaded)
-                            _buildDetailAccordion(state.recommendation.insightsResponse)
-                          else if (state is RecommendationError)
-                            const SizedBox.shrink() // Don't show error twice
-                          else
-                            const SizedBox.shrink(),
-
+                          _buildEmptyRecommendationState(context),
                           const SizedBox(height: 24),
                         ],
                       );
@@ -688,6 +716,39 @@ class _AnalyticTabState extends State<AnalyticTab> {
                   const SizedBox(height: 40),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyRecommendationState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Text(
+              'Belum ada data recommendation, silakan get recommendation terlebih dahulu',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const RecommendationPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: const Text('Get Recommendation'),
             ),
           ],
         ),

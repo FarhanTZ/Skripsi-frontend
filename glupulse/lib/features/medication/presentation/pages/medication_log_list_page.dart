@@ -422,7 +422,13 @@ class _MedicationLogListPageState extends State<MedicationLogListPage> {
                           },
                         );
                       }
-                      return const Center(child: Text('Something went wrong'));
+                      return Center(
+                        child: Text(
+                          'Belum ada medication logs,\nsilakan medication terlebih dahulu',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                        ),
+                      );
                     },
                   ),
                 ),

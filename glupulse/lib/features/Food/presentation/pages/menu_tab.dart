@@ -14,6 +14,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:glupulse/injection_container.dart';
 import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
 import 'package:glupulse/features/Food/domain/entities/food.dart';
+import 'package:glupulse/features/recommendation/presentation/pages/recommendation_page.dart';
 
 import 'order_history_page.dart';
 
@@ -370,13 +371,9 @@ class _MenuTabState extends State<MenuTab> {
                       )).toList();
 
                   return _buildHorizontalFoodList(recommendationFoods);
-                } else if (recommendationState is RecommendationError) {
-                  return SizedBox(
-                    height: 100,
-                    child: Center(child: Text(recommendationState.message)),
-                  );
                 }
-                return const SizedBox.shrink();
+                // Handle empty state or error explicitly
+                return _buildEmptyRecommendationState(context);
               },
             ),
             const SizedBox(height: 24),
@@ -489,7 +486,40 @@ class _MenuTabState extends State<MenuTab> {
     );
   }
 
-  // Helper widget untuk membuat ISI dari halaman promo di dalam PageView
+  Widget _buildEmptyRecommendationState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Text(
+              'Belum ada data recommendation, silakan get recommendation terlebih dahulu',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const RecommendationPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: const Text('Get Recommendation'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget baru untuk membangun setiap seksi menu
   Widget _buildPromoPage({
     required String title,
     required String description,

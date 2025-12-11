@@ -17,24 +17,24 @@ class ProfileTab extends StatelessWidget {
       builder: (context, state) {
         String fullName = 'Guest User';
         String email = 'email@example.com';
+        String? avatarUrl;
 
         if (state is AuthAuthenticated) {
           final user = state.user;
-          // Gunakan nama depan, tangani jika null
           fullName = user.firstName ?? '';
-          // Jika nama depan kosong (misal, baru login Google), gunakan username
           if (fullName.isEmpty) {
             fullName = user.username;
           }
           email = user.email;
+          avatarUrl = user.avatarUrl;
         } else if (state is AuthProfileIncomplete) {
-          // Lakukan hal yang sama untuk state AuthProfileIncomplete
           final user = state.user;
           fullName = user.firstName ?? '';
           if (fullName.isEmpty) {
             fullName = user.username;
           }
           email = user.email;
+          avatarUrl = user.avatarUrl;
         }
 
         return Column(
@@ -45,7 +45,7 @@ class ProfileTab extends StatelessWidget {
                 child: Column(
                   children: [
                     // Container biru di bagian atas, sekarang dengan data dinamis
-                    _buildProfileHeader(context, fullName: fullName, email: email),
+                    _buildProfileHeader(context, fullName: fullName, email: email, avatarUrl: avatarUrl),
                     const SizedBox(height: 24),
 
                     // Daftar menu di bawah container
@@ -238,31 +238,51 @@ class ProfileTab extends StatelessWidget {
     BuildContext context, {
     required String fullName,
     required String email,
+    String? avatarUrl,
   }) {
     return Container(
       width: double.infinity,
       height: 238,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(30), // Lengkungan di bawah
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0F67FE),
+            Color(0xFF4C8CFF),
+          ],
         ),
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F67FE).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 50,
             backgroundColor: Colors.white,
-            child: Icon(
-              Icons.person,
-              size: 60,
-              color: AppTheme.inputLabelColor,
-            ),
+            backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
+                ? NetworkImage(avatarUrl)
+                : null,
+            child: (avatarUrl == null || avatarUrl.isEmpty)
+                ? const Icon(
+                    Icons.person,
+                    size: 60,
+                    color: AppTheme.inputLabelColor,
+                  )
+                : null,
           ),
           const SizedBox(height: 16),
           Text(
-            fullName, // Data dinamis
+            fullName,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -271,7 +291,7 @@ class ProfileTab extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            email, // Data dinamis
+            email,
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
               fontSize: 15,
