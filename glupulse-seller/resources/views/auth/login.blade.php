@@ -22,10 +22,23 @@
                     </h2>
                 </div>
                 
-                <form class="space-y-[58px]" action="{{ route('seller.dashboard') }}" method="GET" novalidate>                    
+                {{-- Pesan Sukses / Error --}}
+                @if(session('success'))
+                    <div class="mb-4 text-green-600 text-center font-bold">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                @if ($errors->any())
+                    <div class="mb-4 text-red-600 text-center font-bold">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form class="space-y-[40px]" action="{{ route('login.perform') }}" method="POST" novalidate>
+                    @csrf
                     {{-- Input untuk Email --}}
                     <div>
-                        <input id="email" name="email" type="email" autocomplete="email" required placeholder="Email" 
+                        <input id="email" name="email" type="email" autocomplete="email" required placeholder="Email" value="{{ old('email') }}"
                                class="appearance-none block w-[331px] h-[55px] mx-auto px-4 border-0 rounded-[20px] shadow-md bg-[#E0E0E0] text-gray-900 placeholder-[#808B9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
                     </div>
 
@@ -41,6 +54,13 @@
                                 class="group relative w-[241px] h-[55px] mx-auto flex justify-center items-center px-4 border-0 text-[20px] font-bold rounded-[20px] text-white bg-[#242E49] shadow-md hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Sign In
                         </button>
+                    </div>
+
+                    {{-- Link ke Register --}}
+                    <div class="text-center text-sm mt-4">
+                        <a href="{{ route('register') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                            Don't have an account? Sign Up
+                        </a>
                     </div>
                 </form>
             </div>

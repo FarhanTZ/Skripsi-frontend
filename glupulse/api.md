@@ -750,3 +750,10 @@ get aja
     }
 ]
 
+
+
+
+{
+    "address_id": "edfd21bd-2c3c-43b7-82f0-add81f8641f6",
+    "payment_method": "Mastercard"
+}

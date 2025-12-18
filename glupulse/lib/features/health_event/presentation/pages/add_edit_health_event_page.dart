@@ -87,8 +87,8 @@ class _AddEditHealthEventPageState extends State<AddEditHealthEventPage> {
         eventDate: _eventDate,
         eventType: _eventType,
         severity: _severity,
-        glucoseValue: int.tryParse(_glucoseValueController.text),
-        ketoneValueMmol: double.tryParse(_ketoneValueMmolController.text),
+        glucoseValue: int.tryParse(_glucoseValueController.text) ?? 0,
+        ketoneValueMmol: double.tryParse(_ketoneValueMmolController.text) ?? 0.0,
         symptoms: _symptomsController.text
             .split(',')
             .map((s) => s.trim())
@@ -100,7 +100,7 @@ class _AddEditHealthEventPageState extends State<AddEditHealthEventPage> {
             .where((s) => s.isNotEmpty)
             .toList(),
         requiredMedicalAttention: _requiredMedicalAttention,
-        notes: _notesController.text.isEmpty ? null : _notesController.text,
+        notes: _notesController.text,
       );
 
       if (widget.healthEvent == null) {
@@ -186,14 +186,16 @@ class _AddEditHealthEventPageState extends State<AddEditHealthEventPage> {
                       validator: (value) => (value == null || value.isEmpty) ? 'Please select a severity level' : null),
                   const SizedBox(height: 24),
 
-                  _buildSectionTitle('Glucose Value (mg/dL)'),
+                  _buildSectionTitle('Glucose Value (mg/dL)',
+                      isMandatory: _eventType == 'hypoglycemia' || _eventType == 'hyperglycemia'),
                   _buildTextField(
                       controller: _glucoseValueController,
                       hintText: 'e.g., 120',
                       keyboardType: TextInputType.number,
                       validator: (value) {
-                        if ((_eventType == 'hypoglycemia' || _eventType == 'hyperglycemia') && (value == null || value.isEmpty)) {
-                          return 'Glucose Value is mandatory for this event type';
+                        bool isMandatory = _eventType == 'hypoglycemia' || _eventType == 'hyperglycemia';
+                        if (isMandatory && (value == null || value.isEmpty)) {
+                          return 'Glucose Value is mandatory for $_eventType';
                         }
                         if (value != null && value.isNotEmpty && int.tryParse(value) == null) {
                           return 'Please enter a valid integer';
@@ -202,14 +204,16 @@ class _AddEditHealthEventPageState extends State<AddEditHealthEventPage> {
                       }),
                   const SizedBox(height: 24),
 
-                  _buildSectionTitle('Ketone Value (mmol)'),
+                  _buildSectionTitle('Ketone Value (mmol)',
+                      isMandatory: _eventType == 'hypoglycemia' || _eventType == 'hyperglycemia'),
                   _buildTextField(
                       controller: _ketoneValueMmolController,
                       hintText: 'e.g., 1.5',
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       validator: (value) {
-                        if (_eventType == 'hyperglycemia' && (value == null || value.isEmpty)) {
-                          return 'Ketone Value is mandatory for hyperglycemia';
+                        bool isMandatory = _eventType == 'hypoglycemia' || _eventType == 'hyperglycemia';
+                        if (isMandatory && (value == null || value.isEmpty)) {
+                          return 'Ketone Value is mandatory for $_eventType';
                         }
                         if (value != null && value.isNotEmpty && double.tryParse(value) == null) {
                           return 'Please enter a valid number';

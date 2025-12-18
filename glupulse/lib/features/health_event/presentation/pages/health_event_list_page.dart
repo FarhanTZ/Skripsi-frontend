@@ -226,16 +226,18 @@ class _HealthEventListPageState extends State<HealthEventListPage> {
               child: BlocConsumer<HealthEventCubit, HealthEventState>( // Diubah dari BlocBuilder
                 listener: (context, state) {
                   // Listener untuk memuat ulang data saat ada perubahan
-                  if (state is HealthEventUpdated || state is HealthEventDeleted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state is HealthEventUpdated ? 'Event updated successfully' : 'Event deleted successfully')),
-                    );
+                  if (state is HealthEventAdded || state is HealthEventUpdated || state is HealthEventDeleted) {
+                    if (state is HealthEventUpdated || state is HealthEventDeleted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state is HealthEventUpdated ? 'Event updated successfully' : 'Event deleted successfully')),
+                      );
+                    }
                     // Panggil fetch di sini untuk memastikan data selalu terbaru setelah aksi
                     _fetchHealthEventRecords();
                   }
                 },
                 builder: (context, state) {
-                  if (state is HealthEventLoading) {
+                  if (state is HealthEventLoading || state is HealthEventAdded || state is HealthEventUpdated || state is HealthEventDeleted) {
                     return const Center(child: CircularProgressIndicator());
                   }
 

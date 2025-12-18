@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:glupulse/features/hba1c/domain/entities/hba1c.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
-import 'package:glupulse/injection_container.dart';
 
 class AddEditHba1cPage extends StatefulWidget {
   final Hba1c? hba1c; // Optional for editing existing record
@@ -84,19 +83,11 @@ class _AddEditHba1cPageState extends State<AddEditHba1cPage> {
         estimatedAvgGlucose:
             int.tryParse(_estimatedAvgGlucoseController.text),
         treatmentChanged: _treatmentChanged,
-        medicationChanges: _medicationChangesController.text.isEmpty
-            ? null
-            : _medicationChangesController.text,
-        dietChanges: _dietChangesController.text.isEmpty
-            ? null
-            : _dietChangesController.text,
-        activityChanges: _activityChangesController.text.isEmpty
-            ? null
-            : _activityChangesController.text,
-        notes: _notesController.text.isEmpty ? null : _notesController.text,
-        documentUrl: _documentUrlController.text.isEmpty
-            ? null
-            : _documentUrlController.text,
+        medicationChanges: _medicationChangesController.text,
+        dietChanges: _dietChangesController.text,
+        activityChanges: _activityChangesController.text,
+        notes: _notesController.text,
+        documentUrl: _documentUrlController.text,
       );
 
       if (widget.hba1c == null) {
