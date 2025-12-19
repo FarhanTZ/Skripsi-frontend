@@ -9,4 +9,5 @@ abstract class FoodRepository {
   Future<Either<Failure, void>> addToCart(String foodId, int quantity);
   Future<Either<Failure, void>> updateCartItem(String foodId, int quantity);
   Future<Either<Failure, void>> removeCartItem(String foodId);
+  Future<Either<Failure, void>> checkout(String addressId, String paymentMethod);
 }

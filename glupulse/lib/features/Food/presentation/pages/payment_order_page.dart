@@ -10,6 +10,8 @@ import 'package:glupulse/features/profile/data/models/address_model.dart';
 import 'package:intl/intl.dart';
 import 'package:glupulse/features/Food/presentation/pages/order_history_page.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:glupulse/features/Food/presentation/cubit/checkout_cubit.dart';
+import 'package:glupulse/features/Food/presentation/cubit/checkout_state.dart';
 import 'package:glupulse/injection_container.dart';
 
 class PaymentOrderPage extends StatefulWidget {
@@ -84,7 +86,23 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<CheckoutCubit, CheckoutState>(
+      listener: (context, state) {
+        if (state is CheckoutSuccess) {
+          _showPaymentSuccessDialog(
+              context: context,
+              message: 'Your payment was successful!',
+              type: SnackBarType.success,
+              orderItems: widget.orderItems,
+              finalTotal: _finalTotal);
+        } else if (state is CheckoutError) {
+          _showModernDialog(
+              context: context,
+              message: state.message,
+              type: SnackBarType.error);
+        }
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFF2F5F9),
       appBar: AppBar(
         toolbarHeight: 80,
@@ -126,6 +144,7 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
         ),
       ),
       bottomNavigationBar: _buildPayNowBar(),
+      ),
     );
   }
 
@@ -434,23 +453,36 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
             ],
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              // TODO: Implementasi logika pembayaran
-              _showPaymentSuccessDialog(
-                  context: context,
-                  message: 'Your payment was successful!',
-                  type: SnackBarType.success,
-                  orderItems: widget.orderItems,
-                  finalTotal: _finalTotal);
+          BlocBuilder<CheckoutCubit, CheckoutState>(
+            builder: (context, state) {
+              if (state is CheckoutLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return ElevatedButton(
+                onPressed: () {
+                  if (_shippingAddress == null) {
+                    _showModernDialog(
+                        context: context,
+                        message: 'Please select a shipping address.',
+                        type: SnackBarType.warning);
+                    return;
+                  }
+                  context.read<CheckoutCubit>().submitCheckout(
+                        addressId: _shippingAddress!.addressId,
+                        paymentMethod: _selectedPaymentMethod ?? 'Credit Card',
+                      );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 55),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                ),
+                child: const Text('Pay Now',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              );
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 55),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            ),
-            child: const Text('Pay Now', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

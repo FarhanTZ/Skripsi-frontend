@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/features/Food/domain/entities/cart_item.dart';
 import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
 import 'package:glupulse/features/Food/presentation/pages/payment_order_page.dart';
+import 'package:glupulse/features/Food/presentation/cubit/checkout_cubit.dart';
 import 'package:glupulse/injection_container.dart';
 import 'package:intl/intl.dart';
 
@@ -334,10 +335,14 @@ class _CartPageState extends State<CartPage> {
                     'price': item.price,
                   };
                 }).toList();
+
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => PaymentOrderPage(
-                    orderItems: orderItems,
-                    totalPrice: _totalPrice,
+                  builder: (context) => BlocProvider(
+                    create: (context) => sl<CheckoutCubit>(),
+                    child: PaymentOrderPage(
+                      orderItems: orderItems,
+                      totalPrice: _totalPrice,
+                    ),
                   ),
                 ));
               } else {

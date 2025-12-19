@@ -752,8 +752,76 @@ get aja
 
 
 
-
+/checkout
+post
 {
     "address_id": "edfd21bd-2c3c-43b7-82f0-add81f8641f6",
     "payment_method": "Mastercard"
 }
+
+/orders/track
+Get
+[
+    {
+        "order_id": "ea5fc55c-d834-4c49-b97e-712086e8cab5",
+        "store_name": "Kwetiau Apeng",
+        "store_phone": "081231916455",
+        "seller_lat": -7.27,
+        "seller_long": 112.73,
+        "total_price": 150000,
+        "status": "Pending Payment",
+        "payment_status": "unpaid",
+        "delivery_address": {
+            "user_id": "fd3ca976-b1f1-4981-952b-361073d8d831",
+            "is_active": true,
+            "address_id": "b3e2c522-776c-465a-9b76-aeaaf95344bd",
+            "created_at": "2025-11-15T21:24:01.158607+07:00",
+            "is_default": false,
+            "updated_at": "2025-11-20T21:46:08.124144+07:00",
+            "address_city": "Jakarta",
+            "address_label": "Apart",
+            "address_line1": "123 Main Street",
+            "address_line2": "Block 1 No 1",
+            "delivery_notes": "Call upon arrival",
+            "recipient_name": "Marvel Stefano",
+            "recipient_phone": "081234567890",
+            "address_district": "Kelapa Gading",
+            "address_latitude": -6.106908626211207,
+            "address_province": "DKI Jakarta",
+            "address_longitude": 106.74657744414517,
+            "address_postalcode": "12345"
+        },
+        "created_at": "2025-12-18T20:27:47.689488+07:00",
+        "items": [
+            {
+                "food_name": "anejo cheese",
+                "quantity": 1,
+                "price": 150000
+            }
+        ]
+    }
+]
+
+
+
+/orders/history?limit=10&offset=0
+Get
+[
+    {
+        "order_id": "ea5fc55c-d834-4c49-b97e-712086e8cab5",
+        "store_name": "Kwetiau Apeng",
+        "store_slug": "kwetiau-apeng-ybdj",
+        "store_logo": "",
+        "total_price": 150000,
+        "status": "completed",
+        "payment_status": "unpaid",
+        "created_at": "2025-12-18T20:27:47.689488+07:00",
+        "items": [
+            {
+                "food_name": "anejo cheese",
+                "quantity": 1,
+                "price": 150000
+            }
+        ]
+    }
+]

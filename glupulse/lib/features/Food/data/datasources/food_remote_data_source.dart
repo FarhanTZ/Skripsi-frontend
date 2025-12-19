@@ -10,6 +10,7 @@ abstract class FoodRemoteDataSource {
   Future<void> addToCart(String foodId, int quantity);
   Future<void> updateCartItem(String foodId, int quantity);
   Future<void> removeCartItem(String foodId);
+  Future<void> checkout(String addressId, String paymentMethod);
 }
 
 class FoodRemoteDataSourceImpl implements FoodRemoteDataSource {
@@ -78,6 +79,23 @@ class FoodRemoteDataSourceImpl implements FoodRemoteDataSource {
       // API Anda menggunakan POST untuk remove, jadi kita gunakan post di sini.
       await apiClient.post('/cart/remove',
           body: {'food_id': foodId}, token: token);
+    } on ServerException {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> checkout(String addressId, String paymentMethod) async {
+    try {
+      final token = await localDataSource.getLastToken();
+      await apiClient.post(
+        '/checkout',
+        body: {
+          'address_id': addressId,
+          'payment_method': paymentMethod,
+        },
+        token: token,
+      );
     } on ServerException {
       rethrow;
     }
