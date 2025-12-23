@@ -11,7 +11,14 @@ class CheckoutInitial extends CheckoutState {}
 
 class CheckoutLoading extends CheckoutState {}
 
-class CheckoutSuccess extends CheckoutState {}
+class CheckoutSuccess extends CheckoutState {
+  final String orderId;
+
+  const CheckoutSuccess({required this.orderId});
+
+  @override
+  List<Object> get props => [orderId];
+}
 
 class CheckoutError extends CheckoutState {
   final String message;

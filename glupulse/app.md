@@ -76,3 +76,7 @@ enable_activity_reminders	YES	YES	all
 enable_medication_reminders	YES	YES	all
 share_data_for_research	YES	YES	all
 share_anonymized_data	YES	YES	all
+
+
+
+I/flutter (24605): DEBUG: First Food Item JSON: {food_id: 779f936b-1491-43d0-bbbb-057462b66022, seller_id: 71c8d315-bf7d-4806-a31e-e02bfb74a271, food_name: american cheese spread, description: Nikmati kelezatan klasik "American Cheese Spread" tanpa khawatir! Dengan Indeks Glikemik (IG) hanya 27 dan Beban Glikemik (GL) yang sangat rendah (0,378), keju olesan ini adalah pilihan cerdas untuk menjaga kadar gula darah Anda tetap stabil. Kaya akan protein (2,6 gram) dan rendah gula (hanya 1,2 gram), cocok sebagai tambahan lezat pada menu sehat harian Anda. Ideal untuk penderita diabetes!, price: 15900.0, currency: IDR, photo_url: null, thumbnail_url: null, is_available: true, stock_count: 23, tags: [Cheese, Spread, American, Low Glycemic Index, Low Glycemic Load, Diabetic Friendly, High Protein, Low Sugar, Dairy], created_at: 2025-12-04T10:16:28.135036+07:00, updated_at: 2025-12-17T22:25:29.034833+07:00, serving_size: 1/2 oz, serving_size_grams: 14.0, quantity: 1.0, calories: 46, carbs_grams: 1.4, fiber_grams: 0, protein_grams: 2.6,

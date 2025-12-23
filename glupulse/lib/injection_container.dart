@@ -122,6 +122,18 @@ import 'package:glupulse/features/recommendation/domain/usecases/submit_food_fee
 import 'package:glupulse/features/recommendation/domain/usecases/submit_activity_feedback.dart';
 import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
 import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_feedback_cubit.dart';
+import 'package:glupulse/features/seller/data/datasources/seller_remote_data_source.dart';
+import 'package:glupulse/features/seller/data/repositories/seller_repository_impl.dart';
+import 'package:glupulse/features/seller/domain/repositories/seller_repository.dart';
+import 'package:glupulse/features/seller/domain/usecases/get_seller_by_id.dart';
+import 'package:glupulse/features/seller/presentation/cubit/seller_cubit.dart';
+import 'package:glupulse/features/orders/data/datasources/order_remote_data_source.dart';
+import 'package:glupulse/features/orders/data/repositories/order_repository_impl.dart';
+import 'package:glupulse/features/orders/domain/repositories/order_repository.dart';
+import 'package:glupulse/features/orders/domain/usecases/get_track_orders_usecase.dart';
+import 'package:glupulse/features/orders/domain/usecases/get_order_history_usecase.dart';
+import 'package:glupulse/features/orders/presentation/cubit/order_history_cubit.dart';
+import 'package:glupulse/features/orders/presentation/cubit/order_track_cubit.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:glupulse/core/network/network_info.dart';
 
@@ -611,7 +623,63 @@ Future<void> init() async {
     ),
   );
 
+  // --- Features - Seller ---
 
+  // Cubit
+  sl.registerFactory(() => SellerCubit(getSellerById: sl()));
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetSellerById(sl()));
+
+  // Repository
+  sl.registerLazySingleton<SellerRepository>(
+    () => SellerRepositoryImpl(
+      remoteDataSource: sl(),
+      networkInfo: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<SellerRemoteDataSource>(
+    () => SellerRemoteDataSourceImpl(
+      apiClient: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+  // --- Features - Orders ---
+
+  // Cubit
+  sl.registerFactory(
+    () => OrderTrackCubit(
+      getTrackOrdersUseCase: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => OrderHistoryCubit(
+      getOrderHistoryUseCase: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetTrackOrdersUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrderHistoryUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<OrderRepository>(
+    () => OrderRepositoryImpl(
+      remoteDataSource: sl(),
+      networkInfo: sl(),
+    ),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<OrderRemoteDataSource>(
+    () => OrderRemoteDataSourceImpl(
+      apiClient: sl(),
+      localDataSource: sl(),
+    ),
+  );
 
   // --- Core ---
   sl.registerLazySingleton(() => ApiClient());

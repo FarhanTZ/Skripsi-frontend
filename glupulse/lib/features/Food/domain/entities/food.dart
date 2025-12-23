@@ -29,6 +29,10 @@ class Food extends Equatable {
   final num? glycemicIndex;
   final num? glycemicLoad;
   final String? foodCategory;
+  
+  // Seller Details from API response
+  final String? storeName;
+  final String? sellerLogoUrl;
 
   const Food({
     required this.foodId,
@@ -57,6 +61,8 @@ class Food extends Equatable {
     this.glycemicIndex,
     this.glycemicLoad,
     this.foodCategory,
+    this.storeName,
+    this.sellerLogoUrl,
   });
 
   @override
@@ -87,5 +93,7 @@ class Food extends Equatable {
         glycemicIndex,
         glycemicLoad,
         foodCategory,
+        storeName,
+        sellerLogoUrl,
       ];
 }

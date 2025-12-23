@@ -90,17 +90,32 @@ class FoodRepositoryImpl implements FoodRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, void>> checkout(String addressId, String paymentMethod) async {
-    if (await networkInfo.isConnected) {
-      try {
-        await remoteDataSource.checkout(addressId, paymentMethod);
-        return const Right(null);
-      } on ServerException catch (e) {
-        return Left(ServerFailure(e.message));
+    @override
+
+    Future<Either<Failure, String>> checkout(String addressId, String paymentMethod) async {
+
+      if (await networkInfo.isConnected) {
+
+        try {
+
+          final orderId = await remoteDataSource.checkout(addressId, paymentMethod);
+
+          return Right(orderId);
+
+        } on ServerException catch (e) {
+
+          return Left(ServerFailure(e.message));
+
+        }
+
+      } else {
+
+        return Left(ConnectionFailure());
+
       }
-    } else {
-      return Left(ConnectionFailure());
+
     }
+
   }
-}
+
+  

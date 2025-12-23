@@ -4,8 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
 import 'package:glupulse/features/Food/domain/entities/food.dart';
+import 'package:glupulse/features/seller/presentation/cubit/seller_cubit.dart';
+import 'package:glupulse/features/seller/presentation/cubit/seller_state.dart';
+import 'package:glupulse/features/seller/presentation/pages/seller_profile_page.dart';
 import 'package:glupulse/injection_container.dart';
-import 'package:intl/intl.dart';
 
 class FoodDetailPage extends StatefulWidget {
   final Food food;
@@ -35,13 +37,13 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormatter = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
-    return BlocProvider(
-      create: (_) => sl<CartCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<CartCubit>()),
+        BlocProvider(
+          create: (_) => sl<SellerCubit>(),
+        ),
+      ],
       child: BlocListener<CartCubit, CartState>(
       listener: (context, state) {
         if (state is CartActionSuccess) {
@@ -163,7 +165,9 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                             ),
                           ],
                         ),
-                        const Divider(color: Colors.grey, thickness: 1, height: 32), // Garis di bawah rating
+                        const SizedBox(height: 16),
+                        _buildSellerInfo(),
+                        const Divider(color: Colors.grey, thickness: 1, height: 32),
                         const SizedBox(height: 24),
                         Text(
                           'Nutrition Facts',
@@ -283,6 +287,58 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
               ),
             ), // Penutup SingleChildScrollView
       ),
+      ),
+    );
+  }
+
+  Widget _buildSellerInfo() {
+    return InkWell(
+      onTap: () {
+        if (widget.food.sellerId != 'recommendation') {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => SellerProfilePage(
+              sellerId: widget.food.sellerId,
+              initialStoreName: widget.food.storeName,
+            ),
+          ));
+        }
+      },
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              widget.food.sellerId == 'recommendation' ? Icons.recommend : Icons.store,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.food.sellerId == 'recommendation' ? 'Recommended' : 'Seller ID',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                Text(
+                  (widget.food.storeName != null && widget.food.storeName!.isNotEmpty) 
+                      ? widget.food.storeName! 
+                      : widget.food.sellerId,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          if (widget.food.sellerId != 'recommendation')
+            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+        ],
       ),
     );
   }

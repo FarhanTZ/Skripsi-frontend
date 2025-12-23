@@ -4,13 +4,13 @@ import 'package:glupulse/core/error/failures.dart';
 import 'package:glupulse/core/usecases/usecase.dart';
 import 'package:glupulse/features/Food/domain/repositories/food_repository.dart';
 
-class CheckoutUseCase implements UseCase<void, CheckoutParams> {
+class CheckoutUseCase implements UseCase<String, CheckoutParams> {
   final FoodRepository repository;
 
   CheckoutUseCase(this.repository);
 
   @override
-  Future<Either<Failure, void>> call(CheckoutParams params) async {
+  Future<Either<Failure, String>> call(CheckoutParams params) async {
     return await repository.checkout(params.addressId, params.paymentMethod);
   }
 }

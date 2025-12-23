@@ -825,3 +825,43 @@ Get
         ]
     }
 ]
+
+/seller/profile
+{
+    "seller_id": "71c8d315-bf7d-4806-a31e-e02bfb74a271",
+    "user_id": "d4d549e7-a63a-4e5d-b0b2-3bf593173f36",
+    "created_at": "2025-12-14T10:13:06.720238+07:00",
+    "updated_at": "2025-12-14T10:13:06.720238+07:00",
+    "store_name": "Kwetiau Apeng",
+    "store_description": "Kwetiau Apeng Surabaya",
+    "store_phone_number": "081231916455",
+    "is_open": false,
+    "business_hours": "eyJmcmlkYXkiOiB7Im9wZW4iOiAiMDk6MDAiLCAiY2xvc2UiOiAiMjE6MDAiLCAiY2xvc2VkIjogZmFsc2V9LCAibW9uZGF5IjogeyJvcGVuIjogIjA5OjMwIiwgImNsb3NlIjogIjIxOjAwIiwgImNsb3NlZCI6IGZhbHNlfSwgInN1bmRheSI6IHsib3BlbiI6ICIwOTozMCIsICJjbG9zZSI6ICIyMTozMCIsICJjbG9zZWQiOiBmYWxzZX0sICJ0dWVzZGF5IjogeyJvcGVuIjogIjA5OjAwIiwgImNsb3NlIjogIjIxOjAwIiwgImNsb3NlZCI6IGZhbHNlfSwgInNhdHVyZGF5IjogeyJvcGVuIjogIjA5OjAwIiwgImNsb3NlIjogIjIxOjAwIiwgImNsb3NlZCI6IHRydWV9LCAidGh1cnNkYXkiOiB7Im9wZW4iOiAiMDk6MDAiLCAiY2xvc2UiOiAiMjE6MDAiLCAiY2xvc2VkIjogZmFsc2V9LCAid2VkbmVzZGF5IjogeyJvcGVuIjogIjA5OjAwIiwgImNsb3NlIjogIjIxOjAwIiwgImNsb3NlZCI6IGZhbHNlfX0=",
+    "verification_status": "pending",
+    "logo_url": null,
+    "banner_url": null,
+    "address_line1": "Jl. Kedung Doro No.267",
+    "address_line2": "Kwetiau Apeng",
+    "district": "Wonorejo",
+    "city": "Surabaya",
+    "province": "East Java",
+    "postal_code": "60261",
+    "latitude": -7.27,
+    "longitude": 112.73,
+    "gmaps_link": null,
+    "store_slug": "kwetiau-apeng-ybdj",
+    "store_email": "marvelstefano@gmail.com",
+    "website_url": null,
+    "social_media_links": null,
+    "is_active": true,
+    "cuisine_type": [
+        "Indonesian",
+        "Chinese Food",
+        "Masakan jawa"
+    ],
+    "price_range": 2,
+    "rejection_reason": null,
+    "verified_at": null,
+    "average_rating": 0,
+    "review_count": 0
+}

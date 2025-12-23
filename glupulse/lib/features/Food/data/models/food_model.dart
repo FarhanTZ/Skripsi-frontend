@@ -28,6 +28,8 @@ class FoodModel extends Food {
     super.glycemicIndex,
     super.glycemicLoad,
     super.foodCategory,
+    super.storeName,
+    super.sellerLogoUrl,
   });
 
   factory FoodModel.fromJson(Map<String, dynamic> json) {
@@ -82,6 +84,13 @@ class FoodModel extends Food {
       glycemicIndex: parseNum(json['glycemic_index']),
       glycemicLoad: parseNum(json['glycemic_load']),
       foodCategory: parseString(json['food_category']),
+      storeName: parseString(json['store_name']) ?? 
+                 parseString(json['seller_name']) ?? 
+                 (json['seller'] is Map ? parseString(json['seller']['store_name'] ?? json['seller']['name']) : null),
+      sellerLogoUrl: parseString(json['store_logo']) ?? 
+                     parseString(json['seller_logo']) ?? 
+                     parseString(json['logo_url']) ??
+                     (json['seller'] is Map ? parseString(json['seller']['logo_url'] ?? json['seller']['logo']) : null),
     );
   }
 
@@ -113,6 +122,8 @@ class FoodModel extends Food {
       'glycemic_index': glycemicIndex,
       'glycemic_load': glycemicLoad,
       'food_category': foodCategory,
+      'store_name': storeName,
+      'store_logo': sellerLogoUrl,
     };
   }
 }

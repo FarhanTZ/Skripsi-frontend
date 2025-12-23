@@ -5,10 +5,10 @@ import 'package:glupulse/features/Address/presentation/cubit/address_cubit.dart'
 import 'package:glupulse/features/Address/presentation/pages/address_list_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
-import 'package:glupulse/features/Food/presentation/pages/order_tracking_page.dart';
+import 'package:glupulse/features/orders/presentation/pages/order_history_page.dart';
+import 'package:glupulse/features/orders/presentation/pages/order_tracking_page.dart';
 import 'package:glupulse/features/profile/data/models/address_model.dart';
 import 'package:intl/intl.dart';
-import 'package:glupulse/features/Food/presentation/pages/order_history_page.dart';
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:glupulse/features/Food/presentation/cubit/checkout_cubit.dart';
 import 'package:glupulse/features/Food/presentation/cubit/checkout_state.dart';
@@ -94,7 +94,8 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
               message: 'Your payment was successful!',
               type: SnackBarType.success,
               orderItems: widget.orderItems,
-              finalTotal: _finalTotal);
+              finalTotal: _finalTotal,
+              realOrderId: state.orderId); // Pass real ID
         } else if (state is CheckoutError) {
           _showModernDialog(
               context: context,
@@ -536,7 +537,8 @@ void _showPaymentSuccessDialog(
     required String message,
     required SnackBarType type,
     required List<Map<String, dynamic>> orderItems,
-    required double finalTotal}) {
+    required double finalTotal,
+    required String realOrderId}) {
   showDialog(
     context: context,
     barrierDismissible: false, // Pengguna harus menekan tombol
@@ -556,9 +558,6 @@ void _showPaymentSuccessDialog(
             // 1. Tutup dialog
             Navigator.of(dialogContext).pop();
 
-            // 2. Buat Order ID unik
-            final orderId = 'GLU-${DateTime.now().millisecondsSinceEpoch}';
-
             // 3. Hapus semua halaman sampai ke root (HomePage)
             Navigator.of(context).popUntil((route) => route.isFirst);
 
@@ -572,7 +571,7 @@ void _showPaymentSuccessDialog(
               builder: (context) => OrderTrackingPage(
                 orderItems: orderItems,
                 finalTotal: finalTotal,
-                orderId: orderId,
+                orderId: realOrderId, // Use real ID
               ),
             ));
           },

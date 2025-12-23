@@ -144,6 +144,12 @@ class ApiClient {
             return []; // Treat as empty list
           }
           
+          // Prioritize common keys for data lists
+          if (responseBody['data'] is List) return responseBody['data'];
+          if (responseBody['items'] is List) return responseBody['items'];
+          if (responseBody['orders'] is List) return responseBody['orders'];
+          if (responseBody['results'] is List) return responseBody['results'];
+          
           // NEW: Attempt to find a list inside the map values (e.g. { "data": [...] })
           for (final value in responseBody.values) {
             if (value is List) {

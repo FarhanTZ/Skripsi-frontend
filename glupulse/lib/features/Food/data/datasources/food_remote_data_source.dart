@@ -10,7 +10,7 @@ abstract class FoodRemoteDataSource {
   Future<void> addToCart(String foodId, int quantity);
   Future<void> updateCartItem(String foodId, int quantity);
   Future<void> removeCartItem(String foodId);
-  Future<void> checkout(String addressId, String paymentMethod);
+  Future<String> checkout(String addressId, String paymentMethod);
 }
 
 class FoodRemoteDataSourceImpl implements FoodRemoteDataSource {
@@ -26,6 +26,7 @@ class FoodRemoteDataSourceImpl implements FoodRemoteDataSource {
       final token = await localDataSource.getLastToken();
       // Panggil metode getList dari ApiClient
       final List<dynamic> jsonList = await apiClient.getList('/foods', token: token);
+
       // Konversi list JSON menjadi list FoodModel
       return jsonList.map((json) => FoodModel.fromJson(json)).toList();
     } on ServerException {
@@ -85,10 +86,10 @@ class FoodRemoteDataSourceImpl implements FoodRemoteDataSource {
   }
 
   @override
-  Future<void> checkout(String addressId, String paymentMethod) async {
+  Future<String> checkout(String addressId, String paymentMethod) async {
     try {
       final token = await localDataSource.getLastToken();
-      await apiClient.post(
+      final response = await apiClient.post(
         '/checkout',
         body: {
           'address_id': addressId,
@@ -96,6 +97,41 @@ class FoodRemoteDataSourceImpl implements FoodRemoteDataSource {
         },
         token: token,
       );
+      
+      // Fungsi bantu untuk mencari ID dalam Map
+      String? findId(Map<String, dynamic> map) {
+          if (map.containsKey('order_id')) return map['order_id'].toString();
+          if (map.containsKey('id')) return map['id'].toString();
+          if (map.containsKey('orderId')) return map['orderId'].toString();
+          return null;
+      }
+
+      // 1. Cek langsung di root response
+      var id = findId(response);
+      if (id != null) return id;
+
+      // 2. Cek di dalam object 'data'
+      if (response.containsKey('data') && response['data'] is Map) {
+          final dataMap = response['data'] as Map<String, dynamic>;
+          id = findId(dataMap);
+          if (id != null) return id;
+          
+          // Cek lagi kalau ada nested 'order' di dalam 'data'
+          if (dataMap.containsKey('order') && dataMap['order'] is Map) {
+             id = findId(dataMap['order']);
+             if (id != null) return id;
+          }
+      }
+
+      // 3. Cek di dalam object 'order'
+      if (response.containsKey('order') && response['order'] is Map) {
+          id = findId(response['order'] as Map<String, dynamic>);
+          if (id != null) return id;
+      }
+
+      // Jika masih tidak ketemu, tampilkan semua keys biar gampang debug
+      throw ServerException('Order created but ID not returned. Keys: ${response.keys.toList()} | Response: $response');
+      
     } on ServerException {
       rethrow;
     }
