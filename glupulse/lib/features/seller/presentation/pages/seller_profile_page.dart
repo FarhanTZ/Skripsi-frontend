@@ -118,8 +118,12 @@ class SellerProfilePage extends StatelessWidget {
           Container(
             height: 150,
             width: double.infinity,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            child: const Icon(Icons.store, size: 80, color: Colors.grey),
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/seller.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -137,17 +141,22 @@ class SellerProfilePage extends StatelessWidget {
     }
     
     return Container(
-      height: 100,
+      height: 150,
       width: double.infinity,
-      color: Colors.grey.shade100,
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/seller.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.store, color: Colors.grey, size: 40),
-            const SizedBox(height: 8),
-            Text('Seller Info Unavailable', style: TextStyle(color: Colors.grey.shade600)),
-          ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: Colors.black54,
+          child: const Text(
+            'Seller Info Unavailable',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
@@ -159,7 +168,7 @@ class SellerProfilePage extends StatelessWidget {
       children: [
         // Banner
         Container(
-          height: 200,
+          height: 160,
           width: double.infinity,
           color: Colors.grey.shade300,
           child: seller.bannerUrl != null
@@ -167,9 +176,9 @@ class SellerProfilePage extends StatelessWidget {
                   seller.bannerUrl!,
                   fit: BoxFit.cover,
                   headers: const {'ngrok-skip-browser-warning': 'true'},
-                  errorBuilder: (_, __, ___) => const Icon(Icons.storefront, size: 80, color: Colors.grey),
+                  errorBuilder: (_, __, ___) => Image.asset('assets/images/seller.jpg', fit: BoxFit.cover),
                 )
-              : const Icon(Icons.storefront, size: 80, color: Colors.grey),
+              : Image.asset('assets/images/seller.jpg', fit: BoxFit.cover),
         ),
         // Store Info
         Padding(

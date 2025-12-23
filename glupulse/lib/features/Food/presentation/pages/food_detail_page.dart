@@ -109,17 +109,16 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                           child: SizedBox(
                             height: 180,
                             width: MediaQuery.of(context).size.width - 48, // Lebar kartu disesuaikan
-                            child: (widget.food.photoUrl != null && widget.food.photoUrl!.isNotEmpty)
-                                ? Image.network(
-                                    widget.food.photoUrl!,
-                                    headers: const {'ngrok-skip-browser-warning': 'true'},
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, size: 60, color: Colors.grey)),
-                                  )
-                                : Container(
-                                    color: Colors.grey.shade300,
-                                    child: const Center(child: Icon(Icons.image, size: 60, color: Colors.grey)),
-                                  ),
+                            child: Image.network(
+                            (widget.food.photoUrl != null && widget.food.photoUrl!.isNotEmpty)
+                                ? widget.food.photoUrl!
+                                : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                            headers: const {'ngrok-skip-browser-warning': 'true'},
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => const Center(
+                              child: Icon(Icons.broken_image, size: 60, color: Colors.grey),
+                            ),
+                          ),
                           ),
                         ),
                       ),

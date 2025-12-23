@@ -42,29 +42,26 @@ class FoodCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: (food.photoUrl != null && food.photoUrl!.isNotEmpty)
-                  ? Image.network(
-                      food.photoUrl!,
-                      headers: const {'ngrok-skip-browser-warning': 'true'},
-                      height: 100,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const SizedBox(
-                          height: 100,
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) => const SizedBox(
-                        height: 100,
-                        child: Center(child: Icon(Icons.broken_image, color: Colors.grey, size: 40)),
-                      ),
-                    )
-                  : Container(
-                      height: 100,
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                      child: const Center(child: Icon(Icons.fastfood_outlined, color: Colors.grey, size: 40))),
+              child: Image.network(
+                (food.photoUrl != null && food.photoUrl!.isNotEmpty)
+                    ? food.photoUrl!
+                    : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                headers: const {'ngrok-skip-browser-warning': 'true'},
+                height: 100,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const SizedBox(
+                    height: 100,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) => const SizedBox(
+                  height: 100,
+                  child: Center(child: Icon(Icons.broken_image, color: Colors.grey, size: 40)),
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
