@@ -317,34 +317,15 @@ class _RecommendationPageState extends State<RecommendationPage>
           const SizedBox(height: 16),
           if (recommendation.foodRecommendations.isEmpty)
             _buildFoodEmptyState()
-          else ...[
-            SizedBox(
-              height: 280,
-              child: PageView.builder(
-                controller: _foodPageController,
-                itemCount: recommendation.foodRecommendations.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: _buildFoodCard(recommendation.foodRecommendations[index]),
-                  );
-                },
-              ),
+          else
+            Column(
+              children: recommendation.foodRecommendations.map((food) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: _buildFoodCard(food),
+                );
+              }).toList(),
             ),
-            const SizedBox(height: 12),
-            Center(
-              child: SmoothPageIndicator(
-                controller: _foodPageController,
-                count: recommendation.foodRecommendations.length,
-                effect: ExpandingDotsEffect(
-                  dotHeight: 8,
-                  dotWidth: 8,
-                  activeDotColor: Theme.of(context).colorScheme.primary,
-                  dotColor: Colors.grey.shade300,
-                ),
-              ),
-            ),
-          ],
 
           // 6. Footer (Feedback Button & Session Info)
           const SizedBox(height: 24),
@@ -880,25 +861,26 @@ class _RecommendationPageState extends State<RecommendationPage>
                 const Divider(height: 1),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          food.reason,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey.shade600,
-                            fontStyle: FontStyle.italic,
-                          ),
+                      Text(
+                        food.reason,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${food.currency} ${food.price.toInt()}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          '${food.currency} ${food.price.toInt()}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ],
