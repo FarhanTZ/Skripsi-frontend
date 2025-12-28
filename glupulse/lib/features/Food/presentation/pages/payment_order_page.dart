@@ -104,43 +104,46 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
         }
       },
       child: Scaffold(
-      backgroundColor: const Color(0xFFF2F5F9),
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        toolbarHeight: 80,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(30),
-          ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          'Payment Order',
+          'Checkout',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
+            color: Colors.black,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionTitle('Shipping Address'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             _buildAddressCard(),
             const SizedBox(height: 24),
+            
             _buildSectionTitle('Order Summary'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             _buildOrderSummaryCard(),
             const SizedBox(height: 24),
+            
             _buildSectionTitle('Payment Method'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             _buildPaymentMethodCard(),
             const SizedBox(height: 24),
+            
             _buildDiscountSection(),
+            const SizedBox(height: 100), // Space for bottom bar
           ],
         ),
       ),
@@ -152,10 +155,10 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(
-        fontSize: 20,
+      style: const TextStyle(
+        fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.primary,
+        color: Colors.black87,
       ),
     );
   }
@@ -169,22 +172,11 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
           userAddresses = authState.user.addresses ?? [];
         }
 
-        if (userAddresses.isEmpty) {
-          // Handle case where there are no addresses, maybe show a message
-          return;
-        }
-
-        final selectedAddress =
-            await Navigator.of(context).push<AddressModel>(
+        final selectedAddress = await Navigator.of(context).push<AddressModel>(
           MaterialPageRoute(
-            // Menggunakan builder untuk mendapatkan context baru yang tepat untuk rute ini.
             builder: (routeContext) => MultiBlocProvider(
               providers: [
-                // Menggunakan BlocProvider.value untuk meneruskan instance AuthCubit yang sudah ada.
-                // `context` di sini merujuk ke context dari PaymentOrderPage.
                 BlocProvider.value(value: BlocProvider.of<AuthCubit>(context)),
-                // Membuat instance baru untuk ProfileCubit dan AddressCubit yang akan digunakan
-                // secara eksklusif oleh AddressListPage.
                 BlocProvider(create: (context) => sl<ProfileCubit>()),
                 BlocProvider(create: (context) => sl<AddressCubit>()),
               ],
@@ -199,67 +191,304 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
           });
         }
       },
-      borderRadius: BorderRadius.circular(15),
-      child: Card(
-        elevation: 2,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              const Icon(Icons.location_on_outlined, color: AppTheme.inputLabelColor, size: 32),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _shippingAddress?.addressLabel ?? 'No Address Selected',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${_shippingAddress?.addressLine1 ?? ''}, ${_shippingAddress?.addressCity ?? ''}',
-                      style: const TextStyle(color: Colors.grey, fontSize: 14),
-                    ),
-                  ],
-                ),
-              ), // Tutup Expanded
-              const SizedBox(width: 8),
-              Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 18),
-            ], // Tutup children Row
-          ), // Tutup Row
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.location_on_rounded, color: Theme.of(context).colorScheme.primary, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _shippingAddress?.addressLabel ?? 'No Address Selected',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${_shippingAddress?.addressLine1 ?? 'Please select an address'}, ${_shippingAddress?.addressCity ?? ''}',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey.shade400, size: 16),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildOrderSummaryCard() {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: widget.orderItems.map((item) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        children: [
+          ...widget.orderItems.map((item) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
+              padding: const EdgeInsets.only(bottom: 12.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(child: Text('${item['name']} (x${item['quantity']})')),
-                  Text(currencyFormatter.format(item['price'] * item['quantity'])),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      "${item['quantity']}x",
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      item['name'],
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  Text(
+                    currencyFormatter.format(item['price'] * item['quantity']),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
                 ],
               ),
             );
           }).toList(),
+          const Divider(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Subtotal", style: TextStyle(color: Colors.grey)),
+              Text(currencyFormatter.format(widget.totalPrice), style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: ButtonTheme(
+          alignedDropdown: true,
+          child: DropdownButton<String>(
+            value: _selectedPaymentMethod,
+            isExpanded: true,
+            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+            borderRadius: BorderRadius.circular(16),
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            items: <String>['Credit Card', 'Bank Transfer', 'E-Wallet']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Row(
+                  children: [
+                    Icon(
+                      value == 'Credit Card' ? Icons.credit_card : 
+                      value == 'Bank Transfer' ? Icons.account_balance : Icons.account_balance_wallet,
+                      color: Colors.grey.shade700,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedPaymentMethod = newValue;
+              });
+            },
+          ),
         ),
       ),
     );
   }
 
+  Widget _buildDiscountSection() {
+    return InkWell(
+      onTap: _showDiscountSelectionSheet,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _appliedDiscountCode.isNotEmpty ? Colors.green.shade50 : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: _appliedDiscountCode.isNotEmpty ? Colors.green.shade200 : Colors.grey.shade200,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.local_offer_rounded, 
+              color: _appliedDiscountCode.isNotEmpty ? Colors.green : Colors.grey.shade600,
+              size: 22,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _appliedDiscountCode.isEmpty ? 'Apply Discount Code' : 'Discount Applied: $_appliedDiscountCode',
+                style: TextStyle(
+                  fontSize: 15, 
+                  fontWeight: FontWeight.w600, 
+                  color: _appliedDiscountCode.isEmpty ? Colors.black87 : Colors.green.shade700
+                ),
+              ),
+            ),
+            if (_appliedDiscountCode.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.close, size: 18, color: Colors.green),
+                onPressed: _removeDiscount,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              )
+            else
+              Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey.shade400, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPayNowBar() {
+    return Container(
+      padding: EdgeInsets.only(
+        top: 20,
+        left: 24,
+        right: 24,
+        bottom: 24 + MediaQuery.of(context).padding.bottom,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_discountAmount > 0) ...[
+            _buildPriceRow('Discount', '- ${currencyFormatter.format(_discountAmount)}', isDiscount: true),
+            const SizedBox(height: 12),
+          ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Total Payment',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+              Text(
+                currencyFormatter.format(_finalTotal),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          BlocBuilder<CheckoutCubit, CheckoutState>(
+            builder: (context, state) {
+              if (state is CheckoutLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return ElevatedButton(
+                onPressed: () {
+                  if (_shippingAddress == null) {
+                    _showModernDialog(
+                        context: context,
+                        message: 'Please select a shipping address.',
+                        type: SnackBarType.warning);
+                    return;
+                  }
+                  context.read<CheckoutCubit>().submitCheckout(
+                        addressId: _shippingAddress!.addressId,
+                        paymentMethod: _selectedPaymentMethod ?? 'Credit Card',
+                      );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: const Text('Confirm Payment',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPriceRow(String label, String amount, {bool isDiscount = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(color: Colors.grey, fontSize: 14),
+        ),
+        Text(
+          amount,
+          style: TextStyle(
+            color: isDiscount ? Colors.green : Colors.black87, 
+            fontSize: 14, 
+            fontWeight: FontWeight.w600
+          ),
+        ),
+      ],
+    );
+  }
+  
+  // ... (Rest of dialog methods remain similar, but styling can be tweaked if needed)
   void _applyDiscount(Map<String, dynamic> discount) {
     setState(() {
       final type = discount['type'];
@@ -284,8 +513,8 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
       _discountAmount = 0.0;
       _appliedDiscountCode = '';
     });
-    // Tutup bottom sheet dulu, baru tampilkan dialog
-    Navigator.of(context).pop();
+    // Jika dipanggil dari sheet, mungkin perlu pop. Tapi tombol remove ada di halaman utama.
+    // Jadi cukup tampilkan dialog.
     _showModernDialog(
         context: context,
         message: 'Diskon berhasil dihapus.',
@@ -295,8 +524,9 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
   Future<void> _showDiscountSelectionSheet() async {
     await showModalBottomSheet<void>(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
         return Padding(
@@ -305,204 +535,47 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Pilih Diskon',
-                textAlign: TextAlign.center,
+              Center(
+                child: Container(
+                  width: 40, height: 4, 
+                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Available Discounts',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 16),
               ..._availableDiscounts.map((discount) {
                 bool isSelected = _appliedDiscountCode == discount['code'];
-                return Card(
-                  elevation: 1,
-                  color: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(
-                      color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.05) : Colors.white,
+                    border: Border.all(
+                      color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade200,
                     ),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    leading: Icon(Icons.local_activity, color: Theme.of(context).colorScheme.primary),
                     title: Text(discount['title'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(discount['description'] as String),
+                    subtitle: Text(discount['description'] as String, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                     onTap: () => _applyDiscount(discount),
                     trailing: isSelected ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary) : null,
                   ),
                 );
               }).toList(),
-              if (_appliedDiscountCode.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                TextButton.icon(
-                  onPressed: _removeDiscount,
-                  icon: const Icon(Icons.close, color: Colors.red),
-                  label: const Text('Hapus Diskon', style: TextStyle(color: Colors.red)),
-                ),
-              ],
               const SizedBox(height: 16),
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDiscountSection() {
-    return InkWell(
-      onTap: _showDiscountSelectionSheet,
-      borderRadius: BorderRadius.circular(15),
-      child: Card(
-        elevation: 2,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Icon(Icons.local_offer_outlined, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  _appliedDiscountCode.isEmpty ? 'Pilih Diskon' : 'Diskon Diterapkan: $_appliedDiscountCode',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: _appliedDiscountCode.isEmpty ? Colors.black87 : Colors.green),
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 18),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethodCard() {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: _selectedPaymentMethod,
-            isExpanded: true,
-            icon: const Icon(Icons.arrow_drop_down),
-            items: <String>['Credit Card', 'Bank Transfer', 'E-Wallet']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedPaymentMethod = newValue;
-              });
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPayNowBar() {
-    return Container(
-      padding: EdgeInsets.only(
-        top: 16,
-        left: 24,
-        right: 24,
-        bottom: 16 + MediaQuery.of(context).padding.bottom,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_discountAmount > 0) ...[
-            _buildPriceRow('Subtotal', currencyFormatter.format(widget.totalPrice)),
-            const SizedBox(height: 8),
-            _buildPriceRow('Diskon ($_appliedDiscountCode)', '- ${currencyFormatter.format(_discountAmount)}', isDiscount: true),
-            const Divider(height: 24),
-          ],
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Total Price',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                currencyFormatter.format(_finalTotal),
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          BlocBuilder<CheckoutCubit, CheckoutState>(
-            builder: (context, state) {
-              if (state is CheckoutLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return ElevatedButton(
-                onPressed: () {
-                  if (_shippingAddress == null) {
-                    _showModernDialog(
-                        context: context,
-                        message: 'Please select a shipping address.',
-                        type: SnackBarType.warning);
-                    return;
-                  }
-                  context.read<CheckoutCubit>().submitCheckout(
-                        addressId: _shippingAddress!.addressId,
-                        paymentMethod: _selectedPaymentMethod ?? 'Credit Card',
-                      );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                ),
-                child: const Text('Pay Now',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPriceRow(String label, String amount, {bool isDiscount = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: Colors.grey, fontSize: 16),
-        ),
-        Text(
-          amount,
-          style: TextStyle(color: isDiscount ? Colors.green : Colors.black87, fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-      ],
     );
   }
 }
@@ -646,26 +719,33 @@ Widget _buildDialogContent(
               style: const TextStyle(fontSize: 16.0, color: Colors.black54),
             ),
             const SizedBox(height: 24.0),
-            ElevatedButton(
-              onPressed: onOkPressed ?? () => Navigator.of(dialogContext).pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(dialogContext).colorScheme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onOkPressed ?? () => Navigator.of(dialogContext).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(dialogContext).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                  elevation: 0,
+                ),
+                child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
-              child: const Text('OK'),
             ),
           ],
         ),
       ),
       // Ikon di atas dialog
       Positioned(
-        left: 20,
-        right: 20,
-        child: CircleAvatar(
-          backgroundColor: iconBackgroundColor,
-          radius: 45,
-          child: Icon(iconData, color: Colors.white, size: 50),
+        left: 0,
+        right: 0,
+        child: Center(
+          child: CircleAvatar(
+            backgroundColor: iconBackgroundColor,
+            radius: 45,
+            child: Icon(iconData, color: Colors.white, size: 50),
+          ),
         ),
       ),
     ],
