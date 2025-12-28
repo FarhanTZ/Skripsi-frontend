@@ -85,7 +85,7 @@ class _CartPageState extends State<CartPage> {
         listener: (context, state) {
           if (state is CartLoaded) {
             setState(() {
-              _cartItems = state.cart.items;
+              _cartItems = List<CartItem>.from(state.cart.items);
               // Sync selection state: remove IDs that are no longer in the cart
               final currentIds = _cartItems.map((e) => e.cartItemId).toSet();
               _selectedItemIds = _selectedItemIds.intersection(currentIds);
@@ -241,7 +241,7 @@ class _CartPageState extends State<CartPage> {
             
             // Delete Action
             IconButton(
-              onPressed: () => context.read<CartCubit>().removeItemFromCart(item.foodId),
+              onPressed: () => _confirmRemoveItem(context, item),
               icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 22),
             ),
           ],
@@ -255,7 +255,9 @@ class _CartPageState extends State<CartPage> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.all(4),
+        width: 32,
+        height: 32,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade300),
           borderRadius: BorderRadius.circular(8),
@@ -266,13 +268,54 @@ class _CartPageState extends State<CartPage> {
   }
 
   void _incrementQuantity(CartItem item) {
+    // Optimistic Update: Update UI immediately
+    setState(() {
+      final index = _cartItems.indexWhere((i) => i.cartItemId == item.cartItemId);
+      if (index != -1) {
+        _cartItems[index] = item.copyWith(quantity: item.quantity + 1);
+      }
+    });
+    
     context.read<CartCubit>().updateItemQuantity(item.foodId, item.quantity + 1);
   }
 
   void _decrementQuantity(CartItem item) {
     if (item.quantity > 1) {
+      // Optimistic Update
+      setState(() {
+        final index = _cartItems.indexWhere((i) => i.cartItemId == item.cartItemId);
+        if (index != -1) {
+          _cartItems[index] = item.copyWith(quantity: item.quantity - 1);
+        }
+      });
       context.read<CartCubit>().updateItemQuantity(item.foodId, item.quantity - 1);
     } else {
+      _confirmRemoveItem(context, item);
+    }
+  }
+
+  Future<void> _confirmRemoveItem(BuildContext context, CartItem item) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Item'),
+        content: Text('Are you sure you want to remove "${item.foodName}" from your cart?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
       context.read<CartCubit>().removeItemFromCart(item.foodId);
     }
   }

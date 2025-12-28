@@ -17,6 +17,7 @@ import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/injection_container.dart' as di;
 import 'package:glupulse/injection_container.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
+import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 import 'features/introduction/presentation/pages/introduction_screen.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => sl<AuthCubit>()..checkAuthenticationStatus()),
         BlocProvider(create: (_) => sl<FoodCubit>()),
+        BlocProvider(create: (_) => sl<CartCubit>()),
         BlocProvider(create: (_) => sl<Hba1cCubit>()),
         BlocProvider(create: (_) => sl<GlucoseCubit>()),
         BlocProvider(create: (_) => sl<HealthEventCubit>()),
