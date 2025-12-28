@@ -292,11 +292,11 @@ class _MenuTabState extends State<MenuTab> {
               child: Container(
                 height: 150,
                 decoration: BoxDecoration(
-                  color: Colors.orangeAccent, // Warna dasar kartu
+                  color: Colors.white, // Warna dasar kartu putih
                   borderRadius: BorderRadius.circular(15.0),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.orangeAccent.withOpacity(0.3),
+                      color: Colors.grey.withOpacity(0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
@@ -311,14 +311,17 @@ class _MenuTabState extends State<MenuTab> {
                         _buildPromoPage(
                           title: 'Diskon 50%',
                           description: 'Untuk semua menu utama hari ini!',
+                          imagePath: 'assets/images/Diskon_1.png',
                         ),
                         _buildPromoPage(
                           title: 'Beli 1 Gratis 1',
                           description: 'Untuk semua minuman sehat.',
+                          imagePath: 'assets/images/Diskon_2.png',
                         ),
                         _buildPromoPage(
                           title: 'Gratis Ongkir',
                           description: 'Tanpa minimum pembelian.',
+                          imagePath: 'assets/images/Diskon_3.png',
                         ),
                       ],
                     ),
@@ -327,7 +330,12 @@ class _MenuTabState extends State<MenuTab> {
                       child: SmoothPageIndicator(
                         controller: _promoPageController,
                         count: 3, // Sesuaikan dengan jumlah halaman promo
-                        effect: ExpandingDotsEffect(dotHeight: 8, dotWidth: 8, activeDotColor: Colors.white, dotColor: Colors.white.withOpacity(0.5)),
+                        effect: ExpandingDotsEffect(
+                          dotHeight: 8, 
+                          dotWidth: 8, 
+                          activeDotColor: Theme.of(context).colorScheme.primary, 
+                          dotColor: Colors.grey.shade300
+                        ),
                       ),
                     ),
                   ],
@@ -524,25 +532,56 @@ class _MenuTabState extends State<MenuTab> {
   Widget _buildPromoPage({
     required String title,
     required String description,
+    required String imagePath,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+    return Row(
+      children: [
+        // Image Section - Full height
+        SizedBox(
+          width: 130, // Lebar gambar diatur tetap
+          height: double.infinity,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(15),
+              bottomLeft: Radius.circular(15),
+            ),
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Colors.grey.shade200, 
+                child: const Icon(Icons.broken_image, color: Colors.grey)
+              ),
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.9)),
+        ),
+        // Text Section - With padding
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
