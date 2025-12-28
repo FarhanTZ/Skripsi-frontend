@@ -321,7 +321,7 @@ class _RecommendationPageState extends State<RecommendationPage>
             Column(
               children: [
                 SizedBox(
-                  height: 280, // Fixed height for the food carousel
+                  height: 310, // Fixed height for the food carousel (Increased to prevent overflow)
                   child: PageView.builder(
                     controller: _foodPageController,
                     itemCount: recommendation.foodRecommendations.length,
@@ -888,6 +888,8 @@ class _RecommendationPageState extends State<RecommendationPage>
                     children: [
                       Text(
                         food.reason,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade600,
