@@ -865,3 +865,201 @@ Get
     "average_rating": 0,
     "review_count": 0
 }
+
+
+
+/food/categories
+[
+    {
+        "category_id": 31,
+        "category_code": "AFRICAN",
+        "display_name": "African",
+        "description": null
+    },
+    {
+        "category_id": 16,
+        "category_code": "BEVERAGE_ALCOHOL",
+        "display_name": "Alcohol",
+        "description": null
+    },
+    {
+        "category_id": 26,
+        "category_code": "WESTERN_AMERICAN",
+        "display_name": "American",
+        "description": null
+    },
+    {
+        "category_id": 21,
+        "category_code": "ASIAN_GENERIC",
+        "display_name": "Asian (General)",
+        "description": null
+    },
+    {
+        "category_id": 14,
+        "category_code": "BEVERAGE_COFFEE_TEA",
+        "display_name": "Coffee & Tea",
+        "description": null
+    },
+    {
+        "category_id": 10,
+        "category_code": "DAIRY_ALT",
+        "display_name": "Dairy Alternatives",
+        "description": null
+    },
+    {
+        "category_id": 9,
+        "category_code": "DAIRY",
+        "display_name": "Dairy & Cheese",
+        "description": null
+    },
+    {
+        "category_id": 23,
+        "category_code": "ASIAN_EAST",
+        "display_name": "East Asian (Chinese, Japanese, Korean)",
+        "description": null
+    },
+    {
+        "category_id": 27,
+        "category_code": "WESTERN_EUROPEAN",
+        "display_name": "European",
+        "description": null
+    },
+    {
+        "category_id": 11,
+        "category_code": "FATS_OILS",
+        "display_name": "Fats & Oils",
+        "description": null
+    },
+    {
+        "category_id": 3,
+        "category_code": "FRUIT",
+        "display_name": "Fruits",
+        "description": null
+    },
+    {
+        "category_id": 32,
+        "category_code": "FUSION",
+        "display_name": "Fusion / Modern",
+        "description": null
+    },
+    {
+        "category_id": 30,
+        "category_code": "LATIN_AMERICAN",
+        "display_name": "Latin American / Mexican",
+        "description": null
+    },
+    {
+        "category_id": 6,
+        "category_code": "PROTEIN_MEAT",
+        "display_name": "Meat & Poultry",
+        "description": null
+    },
+    {
+        "category_id": 28,
+        "category_code": "MEDITERRANEAN",
+        "display_name": "Mediterranean",
+        "description": null
+    },
+    {
+        "category_id": 29,
+        "category_code": "MIDDLE_EASTERN",
+        "display_name": "Middle Eastern",
+        "description": null
+    },
+    {
+        "category_id": 1,
+        "category_code": "VEG_NON_STARCHY",
+        "display_name": "Non-Starchy Vegetables",
+        "description": null
+    },
+    {
+        "category_id": 12,
+        "category_code": "NUTS_SEEDS",
+        "display_name": "Nuts & Seeds",
+        "description": null
+    },
+    {
+        "category_id": 8,
+        "category_code": "PROTEIN_PLANT",
+        "display_name": "Plant-Based Protein",
+        "description": null
+    },
+    {
+        "category_id": 20,
+        "category_code": "PREPARED_MEAL",
+        "display_name": "Prepared/Mixed Meals",
+        "description": null
+    },
+    {
+        "category_id": 5,
+        "category_code": "GRAIN_REFINED",
+        "display_name": "Refined Grains",
+        "description": null
+    },
+    {
+        "category_id": 19,
+        "category_code": "CONDIMENTS",
+        "display_name": "Sauces & Condiments",
+        "description": null
+    },
+    {
+        "category_id": 18,
+        "category_code": "SNACKS",
+        "display_name": "Savory Snacks",
+        "description": null
+    },
+    {
+        "category_id": 7,
+        "category_code": "PROTEIN_SEAFOOD",
+        "display_name": "Seafood",
+        "description": null
+    },
+    {
+        "category_id": 24,
+        "category_code": "ASIAN_SOUTH",
+        "display_name": "South Asian (Indian, Pakistani)",
+        "description": null
+    },
+    {
+        "category_id": 22,
+        "category_code": "ASIAN_SE",
+        "display_name": "Southeast Asian (Indonesian, Thai, Viet)",
+        "description": null
+    },
+    {
+        "category_id": 2,
+        "category_code": "VEG_STARCHY",
+        "display_name": "Starchy Vegetables",
+        "description": null
+    },
+    {
+        "category_id": 15,
+        "category_code": "BEVERAGE_SUGARY",
+        "display_name": "Sugary Drinks",
+        "description": null
+    },
+    {
+        "category_id": 17,
+        "category_code": "SWEETS",
+        "display_name": "Sweets & Desserts",
+        "description": null
+    },
+    {
+        "category_id": 13,
+        "category_code": "BEVERAGE_WATER",
+        "display_name": "Water",
+        "description": null
+    },
+    {
+        "category_id": 25,
+        "category_code": "WESTERN_GENERIC",
+        "display_name": "Western (General)",
+        "description": null
+    },
+    {
+        "category_id": 4,
+        "category_code": "GRAIN_WHOLE",
+        "display_name": "Whole Grains",
+        "description": null
+    }
+]

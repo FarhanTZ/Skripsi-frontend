@@ -2,9 +2,11 @@ import 'package:dartz/dartz.dart';
 import 'package:glupulse/core/error/failures.dart';
 import 'package:glupulse/features/Food/domain/entities/cart.dart';
 import 'package:glupulse/features/Food/domain/entities/food.dart';
+import 'package:glupulse/features/Food/domain/entities/food_category.dart';
 
 abstract class FoodRepository {
   Future<Either<Failure, List<Food>>> getFoods();
+  Future<Either<Failure, List<FoodCategory>>> getFoodCategories();
   Future<Either<Failure, Cart>> getCart();
   Future<Either<Failure, void>> addToCart(String foodId, int quantity);
   Future<Either<Failure, void>> updateCartItem(String foodId, int quantity);

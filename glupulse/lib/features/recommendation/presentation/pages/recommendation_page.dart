@@ -319,12 +319,34 @@ class _RecommendationPageState extends State<RecommendationPage>
             _buildFoodEmptyState()
           else
             Column(
-              children: recommendation.foodRecommendations.map((food) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: _buildFoodCard(food),
-                );
-              }).toList(),
+              children: [
+                SizedBox(
+                  height: 280, // Fixed height for the food carousel
+                  child: PageView.builder(
+                    controller: _foodPageController,
+                    itemCount: recommendation.foodRecommendations.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: _buildFoodCard(recommendation.foodRecommendations[index]),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: SmoothPageIndicator(
+                    controller: _foodPageController,
+                    count: recommendation.foodRecommendations.length,
+                    effect: ExpandingDotsEffect(
+                      dotHeight: 8,
+                      dotWidth: 8,
+                      activeDotColor: Theme.of(context).colorScheme.primary,
+                      dotColor: Colors.grey.shade300,
+                    ),
+                  ),
+                ),
+              ],
             ),
 
           // 6. Footer (Feedback Button & Session Info)

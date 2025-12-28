@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/features/Food/domain/entities/food.dart';
+import 'package:glupulse/features/Food/domain/entities/food_category.dart';
+import 'package:glupulse/features/Food/presentation/cubit/food_category_cubit.dart';
+import 'package:glupulse/features/Food/presentation/cubit/food_category_state.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
+import 'package:glupulse/injection_container.dart';
 
 class AllMenuPage extends StatefulWidget {
   final String title;
@@ -20,7 +25,8 @@ class AllMenuPage extends StatefulWidget {
 class _AllMenuPageState extends State<AllMenuPage> {
   List<dynamic> _filteredFoods = [];
   final TextEditingController _searchController = TextEditingController();
-  String _selectedCategory = 'All';
+  String _selectedCategoryCode = 'All';
+  String _selectedCategoryName = 'All';
 
   @override
   void initState() {
@@ -36,34 +42,61 @@ class _AllMenuPageState extends State<AllMenuPage> {
     super.dispose();
   }
 
-  // Get unique categories from the food list
-  List<String> get _categories {
-    final categories = widget.foods
-        .map((f) => (f as Food).foodCategory ?? 'Other')
-        .toSet()
-        .toList();
-    categories.sort(); // Sort alphabetically
-    return ['All', ...categories];
-  }
-
   void _filterFoods() {
     final query = _searchController.text.toLowerCase();
     
+    print('--- DEBUG START ---');
+    print('Selected Category: Code=$_selectedCategoryCode, Name=$_selectedCategoryName');
+    print('Total Foods in List: ${widget.foods.length}');
+
     setState(() {
       _filteredFoods = widget.foods.where((food) {
         final f = food as Food;
         final matchesSearch = f.foodName.toLowerCase().contains(query);
-        final matchesCategory = _selectedCategory == 'All' || 
-                              (f.foodCategory ?? 'Other') == _selectedCategory;
+        
+        // Logic Filter Kategori yang Diperkuat
+        bool matchesCategory = false;
+        
+        if (_selectedCategoryCode == 'All') {
+          matchesCategory = true;
+        } else {
+          final foodCat = f.foodCategory?.toLowerCase() ?? '';
+          final selectedCode = _selectedCategoryCode.toLowerCase();
+          final selectedName = _selectedCategoryName.toLowerCase();
+          
+          // Cek 1: Apakah field foodCategory mengandung Kode atau Nama Kategori?
+          bool catMatch = foodCat.contains(selectedCode) || foodCat.contains(selectedName);
+          
+          // Cek 2: Apakah Tags mengandung Kode atau Nama Kategori? (Cadangan)
+          bool tagMatch = false;
+          if (f.tags != null) {
+            tagMatch = f.tags!.any((tag) {
+              final t = tag.toLowerCase();
+              return t.contains(selectedCode) || t.contains(selectedName);
+            });
+          }
+
+          matchesCategory = catMatch || tagMatch;
+          
+          // DEBUG PRINT PER FOOD ITEM
+          print('Checking Food: "${f.foodName}"');
+          print('   > Food Category Data: "$foodCat"');
+          print('   > Food Tags Data: ${f.tags}');
+          print('   > Matches? $matchesCategory');
+        }
         
         return matchesSearch && matchesCategory;
       }).toList();
     });
+    print('Filtered Result Count: ${_filteredFoods.length}');
+    print('--- DEBUG END ---');
   }
 
-  void _onCategorySelected(String category) {
+  void _onCategorySelected(String categoryCode, String categoryName) {
+    print('User Selected Category: Code=$categoryCode, Name=$categoryName');
     setState(() {
-      _selectedCategory = category;
+      _selectedCategoryCode = categoryCode;
+      _selectedCategoryName = categoryName;
     });
     _filterFoods();
   }
@@ -76,8 +109,10 @@ class _AllMenuPageState extends State<AllMenuPage> {
     // Aspect ratio adjustment for FoodCard to fit grid nicely
     final double childAspectRatio = 0.75; 
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA), // Light background color
+    return BlocProvider(
+      create: (context) => sl<FoodCategoryCubit>()..fetchFoodCategories(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F7FA), // Light background color
       body: SafeArea(
         child: Column(
           children: [
@@ -152,49 +187,62 @@ class _AllMenuPageState extends State<AllMenuPage> {
 
                   const SizedBox(height: 16),
 
-                  // Category Chips
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: _categories.map((category) {
-                        final isSelected = _selectedCategory == category;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: GestureDetector(
-                            onTap: () => _onCategorySelected(category),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isSelected ? Theme.of(context).colorScheme.primary : Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: isSelected ? Colors.transparent : Colors.grey.shade300,
+                  // Category Chips from API
+                  BlocBuilder<FoodCategoryCubit, FoodCategoryState>(
+                    builder: (context, state) {
+                      List<Map<String, String>> categories = [{'name': 'All', 'code': 'All'}];
+                      if (state is FoodCategoryLoaded) {
+                        for (var c in state.categories) {
+                          categories.add({'name': c.displayName, 'code': c.categoryCode});
+                        }
+                      }
+
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: categories.map((catMap) {
+                            final name = catMap['name']!;
+                            final code = catMap['code']!;
+                            final isSelected = _selectedCategoryCode == code;
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: GestureDetector(
+                                onTap: () => _onCategorySelected(code, name),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? Theme.of(context).colorScheme.primary : Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: isSelected ? Colors.transparent : Colors.grey.shade300,
+                                    ),
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 4),
+                                            )
+                                          ]
+                                        : [],
+                                  ),
+                                  child: Text(
+                                    name,
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.grey.shade700,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
                                 ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        )
-                                      ]
-                                    : [],
                               ),
-                              child: Text(
-                                category,
-                                style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.grey.shade700,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -252,8 +300,10 @@ class _AllMenuPageState extends State<AllMenuPage> {
                       },
                     ),
             ),
-        ],
+          ],
+        ),
       ),
-    ));
+    ),
+    );
   }
 }

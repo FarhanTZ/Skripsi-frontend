@@ -1,11 +1,13 @@
 import 'package:glupulse/core/api/api_client.dart';
 import 'package:glupulse/core/error/exceptions.dart';
 import 'package:glupulse/features/Food/data/models/cart_model.dart';
+import 'package:glupulse/features/Food/data/models/food_category_model.dart';
 import 'package:glupulse/features/Food/data/models/food_model.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
 
 abstract class FoodRemoteDataSource {
   Future<List<FoodModel>> getFoods();
+  Future<List<FoodCategoryModel>> getFoodCategories();
   Future<CartModel> getCart();
   Future<void> addToCart(String foodId, int quantity);
   Future<void> updateCartItem(String foodId, int quantity);
@@ -31,6 +33,17 @@ class FoodRemoteDataSourceImpl implements FoodRemoteDataSource {
       return jsonList.map((json) => FoodModel.fromJson(json)).toList();
     } on ServerException {
       rethrow; // Lempar kembali ServerException yang sudah ditangani oleh ApiClient
+    }
+  }
+
+  @override
+  Future<List<FoodCategoryModel>> getFoodCategories() async {
+    try {
+      final token = await localDataSource.getLastToken();
+      final List<dynamic> jsonList = await apiClient.getList('/food/categories', token: token);
+      return jsonList.map((json) => FoodCategoryModel.fromJson(json)).toList();
+    } on ServerException {
+      rethrow;
     }
   }
 

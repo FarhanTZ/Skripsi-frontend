@@ -5,6 +5,7 @@ import 'package:glupulse/core/network/network_info.dart';
 import 'package:glupulse/features/Food/data/datasources/food_remote_data_source.dart';
 import 'package:glupulse/features/Food/domain/entities/cart.dart';
 import 'package:glupulse/features/Food/domain/entities/food.dart';
+import 'package:glupulse/features/Food/domain/entities/food_category.dart';
 import 'package:glupulse/features/Food/domain/repositories/food_repository.dart';
 
 class FoodRepositoryImpl implements FoodRepository {
@@ -27,6 +28,20 @@ class FoodRepositoryImpl implements FoodRepository {
       } catch (e) {
         // Catch parsing errors or other unexpected exceptions
         return Left(ServerFailure('Data processing error: ${e.toString()}'));
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<FoodCategory>>> getFoodCategories() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final remoteCategories = await remoteDataSource.getFoodCategories();
+        return Right(remoteCategories);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
       }
     } else {
       return Left(ConnectionFailure());

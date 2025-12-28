@@ -1,917 +1,784 @@
 # Activity Diagram Glupulse
 
-Dokumen ini menggunakan simbol standar flowchart:
-*   **Lingkaran (( ))**: Start / End.
-*   **Jajar Genjang [/ /]**: Input / Output (Interaksi User & Tampilan).
-*   **Persegi [ ]**: Proses (Logika Frontend & Backend).
-*   **Belah Ketupat { }**: Keputusan (Percabangan Ya/Tidak).
+Dokumen ini berisi 77 Activity Diagram terpisah untuk setiap fitur yang tersedia di sistem Glupulse.
 
 ---
 
-## 1. Authentication
-*(Sama seperti sebelumnya)*
-
-### A. Sign Up (Daftar Akun)
+## 1. Sign Up
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> Out1[/User: Buka Halaman Daftar/]
-    Out1 --> Out2[/Frontend: Tampilkan Form Pendaftaran/]
-    Out2 --> In1[/User: Input Nama, Email, Password/]
-    In1 --> In2[/User: Klik Tombol Daftar/]
-    In2 --> Dec1{Frontend: Cek Validasi Input}
-    Dec1 -- Tidak Valid --> OutErr[/Frontend: Tampilkan Pesan Error/]
-    OutErr --> In1
-    Dec1 -- Valid --> Proc1[Frontend: Kirim Data ke Backend]
-    Proc1 --> Dec2{Backend: Email Tersedia?}
-    Dec2 -- Tidak (Terpakai) --> ProcErr[Backend: Respon Tolak]
-    ProcErr --> OutErr
-    Dec2 -- Ya (Tersedia) --> ProcSave[Backend: Simpan User Baru]
-    ProcSave --> End((Selesai)) %% Dilanjutkan ke Verify OTP
+    Start((Mulai)) --> In1[/User: Input Nama, Email, Password/]
+    In1 --> In2[/User: Klik Daftar/]
+    In2 --> Proc1[Frontend: Validasi Input]
+    Proc1 --> Dec1{Valid?}
+    Dec1 -- Tidak --> OutErr[/Frontend: Tampilkan Error/]
+    Dec1 -- Ya --> Proc2[Backend: Cek Email & Simpan User]
+    Proc2 --> OutSucc[/Frontend: Arahkan ke Verifikasi/]
+    OutSucc --> End((Selesai))
 ```
 
-### B. Login (Masuk)
+## 2. Login
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Halaman Login/]
-    In1 --> Out1[/Frontend: Tampilkan Form Login/]
-    Out1 --> In2[/User: Input Email & Password/]
-    In2 --> In3[/User: Klik Tombol Masuk/]
-    In3 --> Proc1[Frontend: Kirim Data Login]
-    Proc1 --> Dec1{Backend: Email & Password Benar?}
-    Dec1 -- Salah --> ProcFail[Backend: Respon Gagal]
-    ProcFail --> OutErr[/Frontend: Tampilkan Pesan Salah/]
-    OutErr --> In2
-    Dec1 -- Benar --> End((Selesai)) %% Dilanjutkan ke Verify OTP
+    Start((Mulai)) --> In1[/User: Input Email & Password/]
+    In1 --> In2[/User: Klik Masuk/]
+    In2 --> Proc1[Backend: Verifikasi Kredensial/]
+    Proc1 --> Dec1{Benar?}
+    Dec1 -- Tidak --> OutErr[/Frontend: Tampilkan Pesan Gagal/]
+    Dec1 -- Ya --> Proc2[Backend: Generate Token/]
+    Proc2 --> OutHome[/Frontend: Masuk Dashboard/]
+    OutHome --> End((Selesai))
 ```
 
-### C. Login with Google
+## 3. Login with Google
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Tombol 'Sign in with Google'/]
-    In1 --> Proc1[Frontend: Request Auth ke Google]
-    Proc1 --> OutPop[/Google: Tampilkan Pilih Akun/]
-    OutPop --> In2[/User: Pilih Akun Google/]
-    In2 --> Proc2[Frontend: Terima Token dari Google]
-    Proc2 --> Proc3[Frontend: Kirim Token ke Backend]
-    Proc3 --> Dec1{Backend: Email Sudah Terdaftar?}
-    Dec1 -- Sudah --> ProcLog[Backend: Login User & Generate Token]
-    ProcLog --> ProcSave[Frontend: Simpan Token]
-    ProcSave --> OutHome[/Frontend: Masuk ke Dashboard/]
-    Dec1 -- Belum (User Baru) --> ProcReg[Backend: Register User Baru Otomatis]
-    ProcReg --> OutComp[/Frontend: Arahkan ke Form Lengkapi Profil/]
-    OutComp --> End((Selesai)) %% Dilanjutkan ke A1. Input Health Profile
-    OutHome --> End
+    Start((Mulai)) --> In1[/User: Klik 'Sign in with Google'/]
+    In1 --> Proc1[Google: Autentikasi User/]
+    Proc1 --> Proc2[Backend: Cek Email di DB/]
+    Proc2 --> Dec1{Terdaftar?}
+    Dec1 -- Belum --> ProcReg[Backend: Register Otomatis/]
+    Dec1 -- Sudah --> ProcLog[Backend: Login/]
+    ProcReg --> OutHome[/Frontend: Masuk Dashboard/]
+    ProcLog --> OutHome
+    OutHome --> End((Selesai))
 ```
 
-### D. Verify OTP (Lengkap)
+## 4. Input OTP
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> ProcGen[Backend: Generate Kode OTP]
-    ProcGen --> ProcSend[Backend: Kirim Email ke User]
-    ProcSend --> OutForm[/Frontend: Tampilkan Form Input OTP/]
-    OutForm --> InOpen[/User: Buka Email & Salin Kode/]
-    InOpen --> InInput[/User: Input Kode di Aplikasi/]
-    InInput --> InKlik[/User: Klik Verifikasi/]
-    InKlik --> ProcVerif[Frontend: Kirim Kode ke Backend]
-    ProcVerif --> DecValid{Backend: Kode Valid?}
-    DecValid -- Tidak --> OutErr[/Frontend: Tampilkan Error/]
-    OutErr --> InInput
-    DecValid -- Ya --> ProcAktif[Backend: Set Status Akun Aktif]
-    ProcAktif --> DecProf{Backend: Profil Lengkap?}
-    DecProf -- Sudah --> OutHome[/Frontend: Masuk Dashboard/]
-    DecProf -- Belum --> OutComp[/Frontend: Arahkan ke Form Lengkapi Profil/]
-    OutComp --> End((Selesai)) %% Dilanjutkan ke A1. Input Health Profile
-    OutHome --> End
+    Start((Mulai)) --> In1[/User: Terima Kode di Email/]
+    In1 --> In2[/User: Input Kode OTP/]
+    In2 --> Proc1[Backend: Validasi Kode/]
+    Proc1 --> Dec1{Valid?}
+    Dec1 -- Tidak --> OutErr[/Frontend: Tampilkan Error/]
+    Dec1 -- Ya --> Proc2[Backend: Aktivasi Akun/]
+    Proc2 --> OutSucc[/Frontend: Masuk Aplikasi/]
+    OutSucc --> End((Selesai))
 ```
 
-### E. Resend OTP
+## 5. Resend OTP
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Tombol 'Kirim Ulang'/]
-    In1 --> Proc1[Frontend: Request OTP Baru]
-    Proc1 --> Proc2[Backend: Generate Kode Baru]
-    Proc2 --> Proc3[Backend: Kirim Email Lagi]
-    Proc3 --> Out1[/Frontend: Reset Timer Hitung Mundur/]
-    Out1 --> End((Selesai))
+    Start((Mulai)) --> In1[/User: Klik 'Kirim Ulang OTP'/]
+    In1 --> Proc1[Backend: Generate Kode Baru/]
+    Proc1 --> Proc2[Backend: Kirim Email OTP/]
+    Proc2 --> OutSucc[/Frontend: Reset Timer/]
+    OutSucc --> End((Selesai))
 ```
 
-### F. Reset Password
+## 6. Request Password Reset
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Lupa Password/]
-    In1 --> Out1[/Frontend: Tampilkan Form Email/]
-    Out1 --> In2[/User: Input Email/]
-    In2 --> Proc1[Frontend: Request Reset]
-    Proc1 --> Dec1{Backend: Email Terdaftar?}
-    Dec1 -- Tidak --> OutInfo[/Frontend: Tampilkan Info Cek Email/]
-    Dec1 -- Ya --> ProcSend[Backend: Kirim Link/OTP Reset]
-    ProcSend --> OutInfo
-    OutInfo --> In3[/User: Input Password Baru/]
-    In3 --> In4[/User: Klik Simpan/]
-    In4 --> ProcUpdate[Backend: Update Password User]
-    ProcUpdate --> OutLogin[/Frontend: Redirect ke Login/]
+    Start((Mulai)) --> In1[/User: Input Email/]
+    In1 --> In2[/User: Klik Request Reset/]
+    In2 --> Proc1[Backend: Cek Email/]
+    Proc1 --> Proc2[Backend: Kirim Link/Token Reset/]
+    Proc2 --> OutInfo[/Frontend: Tampilkan Info Cek Email/]
+    OutInfo --> End((Selesai))
+```
+
+## 7. Reset Password
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Buka Link Reset/Input Token/]
+    In1 --> In2[/User: Input Password Baru/]
+    In2 --> In3[/User: Klik Simpan/]
+    In3 --> Proc1[Backend: Update Password/]
+    Proc1 --> OutSucc[/Frontend: Redirect ke Login/]
+    OutSucc --> End((Selesai))
+```
+
+## 8. Log Out
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Klik Logout/]
+    In1 --> Proc1[Frontend: Hapus Token Sesi/]
+    Proc1 --> OutLogin[/Frontend: Kembali ke Halaman Login/]
     OutLogin --> End((Selesai))
 ```
 
----
-
-## 2. Profile Management
-*(Sama seperti sebelumnya)*
-### A. Update Profile (Nama, Foto, Bio)
+## 9. Update Profile
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Halaman Profil/]
-    In1 --> In2[/User: Klik Edit Profil/]
-    In2 --> Out1[/Frontend: Tampilkan Form Edit Profil/]
-    Out1 --> In3[/User: Ubah Nama, Foto, atau Bio/]
-    In3 --> In4[/User: Klik Simpan/]
-    In4 --> Proc1[Frontend: Kirim Data ke Backend]
-    Proc1 --> ProcDB[Backend: Update Data di Tabel User]
-    ProcDB --> OutSucc[/Frontend: Tampilkan Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Edit Nama/Bio/Foto/]
+    In1 --> In2[/User: Klik Simpan/]
+    In2 --> Proc1[Backend: Update Data User/]
+    Proc1 --> OutSucc[/Frontend: Tampilkan Profil Baru/]
     OutSucc --> End((Selesai))
 ```
 
-### B. Update Password (Ganti Kata Sandi)
+## 10. Update Password
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Menu Keamanan/]
-    In1 --> Out1[/Frontend: Tampilkan Form Ubah Password/]
-    Out1 --> In2[/User: Input Password Lama/]
-    In2 --> In3[/User: Input Password Baru/]
-    In3 --> In4[/User: Konfirmasi Password Baru/]
-    In4 --> In5[/User: Klik Update Password/]
-    In5 --> Proc1[Frontend: Kirim Data ke Backend]
-    Proc1 --> Dec1{Backend: Password Lama Benar?}
-    Dec1 -- Salah --> OutErr[/Frontend: Tampilkan Error Password Lama/]
-    OutErr --> In2
-    Dec1 -- Benar --> ProcUpdate[Backend: Update Password di DB]
-    ProcUpdate --> OutSucc[/Frontend: Tampilkan Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Input Pass Lama & Baru/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Validasi Pass Lama/]
+    Proc1 --> Dec1{Benar?}
+    Dec1 -- Tidak --> OutErr[/Frontend: Error Pass Lama/]
+    Dec1 -- Ya --> Proc2[Backend: Simpan Pass Baru/]
+    Proc2 --> OutSucc[/Frontend: Notifikasi Sukses/]
     OutSucc --> End((Selesai))
 ```
 
-### C. Update Email
+## 11. Change Email
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Menu Keamanan/]
-    In1 --> Out1[/Frontend: Tampilkan Form Ubah Email/]
-    Out1 --> In2[/User: Input Email Baru/]
-    In2 --> In3[/User: Input Password Konfirmasi/]
-    In3 --> In4[/User: Klik Update Email/]
-    In4 --> Proc1[Frontend: Kirim Data ke Backend]
-    Proc1 --> Dec1{Backend: Email Sudah Terdaftar?}
-    Dec1 -- Ya --> OutErr[/Frontend: Tampilkan Error Email Terpakai/]
-    OutErr --> In2
-    Dec1 -- Tidak --> ProcUpdate[Backend: Update Email di DB]
-    ProcUpdate --> OutSucc[/Frontend: Tampilkan Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Input Email Baru/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Cek Ketersediaan Email/]
+    Proc1 --> Dec1{Tersedia?}
+    Dec1 -- Tidak --> OutErr[/Frontend: Error Email Terpakai/]
+    Dec1 -- Ya --> Proc2[Backend: Update Email/]
+    Proc2 --> OutSucc[/Frontend: Notifikasi Sukses/]
     OutSucc --> End((Selesai))
 ```
 
-### D. Update Username
+## 12. Update Username
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Halaman Profil/]
-    In1 --> In2[/User: Klik Edit Profil/]
-    In2 --> Out1[/Frontend: Tampilkan Form Edit Profil/]
-    Out1 --> In3[/User: Ubah Username/]
-    In3 --> In4[/User: Klik Simpan/]
-    In4 --> Proc1[Frontend: Kirim Data ke Backend]
-    Proc1 --> Dec1{Backend: Username Sudah Ada?}
-    Dec1 -- Ya --> OutErr[/Frontend: Tampilkan Error Username Terpakai/]
-    OutErr --> In3
-    Dec1 -- Tidak --> ProcUpdate[Backend: Update Username di DB]
-    ProcUpdate --> OutSucc[/Frontend: Tampilkan Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Input Username Baru/]
+    In1 --> In2[/User: Klik Simpan/]
+    In2 --> Proc1[Backend: Cek Unik/]
+    Proc1 --> Dec1{Unik?}
+    Dec1 -- Tidak --> OutErr[/Frontend: Error Username Ada/]
+    Dec1 -- Ya --> Proc2[Backend: Update Username/]
+    Proc2 --> OutSucc[/Frontend: Tampilkan Username Baru/]
     OutSucc --> End((Selesai))
 ```
 
-### E. Delete Account
+## 13. Link Google Account
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Menu Hapus Akun/]
-    In1 --> Out1[/Frontend: Minta Konfirmasi Password/]
-    Out1 --> In2[/User: Input Password/]
-    In2 --> Proc1[Frontend: Kirim Request Hapus]
-    Proc1 --> Dec1{Backend: Password Benar?}
-    Dec1 -- Salah --> OutErr[/Frontend: Tampilkan Error/]
-    OutErr --> In2
-    Dec1 -- Benar --> ProcDel[Backend: Hapus Data Permanen]
-    ProcDel --> ProcLogout[Frontend: Logout Otomatis]
-    ProcLogout --> OutLogin[/Frontend: Redirect ke Login/]
-    OutLogin --> End((Selesai))
-```
-
-### F. Link Google Account
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Menu Akun Terhubung/]
-    In1 --> In2[/User: Klik Tombol 'Hubungkan Google'/]
-    In2 --> Out1[/Frontend: Buka Pop-up Google Login/]
-    Out1 --> In3[/User: Pilih Akun Google/]
-    In3 --> Proc1[Frontend: Terima Token dari Google]
-    Proc1 --> Proc2[Frontend: Kirim Token ke Backend]
-    Proc2 --> Proc3[Backend: Link Google ID ke Akun User]
-    Proc3 --> OutSucc[/Frontend: Tampilkan Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Klik Hubungkan Google/]
+    In1 --> Proc1[Google: Auth User/]
+    Proc1 --> Proc2[Backend: Simpan Google ID/]
+    Proc2 --> OutSucc[/Frontend: Status Terhubung/]
     OutSucc --> End((Selesai))
 ```
 
-### G. Unlink Google Account
+## 14. Unlink Google Account
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Menu Akun Terhubung/]
-    In1 --> In2[/User: Klik Tombol 'Putuskan Google'/]
-    In2 --> Out1[/Frontend: Tampilkan Konfirmasi Unlink/]
-    Out1 --> In3[/User: Klik 'Ya, Putuskan'/]
-    In3 --> Proc1[Frontend: Kirim Request Unlink ke Backend]
-    Proc1 --> Proc2[Backend: Hapus Link Google ID]
-    Proc2 --> OutSucc[/Frontend: Tampilkan Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Klik Putuskan Google/]
+    In1 --> In2[/User: Konfirmasi/]
+    In2 --> Proc1[Backend: Hapus Google ID/]
+    Proc1 --> OutSucc[/Frontend: Status Terputus/]
     OutSucc --> End((Selesai))
 ```
 
----
+## 15. Delete Account
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Klik Hapus Akun/]
+    In1 --> In2[/User: Input Password Konfirmasi/]
+    In2 --> Proc1[Backend: Hapus Data Permanen/]
+    Proc1 --> OutLog[/Frontend: Logout Otomatis/]
+    OutLog --> End((Selesai))
+```
 
-## 3. Address Management
-*(Sama seperti sebelumnya)*
-### A. View Address (Lihat Daftar Alamat)
+## 16. Add Delivery Address
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Input Data Alamat/]
+    In1 --> In2[/User: Klik Simpan/]
+    In2 --> Proc1[Backend: Simpan Alamat Baru/]
+    Proc1 --> OutSucc[/Frontend: Kembali ke List/]
+    OutSucc --> End((Selesai))
+```
+
+## 17. View Address List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Menu Alamat/]
-    In1 --> Proc1[Frontend: Request Data Alamat]
-    Proc1 --> ProcDB[Backend: Query Daftar Alamat User]
-    ProcDB --> OutData[/Backend: Return List Alamat/]
-    OutData --> OutList[/Frontend: Tampilkan Daftar Alamat/]
+    In1 --> Proc1[Backend: Ambil Daftar Alamat/]
+    Proc1 --> OutList[/Frontend: Tampilkan List Alamat/]
     OutList --> End((Selesai))
 ```
 
-### B. Insert Address (Tambah Alamat)
+## 18. Update Address
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Tambah Alamat/]
-    In1 --> Out1[/Frontend: Tampilkan Form/]
-    Out1 --> In2[/User: Isi Jalan, Kota, & No HP/]
-    In2 --> In3[/User: Tentukan Titik Peta/]
-    In3 --> In4[/User: Klik Simpan/]
-    In4 --> Proc1[Frontend: Kirim Data Alamat]
-    Proc1 --> ProcDB[Backend: Simpan ke Tabel Address]
-    ProcDB --> OutRefresh[/Frontend: Refresh List Alamat/]
-    OutRefresh --> End((Selesai))
-```
-
-### C. Update Address (Ubah Alamat)
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Alamat di List/]
-    In1 --> In2[/User: Klik Tombol Edit/]
-    In2 --> Out1[/Frontend: Tampilkan Form Edit Alamat/]
-    Out1 --> In3[/User: Ubah Data Alamat/]
-    In3 --> In4[/User: Klik Update/]
-    In4 --> Proc1[Frontend: Kirim Perubahan ke Backend]
-    Proc1 --> ProcDB[Backend: Update Data Alamat di DB]
-    ProcDB --> OutSucc[/Frontend: Tampilkan Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Edit Detail Alamat/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Update Data Alamat/]
+    Proc1 --> OutSucc[/Frontend: Notifikasi Sukses/]
     OutSucc --> End((Selesai))
 ```
 
-### D. Set Default Address (Set Utama)
+## 19. Delete Address
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Alamat di List/]
-    In1 --> In2[/User: Klik 'Jadikan Utama'/]
-    In2 --> Proc1[Frontend: Request Set Default]
-    Proc1 --> ProcDB[Backend: Update Status Default di DB]
-    ProcDB --> OutRefresh[/Frontend: Urutkan Alamat (Utama di Atas)/]
-    OutRefresh --> End((Selesai))
+    Start((Mulai)) --> In1[/User: Klik Hapus Alamat/]
+    In1 --> In2[/User: Konfirmasi Ya/]
+    In2 --> Proc1[Backend: Hapus Alamat/]
+    Proc1 --> OutSucc[/Frontend: List Terupdate/]
+    OutSucc --> End((Selesai))
 ```
 
-### E. Delete Address (Hapus Alamat)
+## 20. Set Default Address
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Alamat yang Akan Dihapus/]
-    In1 --> In2[/User: Klik Ikon Hapus/]
-    In2 --> Out1[/Frontend: Tampilkan Konfirmasi Hapus/]
-    Out1 --> In3[/User: Klik 'Ya, Hapus'/]
-    In3 --> Proc1[Frontend: Request Hapus Alamat]
-    Proc1 --> ProcDB[Backend: Delete Record Alamat]
-    ProcDB --> OutRefresh[/Frontend: Hapus Item dari List Tampilan/]
-    OutRefresh --> End((Selesai))
+    Start((Mulai)) --> In1[/User: Pilih Alamat/]
+    In1 --> In2[/User: Klik Jadikan Utama/]
+    In2 --> Proc1[Backend: Set Default=True/]
+    Proc1 --> OutSucc[/Frontend: Alamat Jadi Prioritas/]
+    OutSucc --> End((Selesai))
 ```
 
----
-
-## 4. Cart & Order
-*(Sama seperti sebelumnya)*
-### A. View Cart (Lihat Keranjang)
+## 21. View Shopping Cart Item
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Ikon Keranjang/]
-    In1 --> Proc1[Frontend: Request Data Cart]
-    Proc1 --> ProcDB[Backend: Query Item di Keranjang User]
-    ProcDB --> OutData[/Backend: Return List Item & Harga/]
-    OutData --> OutList[/Frontend: Tampilkan Daftar Belanja & Total/]
+    Start((Mulai)) --> In1[/User: Buka Keranjang/]
+    In1 --> Proc1[Backend: Ambil Item Keranjang/]
+    Proc1 --> OutList[/Frontend: Tampilkan Produk & Total/]
     OutList --> End((Selesai))
 ```
 
-### B. Add Item to Cart (Tambah Barang)
+## 22. Add Item to Cart
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Halaman Produk/]
-    In1 --> In2[/User: Pilih Varian & Jumlah/]
-    In2 --> In3[/User: Klik 'Tambah Keranjang'/]
-    In3 --> Proc1[Frontend: Cek Ketersediaan]
-    Proc1 --> Dec1{Backend: Stok Cukup?}
-    Dec1 -- Tidak --> OutHabis[/Frontend: Tampilkan Stok Habis/]
-    OutHabis --> End((Selesai))
-    Dec1 -- Ya --> ProcSave[Backend: Simpan/Update Item di Cart]
-    ProcSave --> OutSucc[/Frontend: Tampilkan Notifikasi Berhasil/]
+    Start((Mulai)) --> In1[/User: Klik Tambah ke Keranjang/]
+    In1 --> Proc1[Backend: Cek Stok/]
+    Proc1 --> Dec1{Ada?}
+    Dec1 -- Tidak --> OutErr[/Frontend: Info Stok Habis/]
+    Dec1 -- Ya --> Proc2[Backend: Tambah Item/]
+    Proc2 --> OutSucc[/Frontend: Notifikasi Sukses/]
     OutSucc --> End((Selesai))
 ```
 
-### C. Update Item Quantity (Ubah Jumlah)
+## 23. Update Item Quantity in Cart
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Tombol (+) atau (-)/]
-    In1 --> Proc1[Frontend: Hitung Jumlah Baru/]
-    Proc1 --> Proc2[Frontend: Request Update Qty ke Backend]
-    Proc2 --> ProcDB[Backend: Update Quantity di DB]
-    ProcDB --> OutCalc[/Frontend: Hitung Ulang Total Harga/]
+    Start((Mulai)) --> In1[/User: Ubah Jumlah Item/]
+    In1 --> Proc1[Backend: Update Qty/]
+    Proc1 --> OutCalc[/Frontend: Hitung Ulang Total/]
     OutCalc --> End((Selesai))
 ```
 
-### D. Remove Item from Cart (Hapus Barang)
+## 24. Remove Item from Cart
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Geser Item / Klik Hapus/]
-    In1 --> Out1[/Frontend: Tampilkan Konfirmasi Hapus/]
-    Out1 --> In2[/User: Klik 'Ya'/]
-    In2 --> Proc1[Frontend: Request Hapus Item]
-    Proc1 --> ProcDB[Backend: Delete Item dari Cart]
-    ProcDB --> OutRefresh[/Frontend: Hapus Item dari List Tampilan/]
-    OutRefresh --> End((Selesai))
+    Start((Mulai)) --> In1[/User: Klik Hapus Item/]
+    In1 --> Proc1[Backend: Hapus dari Keranjang/]
+    Proc1 --> OutSucc[/Frontend: Item Hilang/]
+    OutSucc --> End((Selesai))
 ```
 
-### E. Checkout Cart
+## 25. Checkout
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Tombol Checkout/]
-    In1 --> Out1[/Frontend: Tampilkan Halaman Checkout/]
-    Out1 --> In2[/User: Pilih Alamat Pengiriman/]
-    In2 --> In3[/User: Pilih Jasa Pengiriman/]
-    In3 --> In4[/User: Pilih Metode Pembayaran/]
-    In4 --> In5[/User: Klik 'Buat Pesanan'/]
-    In5 --> Proc1[Frontend: Request Create Order]
-    Proc1 --> ProcDB[Backend: Simpan Order (Status: Pending)]
-    ProcDB --> OutPay[/Frontend: Arahkan ke Order Payment/]
+    Start((Mulai)) --> In1[/User: Klik Checkout/]
+    In1 --> In2[/User: Pilih Opsi Pengiriman/]
+    In2 --> Proc1[Backend: Buat Pesanan Pending/]
+    Proc1 --> OutPay[/Frontend: Ke Halaman Bayar/]
     OutPay --> End((Selesai))
 ```
 
-### F. Order Payment (Bayar Pesanan)
+## 26. Simulate Payment
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Lihat Halaman Pembayaran/]
-    In1 --> In2[/User: Transfer / Bayar via E-Wallet/]
-    In2 --> Proc1[Frontend/Gateway: Verifikasi Pembayaran/]
-    Proc1 --> Dec1{Backend: Pembayaran Sukses?}
-    Dec1 -- Gagal --> OutFail[/Frontend: Tampilkan Pesan Gagal/]
-    OutFail --> In1
-    Dec1 -- Sukses --> ProcUpd[Backend: Update Status (Paid/Dikemas)]
-    ProcUpd --> OutSucc[/Frontend: Tampilkan Struk & Status Sukses/]
+    Start((Mulai)) --> In1[/User: Klik Bayar/]
+    In1 --> Proc1[Backend: Proses Simulasi Bayar/]
+    Proc1 --> Dec1{Sukses?}
+    Dec1 -- Gagal --> OutErr[/Frontend: Pesan Gagal/]
+    Dec1 -- Sukses --> Proc2[Backend: Update Status Paid/]
+    Proc2 --> OutSucc[/Frontend: Tampilkan Sukses/]
     OutSucc --> End((Selesai))
 ```
 
-### G. Track Order Status (Lacak Pesanan)
+## 27. Get Order History
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Riwayat Pesanan/]
-    In1 --> In2[/User: Klik Salah Satu Pesanan/]
-    In2 --> Proc1[Frontend: Request Detail & Tracking]
-    Proc1 --> ProcDB[Backend: Ambil Status & Resi Pengiriman]
-    ProcDB --> OutData[/Backend: Return Data Tracking/]
-    OutData --> OutUI[/Frontend: Tampilkan Posisi Paket/]
-    OutUI --> End((Selesai))
+    In1 --> Proc1[Backend: Ambil List Order/]
+    Proc1 --> OutList[/Frontend: Tampilkan Riwayat/]
+    OutList --> End((Selesai))
 ```
 
----
-
-## 5. Health Records
-
-### A. Health Profile (Profil Kesehatan: Tinggi/Berat/GolDar)
-
-#### A1. Input Health Profile (Initial Setup)
-*Dilakukan hanya sekali setelah Register.*
+## 28. Track Active Orders
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Masuk Halaman Profil Awal/]
-    In1 --> In2[/User: Pilih Pengalaman (Simple/Advanced)/]
-    In2 --> In3[/User: Klik Lanjut/]
-    In3 --> In4[/User: Isi Data PageView (Tinggi, Berat, dll)/]
-    In4 --> Dec1{User: Sudah di Halaman Akhir?}
-    Dec1 -- Belum --> In4
-    Dec1 -- Ya --> In5[/User: Klik Simpan/]
-    In5 --> Proc1[Frontend: Kumpulkan Semua Data]
-    Proc1 --> ProcDB[Backend: Simpan Profil Kesehatan Baru]
-    ProcDB --> ProcAuth[Frontend: Validasi Status & Masuk Home]
-    ProcAuth --> End((Selesai))
+    Start((Mulai)) --> In1[/User: Klik Lacak Pesanan/]
+    In1 --> Proc1[Backend: Ambil Status Terkini/]
+    Proc1 --> OutStat[/Frontend: Tampilkan Posisi/]
+    OutStat --> End((Selesai))
 ```
 
-#### A2. View Health Profile
+## 29. Rate Seller
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Menu Profil Kesehatan/]
-    In1 --> Proc1[Frontend: Request Data Profil]
-    Proc1 --> ProcDB[Backend: Ambil Data Health Profile]
-    ProcDB --> OutUI[/Frontend: Tampilkan Data, BMI, & Grafik/]
-    OutUI --> End((Selesai))
-```
-
-#### A3. Update Health Profile (Edit)
-*Dilakukan jika user ingin mengubah data setelah masuk aplikasi.*
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Menu Profil Kesehatan/]
-    In1 --> In2[/User: Klik Edit Profil/]
-    In2 --> Out1[/Frontend: Tampilkan Form Edit dengan Data Lama/]
-    Out1 --> In3[/User: Ubah Data (Berat/Tinggi/Obat)/]
-    In3 --> In4[/User: Klik Simpan Perubahan/]
-    In4 --> Proc1[Frontend: Hitung Ulang (misal BMI)/]
-    Proc1 --> ProcDB[Backend: Update Record di Database]
-    ProcDB --> OutSucc[/Frontend: Kembali ke Tampilan Profil & Notif Sukses/]
+    Start((Mulai)) --> In1[/User: Beri Bintang & Ulasan/]
+    In1 --> In2[/User: Klik Kirim/]
+    In2 --> Proc1[Backend: Simpan Review/]
+    Proc1 --> OutSucc[/Frontend: Terima Kasih/]
     OutSucc --> End((Selesai))
 ```
 
----
-
-### B. HbA1c Record (Gula Darah Jangka Panjang)
-
-#### B1. Input HbA1c
+## 30. Upsert Health Profile
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Input HbA1c/]
-    In1 --> In2[/User: Input Nilai % & Tanggal Tes/]
-    In2 --> In3[/User: Klik Simpan/]
-    In3 --> Dec1{Frontend: Nilai dalam Range Valid?}
+    Start((Mulai)) --> Dec1{Entry Point}
+    Dec1 -- "Selesai Sign Up / Login" --> ProcCheck[Backend: Cek Kelengkapan Profil]
+    ProcCheck --> Dec2{Profil Lengkap?}
+    Dec2 -- Ya --> End((Selesai / Dashboard))
+    Dec2 -- Tidak --> In1[/User: Input Data Fisik, Kondisi & Target/]
     
-    Dec1 -- Tidak --> OutErr[/Frontend: Tampilkan Pesan Error Range/]
-    OutErr --> In2
+    Dec1 -- "Menu Edit Profil" --> In1
     
-    Dec1 -- Ya --> ProcSave[Backend: Simpan Record HbA1c]
-    ProcSave --> OutSucc[/Frontend: Notifikasi Sukses/]
+    In1 --> In2[/User: Klik Simpan/]
+    In2 --> Proc1[Backend: Cek Eksistensi Data]
+    Proc1 --> Dec3{Data Ada?}
+    Dec3 -- Belum --> ProcInsert[Backend: Insert Data Baru]
+    Dec3 -- Sudah --> ProcUpdate[Backend: Update Data Lama]
+    
+    ProcInsert --> OutSucc[/Frontend: Tampilkan Dashboard & BMI/]
+    ProcUpdate --> OutSucc
+    OutSucc --> End
+```
+
+## 31. View Health Profile
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Buka Profil Kesehatan/]
+    In1 --> Proc1[Backend: Ambil Data Profil/]
+    Proc1 --> OutView[/Frontend: Tampilkan Data/]
+    OutView --> End((Selesai))
+```
+
+## 32. Add HbA1c Record
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Input Nilai HbA1c/]
+    In1 --> In2[/User: Klik Tambah/]
+    In2 --> Proc1[Backend: Simpan Record/]
+    Proc1 --> OutSucc[/Frontend: Masuk ke List/]
     OutSucc --> End((Selesai))
 ```
-#### B2. View HbA1c
+
+## 33. View HbA1c List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Menu HbA1c/]
-    In1 --> Proc1[Frontend: Request Riwayat]
-    Proc1 --> ProcDB[Backend:   ]
-    ProcDB --> OutUI[/Frontend: Tampilkan Grafik Tren HbA1c/]
-    OutUI --> End((Selesai))
+    In1 --> Proc1[Backend: Ambil Data HbA1c/]
+    Proc1 --> OutList[/Frontend: Tampilkan Grafik/List/]
+    OutList --> End((Selesai))
 ```
-#### B3. Update HbA1c
+
+## 34. Update HbA1c Record
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Item HbA1c/]
-    In1 --> In2[/User: Ubah Nilai/Tanggal/]
-    In2 --> In3[/User: Klik Update/]
-    In3 --> ProcDB[Backend: Update Record HbA1c]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-#### B4. Delete HbA1c
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Geser Item HbA1c/]
-    In1 --> In2[/User: Klik Hapus/]
-    In2 --> ProcDB[Backend: Hapus Record HbA1c]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Edit Nilai HbA1c/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Update Record/]
+    Proc1 --> OutSucc[/Frontend: Data Berubah/]
     OutSucc --> End((Selesai))
 ```
 
----
-
-### C. Health Event (Kejadian Kesehatan: Pusing, Mual, dll)
-
-#### C1. Input Health Event
+## 35. Delete HbA1c Record
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Tambah Keluhan/]
-    In1 --> In2[/User: Pilih Gejala & Intensitas/]
-    In2 --> In3[/User: Klik Simpan/]
-    In3 --> Dec1{Frontend: Input Valid?}
-    Dec1 -- Tidak --> OutErr[/Frontend: Tampilkan Pesan Error/]
-    OutErr --> In2
-    Dec1 -- Ya --> ProcDB[Backend: Simpan Log Keluhan]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Klik Hapus Record/]
+    In1 --> Proc1[Backend: Hapus Data/]
+    Proc1 --> OutSucc[/Frontend: List Terupdate/]
     OutSucc --> End((Selesai))
 ```
-#### C2. View Health Event
+
+## 36. Add Health Event
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Input Gejala/Keluhan/]
+    In1 --> In2[/User: Klik Simpan/]
+    In2 --> Proc1[Backend: Simpan Event/]
+    Proc1 --> OutSucc[/Frontend: Notifikasi Sukses/]
+    OutSucc --> End((Selesai))
+```
+
+## 37. View Health Event List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Log Keluhan/]
-    In1 --> ProcDB[Backend: Ambil Data Keluhan]
-    ProcDB --> OutUI[/Frontend: Tampilkan Daftar Gejala/]
-    OutUI --> End((Selesai))
+    In1 --> Proc1[Backend: Ambil Daftar Event/]
+    Proc1 --> OutList[/Frontend: Tampilkan List/]
+    OutList --> End((Selesai))
 ```
-#### C3. Update Health Event
+
+## 38. Update Health Event
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Keluhan/]
-    In1 --> In2[/User: Ubah Detail Gejala/]
-    In2 --> In3[/User: Klik Update/]
-    In3 --> ProcDB[Backend: Update Log Keluhan]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-#### C4. Delete Health Event
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Geser Keluhan/]
-    In1 --> In2[/User: Klik Hapus/]
-    In2 --> ProcDB[Backend: Hapus Log Keluhan]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Edit Deskripsi Event/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Update Event/]
+    Proc1 --> OutSucc[/Frontend: Data Berubah/]
     OutSucc --> End((Selesai))
 ```
 
----
-
-### D. Glucose Reading (Gula Darah Harian)
-
-#### D1. Input Glucose
+## 39. Delete Health Event
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Input Glukosa/]
-    In1 --> In2[/User: Input Angka, Waktu, & Kategori (Puasa/Makan)/]
-    In2 --> In3[/User: Klik Simpan/]
-    In3 --> Dec1{Frontend: Cek Nilai Normal/Bahaya?}
-    Dec1 -- Bahaya --> OutAlert[/Frontend: Tampilkan Peringatan/]
-    Dec1 -- Normal --> Proc1
-    OutAlert --> Proc1[Frontend: Kirim Data]
-    Proc1 --> ProcDB[Backend: Simpan Log Glukosa]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-#### D2. View Glucose
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Grafik Glukosa/]
-    In1 --> Proc1[Backend: Query Data & Analisa Tren]
-    Proc1 --> OutUI[/Frontend: Tampilkan Grafik Harian/Mingguan/]
-    OutUI --> End((Selesai))
-```
-#### D3. Update Glucose
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Data Glukosa/]
-    In1 --> In2[/User: Ubah Angka/Waktu/]
-    In2 --> In3[/User: Klik Update/]
-    In3 --> ProcDB[Backend: Update Data Glukosa]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-#### D4. Delete Glucose
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Geser Data Glukosa/]
-    In1 --> In2[/User: Klik Hapus/]
-    In2 --> ProcDB[Backend: Hapus Data Glukosa]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Klik Hapus Event/]
+    In1 --> Proc1[Backend: Hapus Event/]
+    Proc1 --> OutSucc[/Frontend: Event Hilang/]
     OutSucc --> End((Selesai))
 ```
 
----
-
-### E. Activity Logs (Olahraga/Aktivitas Fisik)
-
-#### E1. View Activity Types (Pilih Jenis Aktivitas)
-*Langkah awal sebelum melihat riwayat atau menambah log.*
+## 40. Add Glucose Reading
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Menu Aktivitas/]
-    In1 --> Proc1[Frontend: Request Daftar Tipe Aktivitas/]
-    Proc1 --> ProcDB[Backend: GetActivity Types/]
-    ProcDB --> OutUI[/Frontend: Tampilkan Grid/List Jenis Aktivitas/]
-    OutUI --> End((Selesai))
-```
-
-#### E2. Input Activity Log
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In0[/User: Pilih Jenis Aktivitas/]
-    In0 --> In1[/User: Klik Tombol Tambah Log/]
-    In1 --> In2[/User: Input Durasi & Intensitas/]
-    In2 --> In3[/User: Klik Simpan/]
-    In3 --> Dec1{Frontend: Input Valid?}
-    Dec1 -- Tidak --> OutErr[/Frontend: Tampilkan Error/]
-    OutErr --> In2
-    Dec1 -- Ya --> Proc1[Frontend: Estimasi Kalori Terbakar]
-    Proc1 --> ProcDB[Backend: Simpan Log Aktivitas]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-
-#### E3. View Activity History (Riwayat per Aktivitas)
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Jenis Aktivitas/]
-    In1 --> ProcDB[Backend: Get Logs by Type/]
-    ProcDB --> OutUI[/Frontend: Tampilkan Riwayat & Grafik Aktivitas Tersebut/]
-    OutUI --> End((Selesai))
-```
-
-#### E4. Update Activity Log
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Item di Riwayat/]
-    In1 --> In2[/User: Ubah Durasi/Intensitas/]
-    In2 --> In3[/User: Klik Update/]
-    In3 --> Proc1[Frontend: Hitung Ulang Kalori/]
-    Proc1 --> ProcDB[Backend: Update Log Aktivitas]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-
-#### E5. Delete Activity Log
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Geser Aktivitas/]
-    In1 --> In2[/User: Klik Hapus/]
-    In2 --> ProcDB[Backend: Hapus Log Aktivitas]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-
----
-
-### F. Sleep Logs (Tidur)
-
-#### F1. View Sleep Dashboard (Halaman Utama Tidur)
-*Menampilkan ringkasan kualitas tidur dan grafik.*
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Menu Tidur/]
-    In1 --> ProcDB[Backend: Get Sleep Summary & History/]
-    ProcDB --> OutUI[/Frontend: Tampilkan Grafik & List Tidur/]
-    OutUI --> End((Selesai))
-```
-
-#### F2. Input Sleep Log
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In0[/User: Klik Tambah Data Tidur/]
-    In0 --> In1[/User: Set Waktu Tidur & Bangun/]
+    Start((Mulai)) --> In1[/User: Input Angka Glukosa/]
     In1 --> In2[/User: Klik Simpan/]
-    In2 --> Dec1{Frontend: Waktu Valid?}
-    Dec1 -- Tidak --> OutErr[/Frontend: Tampilkan Error/]
-    OutErr --> In1
-    Dec1 -- Ya --> Proc1[Frontend: Hitung Durasi Tidur]
-    Proc1 --> ProcDB[Backend: Simpan Log Tidur]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    In2 --> Proc1[Backend: Simpan Bacaan/]
+    Proc1 --> OutSucc[/Frontend: Update Grafik/]
     OutSucc --> End((Selesai))
 ```
 
-#### F3. Update Sleep Log
+## 41. View Glucose Reading List
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Data di List/]
-    In1 --> In2[/User: Ubah Jam Tidur/Bangun/]
-    In2 --> In3[/User: Klik Update/]
-    In3 --> ProcDB[Backend: Update Log Tidur]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
+    Start((Mulai)) --> In1[/User: Buka Menu Glukosa/]
+    In1 --> Proc1[Backend: Ambil Data Glukosa/]
+    Proc1 --> OutView[/Frontend: Tampilkan Riwayat/]
+    OutView --> End((Selesai))
 ```
 
-#### F4. Delete Sleep Log
+## 42. Update Glucose Reading
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Geser Data Tidur/]
-    In1 --> In2[/User: Klik Hapus/]
-    In2 --> ProcDB[Backend: Hapus Log Tidur]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Edit Angka Glukosa/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Update Bacaan/]
+    Proc1 --> OutSucc[/Frontend: Grafik Berubah/]
     OutSucc --> End((Selesai))
 ```
 
----
-
-### G. Medication (Daftar Obat/Resep)
-
-#### G1. Input Medication
+## 43. Delete Glucose Reading
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Tambah Obat Baru/]
-    In1 --> In2[/User: Input Nama, Dosis, Stok, Bentuk/]
-    In2 --> In3[/User: Klik Simpan/]
-    In3 --> ProcDB[Backend: Simpan Data Obat/]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Klik Hapus Bacaan/]
+    In1 --> Proc1[Backend: Hapus Data/]
+    Proc1 --> OutSucc[/Frontend: List Terupdate/]
     OutSucc --> End((Selesai))
 ```
-#### G2. View Medication List
+
+## 44. Add Activity Log
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Input Aktivitas & Durasi/]
+    In1 --> In2[/User: Klik Simpan/]
+    In2 --> Proc1[Backend: Simpan Log/]
+    Proc1 --> OutSucc[/Frontend: Kalori Terhitung/]
+    OutSucc --> End((Selesai))
+```
+
+## 45. View Activity Log List
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Buka Log Aktivitas/]
+    In1 --> Proc1[Backend: Ambil Riwayat/]
+    Proc1 --> OutList[/Frontend: Tampilkan List/]
+    OutList --> End((Selesai))
+```
+
+## 46. Update Activity Log
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Edit Durasi Aktivitas/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Update Log/]
+    Proc1 --> OutSucc[/Frontend: Data Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 47. Delete Activity Log
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Klik Hapus Log/]
+    In1 --> Proc1[Backend: Hapus Log/]
+    Proc1 --> OutSucc[/Frontend: Log Hilang/]
+    OutSucc --> End((Selesai))
+```
+
+## 48. Add Sleep Log
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Input Jam Tidur & Bangun/]
+    In1 --> In2[/User: Klik Simpan/]
+    In2 --> Proc1[Backend: Simpan Log Tidur/]
+    Proc1 --> OutSucc[/Frontend: Durasi Terhitung/]
+    OutSucc --> End((Selesai))
+```
+
+## 49. View Sleep Log List
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Buka Log Tidur/]
+    In1 --> Proc1[Backend: Ambil Riwayat/]
+    Proc1 --> OutList[/Frontend: Tampilkan List/]
+    OutList --> End((Selesai))
+```
+
+## 50. Update Sleep Log
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Edit Jam Tidur/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Update Log/]
+    Proc1 --> OutSucc[/Frontend: Data Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 51. Delete Sleep Log
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Klik Hapus Log/]
+    In1 --> Proc1[Backend: Hapus Log/]
+    Proc1 --> OutSucc[/Frontend: Log Hilang/]
+    OutSucc --> End((Selesai))
+```
+
+## 52. Add Medication
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Input Nama & Dosis Obat/]
+    In1 --> In2[/User: Klik Tambah/]
+    In2 --> Proc1[Backend: Simpan Obat Baru/]
+    Proc1 --> OutSucc[/Frontend: Masuk Inventory/]
+    OutSucc --> End((Selesai))
+```
+
+## 53. View Medication List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Daftar Obat/]
-    In1 --> ProcDB[Backend: Get Medication List/]
-    ProcDB --> OutUI[/Frontend: Tampilkan List Obat & Stok/]
-    OutUI --> End((Selesai))
+    In1 --> Proc1[Backend: Ambil Inventory/]
+    Proc1 --> OutList[/Frontend: Tampilkan Obat/]
+    OutList --> End((Selesai))
 ```
-#### G3. Update Medication
+
+## 54. Update Medication
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Obat/]
-    In1 --> In2[/User: Edit Dosis/Jadwal/]
-    In2 --> In3[/User: Klik Update/]
-    In3 --> Proc1[Frontend: Update Alarm/]
-    Proc1 --> ProcDB[Backend: Update Data Obat/]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-#### G4. Delete Medication
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Hapus/]
-    In1 --> ProcDB[Backend: Hapus Obat/]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Edit Detail Obat/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Update Obat/]
+    Proc1 --> OutSucc[/Frontend: Info Berubah/]
     OutSucc --> End((Selesai))
 ```
 
----
-
-### H. Medication Logs (Histori Minum Obat)
-
-#### H1. Input Medication Log (Minum)
+## 55. Delete Medication
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Menu Log Obat/]
-    In1 --> In2[/User: Pilih Obat dari Daftar/]
-    In2 --> In3[/User: Input Waktu Minum, Dosis, dll./]
-    In3 --> In4[/User: Konfirmasi Data Log/]
-    In4 --> In5[/User: Klik Simpan/]
-    In5 --> ProcDB[Backend: Simpan Log Minum & Kurangi Stok/]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-#### H2. View Medication Log
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Histori Obat/]
-    In1 --> ProcDB[Backend: Get Logs/]
-    ProcDB --> OutUI[/Frontend: Tampilkan Riwayat Kepatuhan/]
-    OutUI --> End((Selesai))
-```
-#### H3. Update Medication Log (Jarang, misal salah klik)
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Log 'Sudah Diminum'/]
-    In1 --> In2[/User: Ubah Jam/Batalkan/]
-    In2 --> In3[/User: Klik Update/]
-    In3 --> ProcDB[Backend: Update Log & Koreksi Stok/]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-#### H4. Delete Medication Log
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Geser Log/]
-    In1 --> In2[/User: Klik Hapus/]
-    In2 --> ProcDB[Backend: Delete Log/]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Klik Hapus Obat/]
+    In1 --> Proc1[Backend: Hapus Obat/]
+    Proc1 --> OutSucc[/Frontend: Inventory Berkurang/]
     OutSucc --> End((Selesai))
 ```
 
----
-
-### I. Meal Logs (Makanan)
-
-#### I1. Input Meal
+## 56. Add Medication Intake Log
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> InChoice{User: Pilih Metode?}
-    
-    %% Flow Pencarian Database
-    InChoice -- Cari Database --> InSearch[/User: Ketik Nama Makanan/]
-    InSearch --> ProcSearch[Backend: Cari di DB]
-    ProcSearch --> OutList[/Frontend: Tampilkan Hasil/]
-    OutList --> InSelect[/User: Pilih Makanan & Porsi/]
-    InSelect --> ProcCalc[Frontend: Hitung Nutrisi Otomatis]
-    ProcCalc --> InSave
-    
-    %% Flow Input Manual
-    InChoice -- Manual --> InManual[/User: Input Nama, Kalori, Karbo Mandiri/]
-    InManual --> InSave
-    
-    %% Simpan
-    InSave[/User: Klik Simpan/] --> ProcSave[Backend: Simpan Log Makan]
-    ProcSave --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Klik 'Sudah Minum'/]
+    In1 --> Proc1[Backend: Simpan Log Minum/]
+    Proc1 --> Proc2[Backend: Kurangi Stok/]
+    Proc2 --> OutSucc[/Frontend: Status Tercentang/]
     OutSucc --> End((Selesai))
 ```
-#### I2. View Meal
+
+## 57. View Medication Intake Logs
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Buka Riwayat Minum/]
+    In1 --> Proc1[Backend: Ambil Log Harian/]
+    Proc1 --> OutList[/Frontend: Tampilkan Kepatuhan/]
+    OutList --> End((Selesai))
+```
+
+## 58. Update Medication Intake Log
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Edit Waktu Minum/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Update Log Minum/]
+    Proc1 --> OutSucc[/Frontend: Data Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 59. Delete Medication Intake Log
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Batalkan Status Minum/]
+    In1 --> Proc1[Backend: Hapus Log Minum/]
+    Proc1 --> Proc2[Backend: Kembalikan Stok/]
+    Proc2 --> OutSucc[/Frontend: Status Batal/]
+    OutSucc --> End((Selesai))
+```
+
+## 60. Add Meal Log
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Input Makanan & Porsi/]
+    In1 --> In2[/User: Klik Simpan/]
+    In2 --> Proc1[Backend: Simpan Log Makan/]
+    Proc1 --> OutSucc[/Frontend: Nutrisi Terhitung/]
+    OutSucc --> End((Selesai))
+```
+
+## 61. View Meal Log List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Diary Makanan/]
-    In1 --> ProcDB[Backend: Get Meal Logs/]
-    ProcDB --> OutUI[/Frontend: Tampilkan List Makanan & Total Kalori Harian/]
-    OutUI --> End((Selesai))
-```
-#### I3. Update Meal
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Pilih Makanan di Diary/]
-    In1 --> In2[/User: Ubah Porsi/]
-    In2 --> In3[/User: Klik Update/]
-    In3 --> Proc1[Frontend: Hitung Ulang Nutrisi/]
-    Proc1 --> ProcDB[Backend: Update Log Makan/]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
-```
-#### I4. Delete Meal
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Geser Makanan/]
-    In1 --> In2[/User: Klik Hapus/]
-    In2 --> ProcDB[Backend: Hapus Log Makan/]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
-    OutSucc --> End((Selesai))
+    In1 --> Proc1[Backend: Ambil Log Harian/]
+    Proc1 --> OutList[/Frontend: Tampilkan Daftar/]
+    OutList --> End((Selesai))
 ```
 
----
-
-## 6. AI Features
-
-### A. Recommendation System
-
-#### A1. Insert Recommendation Preferences
-*User memilih preferensi dan mengirim data untuk diproses AI.*
+## 62. View Meal Log Detail
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Tab Rekomendasi/]
-    In1 --> InChoice{User: Pilih Kategori Rekomendasi?}
-    
-    %% Flow Makanan
-    InChoice -- Makanan --> InPrefFood[/User: Pilih Preferensi Makanan/]
-    InPrefFood --> InQFood[/User: Input Pertanyaan Makanan (Opsional)/]
-    InQFood --> InSend
-    
-    %% Flow Aktivitas
-    InChoice -- Aktivitas --> InPrefAct[/User: Pilih Preferensi Aktivitas/]
-    InPrefAct --> InQAct[/User: Input Pertanyaan Aktivitas (Opsional)/]
-    InQAct --> InSend
-    
-    %% Flow Insight
-    InChoice -- Insight --> InQInsight[/User: Input Pertanyaan Medis/]
-    InQInsight --> InSend
-    
-    %% Merge Send
-    InSend[/User: Klik Kirim/] --> Proc1[Frontend: Kirim Data ke Backend]
-    Proc1 --> ProcDB[Backend: Proses Request AI]
-    ProcDB --> DecStatus{Backend: Berhasil?}
-    DecStatus -- Gagal --> OutErr[/Frontend: Tampilkan Pesan Error/]
-    OutErr --> InSend
-    DecStatus -- Sukses --> OutUI[/Frontend: Tampilkan Hasil Rekomendasi/]
-    OutUI --> End((Selesai))
+    Start((Mulai)) --> In1[/User: Klik Item Makanan/]
+    In1 --> Proc1[Backend: Ambil Detail Nutrisi/]
+    Proc1 --> OutDet[/Frontend: Tampilkan Info Gizi/]
+    OutDet --> End((Selesai))
 ```
 
-#### A2. Get Last Recommendation
-*User melihat hasil rekomendasi terakhir yang digenerate AI.*
+## 63. Update Meal Log
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Buka Halaman Hasil/]
-    In1 --> Proc1[Frontend: Request Rekomendasi Terakhir/]
-    Proc1 --> ProcDB[Backend: Ambil Data Respon AI Terakhir/]
-    ProcDB --> OutUI[/Frontend: Tampilkan Hasil Rekomendasi/]
-    OutUI --> End((Selesai))
-```
-
-### B. Feedback AI Recommendations
-
-#### B1. Food Recommendation Feedback
-*User memberikan umpan balik khusus untuk rekomendasi makanan.*
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Feedback pada Rekomendasi Makanan/]
-    In1 --> In2[/User: Input Rating & Komentar/]
-    In2 --> In3[/User: Klik Kirim/]
-    In3 --> Proc1[Frontend: Kirim Data ke Backend]
-    Proc1 --> ProcDB[Backend: Simpan Feedback Makanan]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Edit Porsi/]
+    In1 --> In2[/User: Klik Update/]
+    In2 --> Proc1[Backend: Update Log Makan/]
+    Proc1 --> OutSucc[/Frontend: Nutrisi Update/]
     OutSucc --> End((Selesai))
 ```
 
-#### B2. Activity Recommendation Feedback
-*User memberikan umpan balik khusus untuk rekomendasi aktivitas.*
+## 64. Delete Meal Log
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Feedback pada Rekomendasi Aktivitas/]
-    In1 --> In2[/User: Input Rating & Komentar/]
-    In2 --> In3[/User: Klik Kirim/]
-    In3 --> Proc1[Frontend: Kirim Data ke Backend]
-    Proc1 --> ProcDB[Backend: Simpan Feedback Aktivitas]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Klik Hapus Makanan/]
+    In1 --> Proc1[Backend: Hapus Log Makan/]
+    Proc1 --> OutSucc[/Frontend: Item Hilang/]
     OutSucc --> End((Selesai))
 ```
 
-#### B3. Overall Insight Feedback
-*User memberikan penilaian terhadap kualitas insight AI secara umum.*
+## 65. Get AI Recommendations
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/User: Klik Feedback pada Insight/]
-    In1 --> In2[/User: Input Rating & Komentar/]
-    In2 --> In3[/User: Klik Kirim/]
-    In3 --> Proc1[Frontend: Kirim Data ke Backend]
-    Proc1 --> ProcDB[Backend: Simpan Feedback Insight]
-    ProcDB --> OutSucc[/Frontend: Notifikasi Sukses/]
+    Start((Mulai)) --> In1[/User: Klik Minta Saran/]
+    In1 --> Proc1[Backend: Proses Data User/]
+    Proc1 --> Proc2[AI: Generate Saran/]
+    Proc2 --> OutRec[/Frontend: Tampilkan Rekomendasi/]
+    OutRec --> End((Selesai))
+```
+
+## 66. View Recommendation History
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Buka Riwayat Saran/]
+    In1 --> Proc1[Backend: Ambil Log Saran/]
+    Proc1 --> OutList[/Frontend: Tampilkan List/]
+    OutList --> End((Selesai))
+```
+
+## 67. Submit Recommendation Feedback
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Input Rating/Komen/]
+    In1 --> In2[/User: Klik Kirim/]
+    In2 --> Proc1[Backend: Simpan Feedback/]
+    Proc1 --> OutSucc[/Frontend: Terima Kasih/]
+    OutSucc --> End((Selesai))
+```
+
+## 68. View Seller Dashboard
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Buka Dashboard/]
+    In1 --> Proc1[Backend: Ambil Data Toko/]
+    Proc1 --> OutDash[/Frontend: Tampilkan Ringkasan/]
+    OutDash --> End((Selesai))
+```
+
+## 69. View Dashboard Statistics
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Lihat Statistik/]
+    In1 --> Proc1[Backend: Hitung Statistik/]
+    Proc1 --> OutStat[/Frontend: Tampilkan Angka Kinerja/]
+    OutStat --> End((Selesai))
+```
+
+## 70. View Sales Chart Data
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Lihat Grafik/]
+    In1 --> Proc1[Backend: Ambil Data Penjualan/]
+    Proc1 --> OutChart[/Frontend: Render Grafik/]
+    OutChart --> End((Selesai))
+```
+
+## 71. Create New Menu Item
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Input Data Produk/]
+    In1 --> In2[/Seller: Klik Tambah/]
+    In2 --> Proc1[Backend: Simpan Menu Baru/]
+    Proc1 --> OutSucc[/Frontend: Masuk Katalog/]
+    OutSucc --> End((Selesai))
+```
+
+## 72. View Menu List
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Buka Menu Toko/]
+    In1 --> Proc1[Backend: Ambil Daftar Produk/]
+    Proc1 --> OutList[/Frontend: Tampilkan Katalog/]
+    OutList --> End((Selesai))
+```
+
+## 73. View Menu Item Details
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Klik Item/]
+    In1 --> Proc1[Backend: Ambil Detail/]
+    Proc1 --> OutDet[/Frontend: Tampilkan Spesifikasi/]
+    OutDet --> End((Selesai))
+```
+
+## 74. Update Menu Item
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Edit Data Produk/]
+    In1 --> In2[/Seller: Klik Update/]
+    In2 --> Proc1[Backend: Update Menu/]
+    Proc1 --> OutSucc[/Frontend: Info Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 75. Delete Menu Item
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Klik Hapus Produk/]
+    In1 --> Proc1[Backend: Hapus Menu/]
+    Proc1 --> OutSucc[/Frontend: Produk Hilang/]
+    OutSucc --> End((Selesai))
+```
+
+## 76. Update Order Status
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Pilih Pesanan/]
+    In1 --> In2[/Seller: Ubah Status (Kirim)/]
+    In2 --> Proc1[Backend: Update Status Order/]
+    Proc1 --> OutSucc[/Frontend: Status Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 77. Seller Reply Review
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Tulis Balasan/]
+    In1 --> In2[/Seller: Klik Kirim/]
+    In2 --> Proc1[Backend: Simpan Balasan/]
+    Proc1 --> OutSucc[/Frontend: Balasan Tampil/]
     OutSucc --> End((Selesai))
 ```

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glupulse/features/Food/domain/entities/food.dart';
+import 'package:glupulse/features/Food/domain/entities/food_category.dart';
+import 'package:glupulse/features/Food/presentation/cubit/food_category_cubit.dart';
+import 'package:glupulse/features/Food/presentation/cubit/food_category_state.dart';
 import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
 import 'package:glupulse/features/recommendation/presentation/pages/recommendation_page.dart';
+import 'package:glupulse/injection_container.dart';
 
 class AddRecommendationPage extends StatefulWidget {
   const AddRecommendationPage({super.key});
@@ -30,8 +35,16 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
   List<String> _selectedFoodCategories = [];
   List<String> _selectedActivityTypes = [];
 
-  final List<String> _allFoodCategories = ['Mediterranean', 'Vegetables', 'Low Carb', 'High Protein', 'Dairy Free', 'Gluten Free', 'European', 'Dairy & Cheese'];
-  final List<String> _allActivityTypes = ['YOGA', 'WALKING', 'SWIMMING', 'RUNNING', 'STRENGTH', 'CYCLING'];
+  List<Map<String, String>> _allFoodCategories = [];
+  
+  final List<Map<String, String>> _allActivityTypes = [
+    {'code': 'YOGA', 'label': 'Yoga'},
+    {'code': 'WALKING', 'label': 'Walking'},
+    {'code': 'SWIMMING', 'label': 'Swimming'},
+    {'code': 'RUNNING', 'label': 'Running'},
+    {'code': 'STRENGTH', 'label': 'Strength Training'},
+    {'code': 'CYCLING', 'label': 'Cycling'},
+  ];
 
   @override
   void dispose() {
@@ -59,9 +72,9 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
       final data = {
         "type": selectedTypes,
         "meal_type": _selectedMealType?.toLowerCase() ?? "any",
-        "food_category": _selectedFoodCategories,
+        "food_category": _selectedFoodCategories, // Sends List<String> of CODES
         "food_preferences": _foodPreferencesController.text,
-        "activity_type_code": _selectedActivityTypes,
+        "activity_type_code": _selectedActivityTypes, // Sends List<String> of CODES
         "activity_preferences": _activityPreferencesController.text,
         "insights": _insightsController.text,
       };
@@ -74,9 +87,11 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
-    return BlocListener<RecommendationCubit, RecommendationState>(
-      listener: (context, state) {
-        if (state is RecommendationLoading) {
+    return BlocProvider(
+      create: (context) => sl<FoodCategoryCubit>()..fetchFoodCategories(),
+      child: BlocListener<RecommendationCubit, RecommendationState>(
+        listener: (context, state) {
+          if (state is RecommendationLoading) {
           showDialog(
             context: context,
             barrierDismissible: false,
@@ -181,13 +196,24 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
                             onChanged: (val) => setState(() => _selectedMealType = val),
                           ),
                           const SizedBox(height: 16),
-                          _buildMultiSelectChips(
-                            label: 'Preferred Categories',
-                            allOptions: _allFoodCategories,
-                            selectedOptions: _selectedFoodCategories,
-                            color: Colors.orange,
-                            onSelectionChanged: (newSelection) {
-                              setState(() => _selectedFoodCategories = newSelection);
+                          BlocBuilder<FoodCategoryCubit, FoodCategoryState>(
+                            builder: (context, state) {
+                              if (state is FoodCategoryLoaded) {
+                                // Map entities to {code, label} for the widget
+                                _allFoodCategories = state.categories.map((c) => {
+                                  'code': c.categoryCode,
+                                  'label': c.displayName,
+                                }).toList();
+                              }
+                              return _buildMultiSelectChips(
+                                label: 'Preferred Categories',
+                                options: _allFoodCategories,
+                                selectedCodes: _selectedFoodCategories,
+                                color: Colors.orange,
+                                onSelectionChanged: (newSelection) {
+                                  setState(() => _selectedFoodCategories = newSelection);
+                                },
+                              );
                             },
                           ),
                           const SizedBox(height: 16),
@@ -217,8 +243,8 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
                         children: [
                            _buildMultiSelectChips(
                             label: 'Interested Activities',
-                            allOptions: _allActivityTypes,
-                            selectedOptions: _selectedActivityTypes,
+                            options: _allActivityTypes,
+                            selectedCodes: _selectedActivityTypes,
                             color: Colors.blue,
                             onSelectionChanged: (newSelection) {
                               setState(() => _selectedActivityTypes = newSelection);
@@ -297,6 +323,7 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -389,8 +416,8 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
 
   Widget _buildMultiSelectChips({
     required String label,
-    required List<String> allOptions,
-    required List<String> selectedOptions,
+    required List<Map<String, String>> options, // [{code, label}]
+    required List<String> selectedCodes,
     required ValueChanged<List<String>> onSelectionChanged,
     required Color color,
   }) {
@@ -405,15 +432,17 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
         Wrap(
           spacing: 8.0,
           runSpacing: 8.0,
-          children: allOptions.map((option) {
-            final isSelected = selectedOptions.contains(option);
+          children: options.map((option) {
+            final code = option['code']!;
+            final labelText = option['label']!;
+            final isSelected = selectedCodes.contains(code);
             return InkWell(
               onTap: () {
-                final newSelection = List<String>.from(selectedOptions);
+                final newSelection = List<String>.from(selectedCodes);
                 if (isSelected) {
-                  newSelection.remove(option);
+                  newSelection.remove(code);
                 } else {
-                  newSelection.add(option);
+                  newSelection.add(code);
                 }
                 onSelectionChanged(newSelection);
               },
@@ -430,7 +459,7 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
                   ),
                 ),
                 child: Text(
-                  option,
+                  labelText,
                   style: TextStyle(
                     color: isSelected ? color : Colors.grey.shade700,
                     fontSize: 12,

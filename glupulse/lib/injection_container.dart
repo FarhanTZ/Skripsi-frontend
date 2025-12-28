@@ -58,7 +58,9 @@ import 'package:glupulse/features/Food/domain/usecases/add_to_cart_usecase.dart'
 import 'package:glupulse/features/Food/domain/usecases/update_cart_item_usecase.dart';
 import 'package:glupulse/features/Food/domain/usecases/remove_cart_item_usecase.dart';
 import 'package:glupulse/features/Food/domain/usecases/checkout_usecase.dart';
+import 'package:glupulse/features/Food/domain/usecases/get_food_categories.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
+import 'package:glupulse/features/Food/presentation/cubit/food_category_cubit.dart';
 import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
 import 'package:glupulse/features/Food/presentation/cubit/checkout_cubit.dart';
 import 'package:glupulse/features/hba1c/data/datasources/hba1c_remote_data_source.dart';
@@ -270,6 +272,7 @@ Future<void> init() async {
 
   // Cubit
   sl.registerFactory(() => FoodCubit(getFoodsUseCase: sl()));
+  sl.registerFactory(() => FoodCategoryCubit(getFoodCategoriesUseCase: sl()));
   sl.registerFactory(
     () => CartCubit(
       getCartUseCase: sl(),
@@ -282,6 +285,7 @@ Future<void> init() async {
 
   // Use cases
   sl.registerLazySingleton(() => GetFoods(sl()));
+  sl.registerLazySingleton(() => GetFoodCategories(sl()));
   sl.registerLazySingleton(() => GetCartUseCase(sl()));
   sl.registerLazySingleton(() => AddToCartUseCase(sl()));
   sl.registerLazySingleton(() => UpdateCartItemUseCase(sl()));
