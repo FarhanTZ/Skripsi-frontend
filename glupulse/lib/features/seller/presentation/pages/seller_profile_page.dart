@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glupulse/features/Food/domain/entities/food.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
+import 'package:glupulse/features/Food/presentation/widgets/add_to_cart_bottom_sheet.dart';
 import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
 import 'package:glupulse/features/seller/domain/entities/seller.dart';
 import 'package:glupulse/features/seller/presentation/cubit/seller_cubit.dart';
@@ -19,194 +21,255 @@ class SellerProfilePage extends StatelessWidget {
     return BlocProvider(
       create: (context) => sl<SellerCubit>()..fetchSeller(sellerId),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(initialStoreName ?? 'Store Profile'),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Seller Info Section
-              BlocBuilder<SellerCubit, SellerState>(
-                builder: (context, state) {
-                  if (state is SellerLoading) {
-                    return const SizedBox(
-                      height: 200,
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  } else if (state is SellerError) {
-                    return _buildFallbackProfile(context);
-                  } else if (state is SellerLoaded) {
-                    return _buildSellerProfile(context, state.seller);
-                  }
-                  return const SizedBox.shrink();
+        backgroundColor: Colors.white,
+        body: BlocBuilder<SellerCubit, SellerState>(
+          builder: (context, sellerState) {
+            if (sellerState is SellerLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (sellerState is SellerError) {
+              return _buildErrorView(context);
+            } else if (sellerState is SellerLoaded) {
+              return BlocBuilder<FoodCubit, FoodState>(
+                builder: (context, foodState) {
+                  return _buildSellerContent(context, sellerState.seller, foodState);
                 },
-              ),
-              
-              const SizedBox(height: 24),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  'Menu',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSellerContent(BuildContext context, Seller seller, FoodState foodState) {
+    List<Widget> slivers = [];
+
+    // 1. App Bar
+    slivers.add(_buildSliverAppBar(context, seller));
+
+    // 2. Info
+    slivers.add(SliverToBoxAdapter(child: _buildSellerInfo(context, seller)));
+
+    // 3. Menu Content
+    if (foodState is FoodLoaded) {
+      final sellerFoods = foodState.foods.where((f) => f.sellerId == seller.sellerId).toList();
+
+      if (sellerFoods.isEmpty) {
+        slivers.add(
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(40.0),
+              child: Center(child: Text("No menu items available.")),
+            ),
+          ),
+        );
+      } else {
+        // Group items by category
+        final groupedFoods = <String, List<Food>>{};
+        for (var food in sellerFoods) {
+          final category = food.foodCategory ?? 'Other';
+          if (!groupedFoods.containsKey(category)) {
+            groupedFoods[category] = [];
+          }
+          groupedFoods[category]!.add(food);
+        }
+
+        groupedFoods.forEach((category, foods) {
+          // Category Header
+          slivers.add(
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 4, 
+                      height: 24, 
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(2)
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        category,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(10)
+                      ),
+                      child: Text(
+                        "${foods.length}",
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              
-              // Food List Section
-              BlocBuilder<FoodCubit, FoodState>(
-                builder: (context, state) {
-                  if (state is FoodLoaded) {
-                    final sellerFoods = state.foods.where((food) => food.sellerId == sellerId).toList();
-                    
-                    if (sellerFoods.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Text(
-                            'No items available from this seller.',
-                            style: TextStyle(color: Colors.grey.shade500),
-                          ),
-                        ),
-                      );
-                    }
+            ),
+          );
 
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.75,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
-                      itemCount: sellerFoods.length,
-                      itemBuilder: (context, index) {
-                        return FoodCard(
-                          food: sellerFoods[index],
-                          onTap: () {
-                             Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => FoodDetailPage(food: sellerFoods[index]),
-                            ));
-                          },
+          // Grid for this category
+          slivers.add(
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: SliverGrid(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.8,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return FoodCard(
+                      food: foods[index],
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => FoodDetailPage(food: foods[index]),
+                        ));
+                      },
+                      onAddTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => AddToCartBottomSheet(food: foods[index]),
                         );
                       },
                     );
-                  } else if (state is FoodLoading) {
-                    return const Center(child: Padding(
-                      padding: EdgeInsets.all(24.0),
-                      child: CircularProgressIndicator(),
-                    ));
-                  }
-                  return const SizedBox.shrink();
-                },
+                  },
+                  childCount: foods.length,
+                ),
               ),
-              const SizedBox(height: 32),
-            ],
+            ),
+          );
+        });
+      }
+    } else if (foodState is FoodLoading) {
+      slivers.add(
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.all(40),
+            child: Center(child: CircularProgressIndicator()),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildFallbackProfile(BuildContext context) {
-    if (initialStoreName != null && initialStoreName!.isNotEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 150,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/seller.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(initialStoreName!, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text('Seller details could not be loaded.', style: TextStyle(color: Colors.grey.shade600)),
-              ],
-            ),
-          ),
-        ],
       );
     }
-    
-    return Container(
-      height: 150,
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/images/seller.jpg'),
-          fit: BoxFit.cover,
+
+    slivers.add(const SliverPadding(padding: EdgeInsets.only(bottom: 32)));
+
+    return CustomScrollView(slivers: slivers);
+  }
+
+  Widget _buildSliverAppBar(BuildContext context, Seller seller) {
+    return SliverAppBar(
+      expandedHeight: 200.0,
+      floating: false,
+      pinned: true,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: Container(
+        margin: const EdgeInsets.all(8),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          color: Colors.black54,
-          child: const Text(
-            'Seller Info Unavailable',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
+      flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            seller.bannerUrl != null
+                ? Image.network(
+                    seller.bannerUrl!,
+                    fit: BoxFit.cover,
+                    headers: const {'ngrok-skip-browser-warning': 'true'},
+                    errorBuilder: (_, __, ___) => Image.asset('assets/images/seller.jpg', fit: BoxFit.cover),
+                  )
+                : Image.asset('assets/images/seller.jpg', fit: BoxFit.cover),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black.withOpacity(0.2), Colors.transparent],
+                  stops: const [0.0, 0.4],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSellerProfile(BuildContext context, Seller seller) {
+  Widget _buildSellerInfo(BuildContext context, Seller seller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Banner
-        Container(
-          height: 160,
-          width: double.infinity,
-          color: Colors.grey.shade300,
-          child: seller.bannerUrl != null
-              ? Image.network(
-                  seller.bannerUrl!,
-                  fit: BoxFit.cover,
-                  headers: const {'ngrok-skip-browser-warning': 'true'},
-                  errorBuilder: (_, __, ___) => Image.asset('assets/images/seller.jpg', fit: BoxFit.cover),
-                )
-              : Image.asset('assets/images/seller.jpg', fit: BoxFit.cover),
-        ),
-        // Store Info
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 16),
+              // Header Row with Logo and Name
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.grey.shade200,
-                    backgroundImage: seller.logoUrl != null ? NetworkImage(seller.logoUrl!) : null,
-                    child: seller.logoUrl == null ? const Icon(Icons.store, size: 40, color: Colors.grey) : null,
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                      boxShadow: [
+                        BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
+                      ],
+                      image: DecorationImage(
+                        image: (seller.logoUrl != null ? NetworkImage(seller.logoUrl!) : const AssetImage('assets/images/seller.jpg')) as ImageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(seller.storeName, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         Text(
-                          seller.isOpen ? 'Open' : 'Closed',
-                          style: TextStyle(
-                            color: seller.isOpen ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.bold,
+                          seller.storeName,
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: seller.isOpen ? Colors.green.shade50 : Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: seller.isOpen ? Colors.green.shade200 : Colors.red.shade200),
+                          ),
+                          child: Text(
+                            seller.isOpen ? 'Open Now' : 'Closed',
+                            style: TextStyle(
+                              color: seller.isOpen ? Colors.green.shade700 : Colors.red.shade700,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ],
@@ -214,36 +277,77 @@ class SellerProfilePage extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               // Description
-              Text(
-                seller.storeDescription ?? 'No description available.',
-                style: Theme.of(context).textTheme.bodyLarge,
+              if (seller.storeDescription != null && seller.storeDescription!.isNotEmpty)
+                 Text(
+                    seller.storeDescription!,
+                    style: TextStyle(color: Colors.grey.shade600, height: 1.5, fontSize: 14),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                 ),
+              const SizedBox(height: 20),
+              // Info Chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildInfoChip(Icons.star_rounded, '${seller.averageRating.toStringAsFixed(1)}', Colors.amber),
+                    const SizedBox(width: 12),
+                    _buildInfoChip(Icons.location_on, seller.city ?? 'Unknown', Colors.blue),
+                    const SizedBox(width: 12),
+                    _buildInfoChip(Icons.restaurant, seller.cuisineType.isNotEmpty ? seller.cuisineType.first : 'Food', Colors.orange),
+                  ],
+                ),
               ),
-              const Divider(height: 32),
-              // Details
-              _buildInfoRow(Icons.location_on_outlined, '${seller.addressLine1}, ${seller.city}'),
-              const SizedBox(height: 12),
-              _buildInfoRow(Icons.phone_outlined, seller.storePhoneNumber ?? 'No phone number'),
-              const SizedBox(height: 12),
-              _buildInfoRow(Icons.restaurant_menu_outlined, 'Cuisine: ${seller.cuisineType.join(', ')}'),
-              const SizedBox(height: 12),
-               _buildInfoRow(Icons.star_outline, '${seller.averageRating.toStringAsFixed(1)} (${seller.reviewCount} reviews)'),
-
             ],
           ),
         ),
+        const SizedBox(height: 20),
+        Divider(color: Colors.grey.shade100, thickness: 8),
       ],
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, color: Colors.grey.shade600, size: 20),
-        const SizedBox(width: 12),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
-      ],
+  Widget _buildInfoChip(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.black87),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorView(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(initialStoreName ?? 'Seller Profile')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text("Failed to load seller information."),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Go Back"),
+            )
+          ],
+        ),
+      ),
     );
   }
 }

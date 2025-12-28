@@ -9,6 +9,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
 import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
+import 'package:glupulse/features/Food/presentation/widgets/add_to_cart_bottom_sheet.dart';
 import 'package:glupulse/features/Food/presentation/pages/all_menu_page.dart'; // Import AllMenuPage
 import 'package:glupulse/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -475,20 +476,34 @@ class _MenuTabState extends State<MenuTab> {
     final previewItems = foods.take(5).toList();
     
     return SizedBox(
-      height: 180,
+      height: 210, // Increased height for new FoodCard design
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         itemCount: previewItems.length,
         itemBuilder: (context, index) {
           final food = previewItems[index];
-          return FoodCard(
-            food: food,
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => FoodDetailPage(food: food),
-              ));
-            },
+          return Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: SizedBox(
+              width: 160,
+              child: FoodCard(
+                food: food,
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => FoodDetailPage(food: food),
+                  ));
+                },
+                onAddTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => AddToCartBottomSheet(food: food),
+                  );
+                },
+              ),
+            ),
           );
         },
       ),

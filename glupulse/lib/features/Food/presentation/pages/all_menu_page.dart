@@ -5,6 +5,7 @@ import 'package:glupulse/features/Food/domain/entities/food_category.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_category_cubit.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_category_state.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
+import 'package:glupulse/features/Food/presentation/widgets/add_to_cart_bottom_sheet.dart';
 import 'package:glupulse/features/Food/presentation/widgets/food_card.dart';
 import 'package:glupulse/injection_container.dart';
 
@@ -45,10 +46,6 @@ class _AllMenuPageState extends State<AllMenuPage> {
   void _filterFoods() {
     final query = _searchController.text.toLowerCase();
     
-    print('--- DEBUG START ---');
-    print('Selected Category: Code=$_selectedCategoryCode, Name=$_selectedCategoryName');
-    print('Total Foods in List: ${widget.foods.length}');
-
     setState(() {
       _filteredFoods = widget.foods.where((food) {
         final f = food as Food;
@@ -77,23 +74,14 @@ class _AllMenuPageState extends State<AllMenuPage> {
           }
 
           matchesCategory = catMatch || tagMatch;
-          
-          // DEBUG PRINT PER FOOD ITEM
-          print('Checking Food: "${f.foodName}"');
-          print('   > Food Category Data: "$foodCat"');
-          print('   > Food Tags Data: ${f.tags}');
-          print('   > Matches? $matchesCategory');
         }
         
         return matchesSearch && matchesCategory;
       }).toList();
     });
-    print('Filtered Result Count: ${_filteredFoods.length}');
-    print('--- DEBUG END ---');
   }
 
   void _onCategorySelected(String categoryCode, String categoryName) {
-    print('User Selected Category: Code=$categoryCode, Name=$categoryName');
     setState(() {
       _selectedCategoryCode = categoryCode;
       _selectedCategoryName = categoryName;
@@ -107,7 +95,7 @@ class _AllMenuPageState extends State<AllMenuPage> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final int crossAxisCount = screenWidth > 600 ? 3 : 2;
     // Aspect ratio adjustment for FoodCard to fit grid nicely
-    final double childAspectRatio = 0.75; 
+    final double childAspectRatio = 0.8; 
 
     return BlocProvider(
       create: (context) => sl<FoodCategoryCubit>()..fetchFoodCategories(),
@@ -295,6 +283,14 @@ class _AllMenuPageState extends State<AllMenuPage> {
                             Navigator.of(context).push(MaterialPageRoute(
                               builder: (_) => FoodDetailPage(food: food),
                             ));
+                          },
+                          onAddTap: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) => AddToCartBottomSheet(food: food),
+                            );
                           },
                         );
                       },
