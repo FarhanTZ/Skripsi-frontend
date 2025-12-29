@@ -72,7 +72,9 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
       final data = {
         "type": selectedTypes,
         "meal_type": _selectedMealType?.toLowerCase() ?? "any",
-        "food_category": _selectedFoodCategories, // Sends List<String> of CODES
+        "food_category": _selectedFoodCategories.map((code) {
+          return _allFoodCategories.firstWhere((cat) => cat['code'] == code)['label'] ?? code;
+        }).toList(), // Sends List<String> of NAMES/LABELS
         "food_preferences": _foodPreferencesController.text,
         "activity_type_code": _selectedActivityTypes, // Sends List<String> of CODES
         "activity_preferences": _activityPreferencesController.text,
