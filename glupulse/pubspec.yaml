@@ -43,6 +43,10 @@ dependencies:
 
   # Networking & API
   dio: ^5.9.0
+  http: ^1.2.1
+
+  # Google Sign-In
+  google_sign_in: ^6.2.1
 
   # Routing
   go_router: ^14.8.1
@@ -61,6 +65,21 @@ dependencies:
 
   # Charting library
   fl_chart: ^0.68.0 # Atau versi terbaru yang kompatibel
+
+  # For location services
+  geolocator: ^11.0.0
+
+  # For converting coordinates to address
+  geocoding: ^3.0.0
+  google_maps_flutter: ^2.5.3
+  dartz: ^0.10.1
+  get_it: ^8.2.0
+  equatable: ^2.0.5
+  shared_preferences: ^2.5.3
+
+  # Image Picker
+  image_picker: ^1.1.2
+  internet_connection_checker: ^3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -88,7 +107,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/images/ # Pastikan path ini sudah ada
+    - assets/images/
+    - assets/images/aktivity/ # Pastikan path ini sudah ada
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
