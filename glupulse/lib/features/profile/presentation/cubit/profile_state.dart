@@ -1,4 +1,5 @@
-part of 'profile_cubit.dart';
+import 'package:equatable/equatable.dart';
+import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 
 abstract class ProfileState extends Equatable {
   const ProfileState();

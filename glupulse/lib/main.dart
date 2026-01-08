@@ -1,28 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glupulse/features/HealthData/presentation/cubit/health_profile_cubit.dart';
 import 'package:glupulse/features/Splash/presentation/pages/splash_screen.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
+import 'package:glupulse/features/activity/presentation/cubit/activity_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/auth/presentation/pages/otp_verification_page.dart';
-import 'package:glupulse/features/Dashboard/presentation/pages/Dashboard_page.dart';
+import 'package:glupulse/features/hba1c/presentation/cubit/hba1c_cubit.dart';
+import 'package:glupulse/features/glucose/presentation/cubit/glucose_cubit.dart';
+import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
+import 'package:glupulse/features/medication/presentation/cubit/medication_cubit.dart';
+import 'package:glupulse/features/medication/presentation/cubit/medication_log_cubit.dart';
+import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
+import 'package:glupulse/features/sleep_log/presentation/cubit/sleep_log_cubit.dart';
+import 'package:glupulse/navbar_button.dart';
 import 'package:glupulse/injection_container.dart' as di;
 import 'package:glupulse/injection_container.dart';
+import 'package:glupulse/features/Food/presentation/cubit/food_cubit.dart';
+import 'package:glupulse/features/Food/presentation/cubit/cart_cubit.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:glupulse/features/profile/presentation/pages/edit_profile_page.dart';
 import 'features/introduction/presentation/pages/introduction_screen.dart';
+import 'package:glupulse/features/meal_log/presentation/cubit/meal_log_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init(); // Inisialisasi service locator
   runApp(MyApp());
 }
-
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<AuthCubit>()..checkAuthenticationStatus(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<AuthCubit>()..checkAuthenticationStatus()),
+        BlocProvider(create: (_) => sl<FoodCubit>()),
+        BlocProvider(create: (_) => sl<CartCubit>()),
+        BlocProvider(create: (_) => sl<Hba1cCubit>()),
+        BlocProvider(create: (_) => sl<GlucoseCubit>()),
+        BlocProvider(create: (_) => sl<HealthEventCubit>()),
+        BlocProvider(create: (_) => sl<HealthProfileCubit>()),
+        BlocProvider(create: (_) => sl<GlucoseCubit>()),
+        BlocProvider(create: (_) => sl<SleepLogCubit>()),
+        BlocProvider(create: (_) => sl<MedicationCubit>()),
+        BlocProvider(create: (_) => sl<MedicationLogCubit>()),
+        BlocProvider(create: (_) => sl<ActivityCubit>()),
+        BlocProvider(create: (_) => sl<MealLogCubit>()),
+        BlocProvider(create: (_) => sl<RecommendationCubit>())
+        // Tambah cubit lain yang harus global di sini
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'GluPulse',
@@ -30,24 +56,22 @@ class MyApp extends StatelessWidget {
         home: BlocBuilder<AuthCubit, AuthState>(
           builder: (context, state) {
             if (state is AuthLoading || state is AuthInitial) {
-              // Tampilkan splash screen saat memeriksa status autentikasi
               return const SplashScreen();
             } else if (state is AuthAuthenticated) {
-              // Jika sudah terotentikasi, langsung ke HomePage
-              return const HomePage(); // Pastikan HomePage sudah di-import
+              return const HomePage();
             } else if (state is AuthProfileIncomplete) {
-              // Jika profil tidak lengkap, arahkan untuk melengkapi
               return const EditProfilePage(isFromAuthFlow: true);
             } else if (state is AuthOtpRequired) {
-              // Jika butuh verifikasi OTP, arahkan ke OtpVerificationPage
-              return OtpVerificationPage(userId: state.user.id);
+              return OtpVerificationPage(
+                userId: state.userId,
+                pendingId: state.pendingId,
+              );
             }
-            // Jika tidak (AuthUnauthenticated, AuthError), tampilkan IntroductionScreen
-            // yang akan mengarahkan ke LoginPage
-            return const HomePage();
+            return const IntroductionScreen();
           },
         ),
       ),
     );
   }
 }
+

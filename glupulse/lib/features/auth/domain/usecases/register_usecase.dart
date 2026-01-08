@@ -1,18 +1,18 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:glupulse/core/error/failures.dart';
+import 'package:glupulse/features/auth/data/models/login_response_model.dart';
 import 'package:glupulse/core/usecases/usecase.dart';
-import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/domain/repositories/auth_repository.dart';
 
-/// Use case untuk melakukan registrasi pengguna baru.
-class RegisterUseCase implements UseCase<UserEntity, RegisterParams> {
+/// Use case untuk registrasi user.
+class RegisterUseCase implements UseCase<LoginResponseModel, RegisterParams> {
   final AuthRepository repository;
 
   RegisterUseCase(this.repository);
 
   @override
-  Future<Either<Failure, UserEntity>> call(RegisterParams params) async {
+  Future<Either<Failure, LoginResponseModel>> call(RegisterParams params) async {
     return await repository.register(params: params);
   }
 }

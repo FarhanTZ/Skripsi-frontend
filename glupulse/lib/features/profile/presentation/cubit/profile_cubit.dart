@@ -1,13 +1,11 @@
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:glupulse/core/error/failures.dart';
 import 'package:glupulse/core/usecases/usecase.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
-
-part 'profile_state.dart';
+import 'package:glupulse/features/profile/presentation/cubit/profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final GetProfileUseCase getProfileUseCase;
@@ -42,7 +40,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         emit(const ProfileError('Password diperlukan untuk mengubah username.'));
         return;
       }
-      final usernameResult = await updateUsernameUseCase(UpdateUsernameParams(newUsername: params.username!, password: params.password!));
+      final usernameResult = await updateUsernameUseCase(UpdateUsernameParams(newUsername: params.username!));
       usernameResult.fold(
         (failure) {
           firstFailure = failure;

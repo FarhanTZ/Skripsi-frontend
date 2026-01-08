@@ -11,7 +11,16 @@ abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> loginWithGoogle(String idToken);
   Future<LoginResponseModel> register({required RegisterParams params});
   Future<LoginResponseModel> verifyOtp(String userId, String otpCode);
+  Future<LoginResponseModel> verifySignupOtp(String pendingId, String otpCode); // Metode baru
   Future<LoginResponseModel> linkGoogleAccount(String idToken);
+  Future<void> resendOtp({String? userId, String? pendingId});
+  Future<LoginResponseModel> requestPasswordReset(String email);
+  Future<void> completePasswordReset({
+    required String userId,
+    required String otpCode,
+    required String newPassword,
+    required String confirmPassword,
+  });
 }
 
 /// Implementasi konkret dari AuthRemoteDataSource.
@@ -83,7 +92,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           "dob": params.dob,
           "gender": params.gender,
           "address_line1": params.addressLine1,
-          "city": params.city,
+          "address_city": params.city,
         },
       );
       print('AuthRemoteDataSourceImpl: Respon API /signup: $response'); // DEBUG
@@ -91,10 +100,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final loginResponse = LoginResponseModel.fromJson(response);
       await _cacheTokens(loginResponse);
       return loginResponse;
-    } on ServerException {
+    } on ServerException catch (e) {
+      print('AuthRemoteDataSourceImpl: ServerException ditangkap di register: ${e.message}'); // DEBUG
       rethrow;
     } catch (e) {
-      throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+      print('AuthRemoteDataSourceImpl: Exception umum ditangkap di register: $e'); // DEBUG
+      throw ServerException('Gagal melakukan registrasi. Terjadi kesalahan tidak terduga.');
     }
   }
 
@@ -104,8 +115,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await apiClient.post(
         '/verify-otp', // Endpoint spesifik untuk verifikasi OTP
         body: {
-          'user_id': userId,
-          'otp_code': otpCode,
+          'user_id': userId,   // Sesuai dengan spesifikasi Anda
+          'otp_code': otpCode, // Sesuai dengan spesifikasi Anda
         },
       );
       print('AuthRemoteDataSourceImpl: Respon API /verify-otp: $response'); // DEBUG
@@ -118,6 +129,34 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       // Tangani error koneksi atau error tak terduga lainnya.
       throw ServerException('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+    }
+  }
+
+  @override
+  Future<LoginResponseModel> verifySignupOtp(String pendingId, String otpCode) async {
+    try {
+      // Endpoint ini mungkin memerlukan token yang didapat dari langkah sebelumnya
+      final response = await apiClient.post(
+        '/verify-otp', // Sesuai konfirmasi: endpoint sama dengan verifikasi login
+        body: {
+          'pending_id': pendingId,
+          'otp_code': otpCode,
+        },
+        // Tidak ada token yang dikirim di sini, yang mungkin menyebabkan 401.
+        // Namun, jika endpoint ini memang publik setelah signup, maka masalahnya ada di backend.
+        // Jika endpoint ini memerlukan otorisasi, Anda perlu menyediakan token.
+        // Untuk saat ini, kita biarkan tanpa token sesuai logika sebelumnya,
+        // karena respons signup tidak memberikan token.
+      );
+      print('AuthRemoteDataSourceImpl: Respon API /verify-signup-otp: $response'); // DEBUG
+      // Parsing response JSON menjadi LoginResponseModel
+      final loginResponse = LoginResponseModel.fromJson(response);
+      await _cacheTokens(loginResponse);
+      return loginResponse;
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal memverifikasi OTP pendaftaran. Periksa koneksi Anda.');
     }
   }
 
@@ -148,6 +187,71 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
     if (response.refreshToken.isNotEmpty) {
       await localDataSource.cacheRefreshToken(response.refreshToken);
+    }
+  }
+
+  @override
+  Future<void> resendOtp({String? userId, String? pendingId}) async {
+    try {
+      // Buat body request berdasarkan ID yang tersedia
+      final body = <String, String>{};
+      if (userId != null) {
+        body['user_id'] = userId;
+      } else if (pendingId != null) {
+        body['pending_id'] = pendingId;
+      } else {
+        // Seharusnya tidak terjadi jika logika di cubit benar
+        throw ServerException('User ID atau Pending ID dibutuhkan untuk mengirim ulang OTP.');
+      }
+
+      await apiClient.post('/resend-otp', body: body);
+      // Tidak ada return value, sukses jika tidak ada exception
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal mengirim ulang OTP. Periksa koneksi Anda.');
+    }
+  }
+
+  @override
+  Future<LoginResponseModel> requestPasswordReset(String email) async {
+    try {
+      final response = await apiClient.post(
+        '/password/reset/request',
+        body: {
+          'email': email,
+        },
+      );
+      // Asumsikan backend mengembalikan data user (termasuk ID) setelah request berhasil
+      return LoginResponseModel.fromJson(response);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal meminta reset password. Periksa koneksi Anda.');
+    }
+  }
+
+  @override
+  Future<void> completePasswordReset({
+    required String userId,
+    required String otpCode,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      await apiClient.post(
+        '/password/reset/complete',
+        body: {
+          'user_id': userId,
+          'otp_code': otpCode,
+          'new_password': newPassword,
+          'confirm_password': confirmPassword,
+        },
+      );
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal menyelesaikan reset password. Periksa koneksi Anda.');
     }
   }
 }

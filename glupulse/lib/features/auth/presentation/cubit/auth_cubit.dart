@@ -1,28 +1,48 @@
 import 'package:bloc/bloc.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
+import 'package:glupulse/features/HealthData/domain/usecases/get_health_profile.dart';
 import 'package:glupulse/core/error/failures.dart';
 import 'package:glupulse/core/usecases/usecase.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:glupulse/features/auth/domain/repositories/auth_repository.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_with_google_usecase.dart';
+import 'package:glupulse/features/auth/domain/usecases/request_password_reset_usecase.dart';
+import 'package:glupulse/features/auth/domain/usecases/complete_password_reset_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/register_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/delete_account_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/update_password_usecase.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
+import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
+import 'package:glupulse/features/auth/domain/usecases/verify_signup_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
 import 'package:dartz/dartz.dart';
 import 'package:glupulse/injection_container.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+/// A generic success state that can carry a message.
+class AuthSuccess extends AuthState {
+  final String message;
+  const AuthSuccess(this.message);
+}
+
 // --- AuthCubit ---
 /// Cubit yang mengelola state otentikasi.
 class AuthCubit extends Cubit<AuthState> {
   final LoginUseCase loginUseCase;
   final VerifyOtpUseCase verifyOtpUseCase;
+  final VerifySignupOtpUseCase verifySignupOtpUseCase; // Tambahkan use case baru
   final RegisterUseCase registerUseCase;
   final LoginWithGoogleUseCase loginWithGoogleUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
+  final RequestPasswordResetUseCase requestPasswordResetUseCase;
+  final GetHealthProfile getHealthProfile; // Tambahkan use case health profile
+  final CompletePasswordResetUseCase completePasswordResetUseCase;
+  final UpdateUsernameUseCase updateUsernameUseCase;
+  final UpdatePasswordUseCase updatePasswordUseCase;
+  final DeleteAccountUseCase deleteAccountUseCase;
   final AuthRepository authRepository; // Tambahkan AuthRepository
   final ProfileRepository profileRepository; // Tambahkan ProfileRepository
   final GoogleSignIn googleSignIn;
@@ -30,9 +50,16 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required this.loginUseCase,
     required this.verifyOtpUseCase,
+    required this.verifySignupOtpUseCase,
     required this.registerUseCase,
     required this.loginWithGoogleUseCase,
     required this.getCurrentUserUseCase,
+    required this.requestPasswordResetUseCase,
+    required this.getHealthProfile, // Injeksi use case
+    required this.completePasswordResetUseCase,
+    required this.updateUsernameUseCase,
+    required this.updatePasswordUseCase,
+    required this.deleteAccountUseCase,
     required this.authRepository, // Injeksi AuthRepository
     required this.profileRepository, // Injeksi ProfileRepository
     required this.googleSignIn,
@@ -63,8 +90,12 @@ class AuthCubit extends Cubit<AuthState> {
       (user) {
         // Setelah mendapatkan user, cek kelengkapan profilnya
         if (user.isProfileComplete) {
-          print('AuthCubit: Sesi ditemukan dan profil lengkap untuk user: ${user.username}. Emitting AuthAuthenticated.'); // DEBUG
-          emit(AuthAuthenticated(user));
+          // Jika profil dasar lengkap, cek juga profil kesehatannya
+          print(
+              'AuthCubit: Sesi ditemukan, profil dasar lengkap. Mengecek profil kesehatan...');
+          // Kita tidak bisa langsung emit AuthAuthenticated, harus cek health profile dulu
+          // Kita panggil helper yang sudah ada
+          _checkHealthProfileAndEmitState(user);
         } else {
           print('AuthCubit: Sesi ditemukan tapi profil tidak lengkap untuk user: ${user.username}. Emitting AuthProfileIncomplete.'); // DEBUG
           emit(AuthProfileIncomplete(user));
@@ -73,6 +104,23 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
+  /// Metode untuk memeriksa ulang status otentikasi tanpa menampilkan loading.
+  /// Berguna setelah menyelesaikan langkah terakhir dari alur pendaftaran (misal: isi profil kesehatan).
+  Future<void> revalidateAuthenticationStatus() async {
+    print('AuthCubit: Memvalidasi ulang status otentikasi...'); // DEBUG
+    final authResult = await getCurrentUserUseCase(NoParams());
+
+    authResult.fold(
+      (failure) {
+        // Jika terjadi error (seharusnya tidak), kembali ke state unauthenticated.
+        emit(AuthUnauthenticated());
+      },
+      (user) {
+        // Panggil helper untuk memeriksa profil dasar dan kesehatan, lalu emit state yang benar.
+        _fetchProfileAndEmitState(user);
+      },
+    );
+  }
   /// Metode untuk melakukan proses login.
   Future<void> login(String username, String password) async {
     print('AuthCubit: Memulai proses login untuk username: $username'); // DEBUG
@@ -91,7 +139,7 @@ class AuthCubit extends Cubit<AuthState> {
         // Sesuai permintaan, selalu arahkan ke halaman OTP setelah login berhasil.
         print('AuthCubit: Login berhasil. Emitting AuthOtpRequired untuk user ID: ${user.id}'); // DEBUG
         print('AuthCubit: User dari login: username="${user.username}", email="${user.email}"'); // DEBUG
-        emit(AuthOtpRequired(user));
+        emit(AuthOtpRequired(userId: user.id));
       },
     );
   }
@@ -177,23 +225,39 @@ class AuthCubit extends Cubit<AuthState> {
       (failure) {
         emit(AuthError(_mapFailureToMessage(failure)));
       },
-      (user) {
-        // Setelah registrasi berhasil, arahkan ke halaman OTP.
-        print('AuthCubit: User dari register: username="${user.username}", email="${user.email}"'); // DEBUG
-        emit(AuthOtpRequired(user));
+      (responseModel) {
+        // Setelah registrasi, kita mendapatkan pending_id dari response model.
+        final pendingId = responseModel.pendingId;
+        if (pendingId != null) {
+          print('AuthCubit: Registrasi berhasil. Emitting AuthOtpRequired untuk pending ID: $pendingId'); // DEBUG
+          emit(AuthOtpRequired(pendingId: pendingId));
+        } else {
+          emit(const AuthError('Gagal mendapatkan ID registrasi dari server.'));
+        }
       },
     );
   }
 
   /// Metode untuk verifikasi OTP.
-  Future<void> verifyOtp(String userId, String otpCode) async {
-    print('AuthCubit: Memulai verifikasi OTP untuk user ID: $userId'); // DEBUG
+  Future<void> verifyOtp({String? userId, String? pendingId, required String otpCode}) async {
+    print('AuthCubit: Memulai verifikasi OTP...'); // DEBUG
     emit(AuthLoading());
     print('AuthCubit: Emitting AuthLoading...'); // DEBUG
 
-    final result = await verifyOtpUseCase(VerifyOtpParams(userId: userId, otpCode: otpCode));
+    late final Future<Either<Failure, UserEntity>> result;
 
-    result.fold(
+    if (pendingId != null) {
+      print('AuthCubit: Verifikasi OTP untuk pendaftaran dengan pending ID: $pendingId'); // DEBUG
+      result = verifySignupOtpUseCase(VerifySignupOtpParams(pendingId: pendingId, otpCode: otpCode));
+    } else if (userId != null) {
+      print('AuthCubit: Verifikasi OTP untuk login dengan user ID: $userId'); // DEBUG
+      result = verifyOtpUseCase(VerifyOtpParams(userId: userId, otpCode: otpCode));
+    } else {
+      emit(const AuthError("ID untuk verifikasi OTP tidak ditemukan."));
+      return;
+    }
+
+    (await result).fold(
       (failure) {
         final message = _mapFailureToMessage(failure);
         print('AuthCubit: Verifikasi OTP gagal. Emitting AuthError: $message'); // DEBUG
@@ -217,12 +281,133 @@ class AuthCubit extends Cubit<AuthState> {
       },
       (fullUser) {
         print('AuthCubit: Profil lengkap didapatkan. isProfileComplete: ${fullUser.isProfileComplete}');
-        // Gunakan data user yang sudah lengkap untuk menentukan state
         if (fullUser.isProfileComplete) {
-          emit(AuthAuthenticated(fullUser));
+          // Jika profil dasar lengkap, cek profil kesehatan
+          _checkHealthProfileAndEmitState(fullUser);
         } else {
           emit(AuthProfileIncomplete(fullUser));
         }
+      },
+    );
+  }
+
+  /// Helper baru untuk mengecek profil kesehatan.
+  Future<void> _checkHealthProfileAndEmitState(UserEntity user) async {
+    final healthProfileResult = await getHealthProfile(NoParams());
+    healthProfileResult.fold(
+      (failure) => emit(AuthHealthProfileIncomplete(user)), // Jika gagal fetch (kemungkinan besar karena belum ada), anggap tidak lengkap
+      (healthProfile) {
+        emit(AuthAuthenticated(user)); // Jika berhasil fetch, anggap sudah lengkap dan lanjutkan ke home
+      },
+    );
+  }
+
+  /// Metode untuk mengirim ulang kode OTP.
+  Future<void> resendOtp({String? userId, String? pendingId}) async {
+    print('AuthCubit: Meminta pengiriman ulang OTP...'); // DEBUG
+    // Tidak mengubah state menjadi loading agar UI tidak terblokir total,
+    // hanya menampilkan snackbar.
+
+    final result = await authRepository.resendOtp(userId: userId, pendingId: pendingId);
+
+    result.fold(
+      (failure) {
+        final message = _mapFailureToMessage(failure);
+        print('AuthCubit: Gagal mengirim ulang OTP. Emitting AuthError: $message'); // DEBUG
+        // Emit error agar bisa ditangkap listener di UI untuk menampilkan snackbar
+        emit(AuthError(message));
+      },
+      (_) {
+        print('AuthCubit: Permintaan kirim ulang OTP berhasil.'); // DEBUG
+        // Emit state baru untuk menandakan sukses dan menampilkan pesan di UI
+        emit(const AuthOtpResent('Kode OTP baru telah dikirimkan.'));
+      },
+    );
+  }
+
+  /// Metode untuk meminta reset password.
+  Future<void> requestPasswordReset(String email) async {
+    emit(AuthLoading());
+    final result = await requestPasswordResetUseCase(RequestPasswordResetParams(email: email));
+
+    result.fold(
+      (failure) {
+        emit(AuthError(_mapFailureToMessage(failure)));
+      },
+      (response) {
+        // Setelah request reset, backend mengembalikan user_id.
+        // Kita emit state AuthOtpRequired dengan user_id tersebut.
+        final userId = response.user.id;
+        emit(AuthOtpRequired(userId: userId));
+      },
+    );
+  }
+
+  /// Metode untuk menyelesaikan reset password.
+  Future<void> completePasswordReset({
+    required String userId,
+    required String otpCode,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    emit(AuthLoading());
+    final result = await completePasswordResetUseCase(CompletePasswordResetParams(
+      userId: userId,
+      otpCode: otpCode,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
+    ));
+
+    result.fold(
+      (failure) {
+        emit(AuthError(_mapFailureToMessage(failure)));
+      },
+      (_) {
+        emit(PasswordResetCompleted());
+      },
+    );
+  }
+
+  /// Metode untuk memperbarui username.
+  Future<void> updateUsername(String newUsername) async {
+    emit(AuthLoading());
+    final result = await updateUsernameUseCase(UpdateUsernameParams(newUsername: newUsername));
+
+    result.fold(
+      (failure) {
+        emit(AuthError(_mapFailureToMessage(failure)));
+      },
+      (updatedUser) {
+        // Setelah berhasil, panggil _fetchProfileAndEmitState untuk memastikan
+        // kita mendapatkan data user yang paling baru dari server.
+        // Kita gunakan 'updatedUser' sebagai data awal jika fetch gagal.
+        _fetchProfileAndEmitState(updatedUser);
+      },
+    );
+  }
+
+  /// Metode untuk memperbarui password.
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    emit(AuthLoading());
+    final result = await updatePasswordUseCase(UpdatePasswordParams(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
+    ));
+
+    result.fold(
+      (failure) {
+        emit(AuthError(_mapFailureToMessage(failure)));
+      },
+      (_) {
+        // Setelah password berhasil diperbarui, praktik terbaik adalah memaksa pengguna untuk login kembali.
+        // Kita emit state sukses agar UI bisa menampilkan pesan, lalu langsung panggil logout.
+        emit(const AuthSuccess('Password berhasil diperbarui! Silakan login kembali.'));
+        logout(); // Memanggil logout untuk membersihkan sesi dan mengarahkan ke halaman login/intro.
       },
     );
   }
@@ -233,7 +418,9 @@ class AuthCubit extends Cubit<AuthState> {
     print('AuthCubit: Memperbarui user di state. isProfileComplete: ${user.isProfileComplete}'); // DEBUG
     print('AuthCubit: User yang diperbarui: username="${user.username}", email="${user.email}"'); // DEBUG
     if (user.isProfileComplete) {
-      emit(AuthAuthenticated(user));
+      // JANGAN LANGSUNG EMIT AuthAuthenticated.
+      // Panggil helper untuk cek health profile terlebih dahulu.
+      _checkHealthProfileAndEmitState(user);
     } else {
       // Jika setelah update profil masih belum lengkap (seharusnya tidak terjadi, tapi sebagai fallback)
       emit(AuthProfileIncomplete(user));
@@ -251,6 +438,24 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthUnauthenticated());
   }
 
+  /// Metode untuk menghapus akun pengguna.
+  Future<void> deleteAccount(String password) async {
+    print('AuthCubit: Memulai proses hapus akun...'); // DEBUG
+    emit(AuthLoading());
+
+    final result = await deleteAccountUseCase(DeleteAccountParams(password: password));
+    result.fold(
+      (failure) {
+        final message = _mapFailureToMessage(failure);
+        print('AuthCubit: Gagal menghapus akun. Emitting AuthError: $message'); // DEBUG
+        emit(AuthError(message));
+      },
+      (_) {
+        print('AuthCubit: Akun berhasil dihapus. Melakukan logout...'); // DEBUG
+        logout(); // Panggil logout untuk membersihkan sesi dan emit AuthUnauthenticated
+      },
+    );
+  }
 
   /// Helper untuk mengubah objek Failure menjadi pesan yang mudah dibaca.
   String _mapFailureToMessage(Failure failure) {

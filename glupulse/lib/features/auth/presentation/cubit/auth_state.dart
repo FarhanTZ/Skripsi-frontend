@@ -6,7 +6,7 @@ abstract class AuthState extends Equatable {
   const AuthState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 /// State awal sebelum ada interaksi.
@@ -33,13 +33,25 @@ class AuthProfileIncomplete extends AuthState {
   List<Object> get props => [user];
 }
 
-/// State saat pengguna perlu verifikasi OTP.
+/// State ketika OTP diperlukan (setelah login atau register).
 class AuthOtpRequired extends AuthState {
-  final UserEntity user;
-  const AuthOtpRequired(this.user);
+  final String? userId; // Nullable, untuk alur login
+  final String? pendingId; // Nullable, untuk alur signup
+
+  const AuthOtpRequired({this.userId, this.pendingId});
 
   @override
-  List<Object> get props => [user];
+  List<Object?> get props => [userId, pendingId];
+}
+
+/// State saat OTP berhasil dikirim ulang.
+class AuthOtpResent extends AuthState {
+  final String message;
+
+  const AuthOtpResent(this.message);
+
+  @override
+  List<Object> get props => [message];
 }
 
 /// State saat pengguna tidak terotentikasi (misal: setelah logout, atau belum login).
@@ -52,4 +64,27 @@ class AuthError extends AuthState {
 
   @override
   List<Object> get props => [message];
+}
+
+/// State ketika permintaan reset password berhasil dan OTP diperlukan.
+class PasswordResetOtpRequired extends AuthState {
+  final String email; // Kita teruskan email untuk digunakan nanti
+  const PasswordResetOtpRequired(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}
+
+/// State ketika password berhasil direset.
+class PasswordResetCompleted extends AuthState {
+  @override
+  List<Object?> get props => [];
+}
+
+/// State ketika otentikasi berhasil, profil dasar lengkap, tetapi profil kesehatan belum.
+class AuthHealthProfileIncomplete extends AuthState {
+  final UserEntity user;
+  const AuthHealthProfileIncomplete(this.user);
+  @override
+  List<Object> get props => [user];
 }

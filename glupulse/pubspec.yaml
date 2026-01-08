@@ -77,6 +77,10 @@ dependencies:
   equatable: ^2.0.5
   shared_preferences: ^2.5.3
 
+  # Image Picker
+  image_picker: ^1.1.2
+  internet_connection_checker: ^3.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -103,7 +107,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/images/ # Pastikan path ini sudah ada
+    - assets/images/
+    - assets/images/aktivity/ # Pastikan path ini sudah ada
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

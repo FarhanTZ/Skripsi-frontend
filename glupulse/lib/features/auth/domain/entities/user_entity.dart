@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:glupulse/features/profile/data/models/address_model.dart';
 
 /// Entity untuk merepresentasikan data pengguna di dalam aplikasi (domain layer).
 class UserEntity extends Equatable {
@@ -11,6 +12,9 @@ class UserEntity extends Equatable {
   final String? gender;
   final String? addressLine1;
   final String? city;
+  final List<AddressModel>? addresses;
+  final String? avatarUrl;
+  final bool? isGoogleLinked;
 
   const UserEntity({
     required this.id,
@@ -22,6 +26,9 @@ class UserEntity extends Equatable {
     this.gender,
     this.addressLine1,
     this.city,
+    this.addresses,
+    this.avatarUrl,
+    this.isGoogleLinked,
   });
 
   /// Getter untuk memeriksa apakah profil pengguna sudah lengkap.
@@ -34,5 +41,5 @@ class UserEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, username, email, firstName, lastName, dob, gender, addressLine1, city];
+  List<Object?> get props => [id, username, email, firstName, lastName, dob, gender, addressLine1, city, addresses, avatarUrl, isGoogleLinked];
 }
