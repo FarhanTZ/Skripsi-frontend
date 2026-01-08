@@ -1,6 +1,6 @@
 # Activity Diagram Glupulse
 
-Dokumen ini berisi 77 Activity Diagram terpisah untuk setiap fitur yang tersedia di sistem Glupulse.
+Dokumen ini berisi 108 Activity Diagram untuk setiap fitur yang tersedia di sistem Glupulse, sesuai dengan Use Case.
 
 ---
 
@@ -315,7 +315,16 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 30. Upsert Health Profile
+## 30. View Shop Details
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/User: Buka Profil Toko/]
+    In1 --> Proc1[Backend: Ambil Info Toko & Produk/]
+    Proc1 --> OutView[/Frontend: Tampilkan Detail Toko/]
+    OutView --> End((Selesai))
+```
+
+## 31. Upsert Health Profile
 ```mermaid
 flowchart TD
     Start((Mulai)) --> Dec1{Entry Point}
@@ -337,7 +346,7 @@ flowchart TD
     OutSucc --> End
 ```
 
-## 31. View Health Profile
+## 32. View Health Profile
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Profil Kesehatan/]
@@ -346,7 +355,7 @@ flowchart TD
     OutView --> End((Selesai))
 ```
 
-## 32. Add HbA1c Record
+## 33. Add HbA1c Record
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Input Nilai HbA1c/]
@@ -356,7 +365,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 33. View HbA1c List
+## 34. View HbA1c List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Menu HbA1c/]
@@ -365,7 +374,7 @@ flowchart TD
     OutList --> End((Selesai))
 ```
 
-## 34. Update HbA1c Record
+## 35. Update HbA1c Record
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Edit Nilai HbA1c/]
@@ -375,7 +384,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 35. Delete HbA1c Record
+## 36. Delete HbA1c Record
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik Hapus Record/]
@@ -384,7 +393,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 36. Add Health Event
+## 37. Add Health Event
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Input Gejala/Keluhan/]
@@ -394,7 +403,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 37. View Health Event List
+## 38. View Health Event List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Log Keluhan/]
@@ -403,7 +412,7 @@ flowchart TD
     OutList --> End((Selesai))
 ```
 
-## 38. Update Health Event
+## 39. Update Health Event
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Edit Deskripsi Event/]
@@ -413,7 +422,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 39. Delete Health Event
+## 40. Delete Health Event
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik Hapus Event/]
@@ -422,7 +431,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 40. Add Glucose Reading
+## 41. Add Glucose Reading
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Input Angka Glukosa/]
@@ -432,7 +441,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 41. View Glucose Reading List
+## 42. View Glucose Reading List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Menu Glukosa/]
@@ -441,7 +450,7 @@ flowchart TD
     OutView --> End((Selesai))
 ```
 
-## 42. Update Glucose Reading
+## 43. Update Glucose Reading
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Edit Angka Glukosa/]
@@ -451,7 +460,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 43. Delete Glucose Reading
+## 44. Delete Glucose Reading
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik Hapus Bacaan/]
@@ -460,7 +469,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 44. Add Activity Log
+## 45. Add Activity Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Input Aktivitas & Durasi/]
@@ -470,7 +479,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 45. View Activity Log List
+## 46. View Activity Log List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Log Aktivitas/]
@@ -479,7 +488,7 @@ flowchart TD
     OutList --> End((Selesai))
 ```
 
-## 46. Update Activity Log
+## 47. Update Activity Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Edit Durasi Aktivitas/]
@@ -489,7 +498,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 47. Delete Activity Log
+## 48. Delete Activity Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik Hapus Log/]
@@ -498,7 +507,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 48. Add Sleep Log
+## 49. Add Sleep Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Input Jam Tidur & Bangun/]
@@ -508,7 +517,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 49. View Sleep Log List
+## 50. View Sleep Log List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Log Tidur/]
@@ -517,7 +526,7 @@ flowchart TD
     OutList --> End((Selesai))
 ```
 
-## 50. Update Sleep Log
+## 51. Update Sleep Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Edit Jam Tidur/]
@@ -527,7 +536,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 51. Delete Sleep Log
+## 52. Delete Sleep Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik Hapus Log/]
@@ -536,7 +545,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 52. Add Medication
+## 53. Add Medication
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Input Nama & Dosis Obat/]
@@ -546,7 +555,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 53. View Medication List
+## 54. View Medication List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Daftar Obat/]
@@ -555,7 +564,7 @@ flowchart TD
     OutList --> End((Selesai))
 ```
 
-## 54. Update Medication
+## 55. Update Medication
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Edit Detail Obat/]
@@ -565,7 +574,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 55. Delete Medication
+## 56. Delete Medication
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik Hapus Obat/]
@@ -574,7 +583,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 56. Add Medication Intake Log
+## 57. Add Medication Intake Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik 'Sudah Minum'/]
@@ -584,7 +593,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 57. View Medication Intake Logs
+## 58. View Medication Intake Logs
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Riwayat Minum/]
@@ -593,7 +602,7 @@ flowchart TD
     OutList --> End((Selesai))
 ```
 
-## 58. Update Medication Intake Log
+## 59. Update Medication Intake Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Edit Waktu Minum/]
@@ -603,7 +612,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 59. Delete Medication Intake Log
+## 60. Delete Medication Intake Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Batalkan Status Minum/]
@@ -613,7 +622,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 60. Add Meal Log
+## 61. Add Meal Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Input Makanan & Porsi/]
@@ -623,7 +632,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 61. View Meal Log List
+## 62. View Meal Log List
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Diary Makanan/]
@@ -632,7 +641,7 @@ flowchart TD
     OutList --> End((Selesai))
 ```
 
-## 62. View Meal Log Detail
+## 63. View Meal Log Detail
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik Item Makanan/]
@@ -641,7 +650,7 @@ flowchart TD
     OutDet --> End((Selesai))
 ```
 
-## 63. Update Meal Log
+## 64. Update Meal Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Edit Porsi/]
@@ -651,7 +660,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 64. Delete Meal Log
+## 65. Delete Meal Log
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik Hapus Makanan/]
@@ -660,7 +669,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 65. Get AI Recommendations
+## 66. Get AI Recommendations
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Klik Minta Saran/]
@@ -670,7 +679,7 @@ flowchart TD
     OutRec --> End((Selesai))
 ```
 
-## 66. View Recommendation History
+## 67. View Recommendation History
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Buka Riwayat Saran/]
@@ -679,7 +688,7 @@ flowchart TD
     OutList --> End((Selesai))
 ```
 
-## 67. Submit Recommendation Feedback
+## 68. Submit Recommendation Feedback
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/User: Input Rating/Komen/]
@@ -689,7 +698,7 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 68. View Seller Dashboard
+## 69. View Seller Dashboard
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/Seller: Buka Dashboard/]
@@ -698,7 +707,7 @@ flowchart TD
     OutDash --> End((Selesai))
 ```
 
-## 69. View Dashboard Statistics
+## 70. View Dashboard Statistics
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/Seller: Lihat Statistik/]
@@ -707,7 +716,7 @@ flowchart TD
     OutStat --> End((Selesai))
 ```
 
-## 70. View Sales Chart Data
+## 71. View Sales Chart Data
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/Seller: Lihat Grafik/]
@@ -716,54 +725,34 @@ flowchart TD
     OutChart --> End((Selesai))
 ```
 
-## 71. Create New Menu Item
+## 72. View Incoming Orders
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/Seller: Input Data Produk/]
-    In1 --> In2[/Seller: Klik Tambah/]
-    In2 --> Proc1[Backend: Simpan Menu Baru/]
-    Proc1 --> OutSucc[/Frontend: Masuk Katalog/]
-    OutSucc --> End((Selesai))
-```
-
-## 72. View Menu List
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/Seller: Buka Menu Toko/]
-    In1 --> Proc1[Backend: Ambil Daftar Produk/]
-    Proc1 --> OutList[/Frontend: Tampilkan Katalog/]
+    Start((Mulai)) --> In1[/Seller: Buka Tab Pesanan Masuk/]
+    In1 --> Proc1[Backend: Ambil Pesanan Status Pending/]
+    Proc1 --> OutList[/Frontend: Tampilkan Daftar/]
     OutList --> End((Selesai))
 ```
 
-## 73. View Menu Item Details
+## 73. View Active Orders 
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/Seller: Klik Item/]
-    In1 --> Proc1[Backend: Ambil Detail/]
-    Proc1 --> OutDet[/Frontend: Tampilkan Spesifikasi/]
-    OutDet --> End((Selesai))
+    Start((Mulai)) --> In1[/Seller: Buka Tab Proses/]
+    In1 --> Proc1[Backend: Ambil Pesanan Status Proses/Kirim/]
+    Proc1 --> OutList[/Frontend: Tampilkan Daftar/]
+    OutList --> End((Selesai))
 ```
 
-## 74. Update Menu Item
+## 74. View Seller Order History
 ```mermaid
 flowchart TD
-    Start((Mulai)) --> In1[/Seller: Edit Data Produk/]
-    In1 --> In2[/Seller: Klik Update/]
-    In2 --> Proc1[Backend: Update Menu/]
-    Proc1 --> OutSucc[/Frontend: Info Berubah/]
-    OutSucc --> End((Selesai))
+    Start((Mulai)) --> In1[/Seller: Buka Riwayat Pesanan/]
+    In1 --> Proc1[Backend: Ambil Pesanan Selesai/Batal/]
+    Proc1 --> OutList[/Frontend: Tampilkan Riwayat/]
+    OutList --> End((Selesai))
 ```
 
-## 75. Delete Menu Item
-```mermaid
-flowchart TD
-    Start((Mulai)) --> In1[/Seller: Klik Hapus Produk/]
-    In1 --> Proc1[Backend: Hapus Menu/]
-    Proc1 --> OutSucc[/Frontend: Produk Hilang/]
-    OutSucc --> End((Selesai))
-```
-
-## 76. Update Order Status
+## 75. Update Order Status
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/Seller: Pilih Pesanan/]
@@ -773,12 +762,326 @@ flowchart TD
     OutSucc --> End((Selesai))
 ```
 
-## 77. Seller Reply Review
+## 76. Create New Menu Item
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Input Data Produk/]
+    In1 --> In2[/Seller: Klik Tambah/]
+    In2 --> Proc1[Backend: Simpan Menu Baru/]
+    Proc1 --> OutSucc[/Frontend: Masuk Katalog/]
+    OutSucc --> End((Selesai))
+```
+
+## 77. View Menu List
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Buka Menu Toko/]
+    In1 --> Proc1[Backend: Ambil Daftar Produk/]
+    Proc1 --> OutList[/Frontend: Tampilkan Katalog/]
+    OutList --> End((Selesai))
+```
+
+## 78. View Menu Item Details
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Klik Item/]
+    In1 --> Proc1[Backend: Ambil Detail/]
+    Proc1 --> OutDet[/Frontend: Tampilkan Spesifikasi/]
+    OutDet --> End((Selesai))
+```
+
+## 79. Update Menu Item
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Edit Data Produk/]
+    In1 --> In2[/Seller: Klik Update/]
+    In2 --> Proc1[Backend: Update Menu/]
+    Proc1 --> OutSucc[/Frontend: Info Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 80. Delete Menu Item
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Klik Hapus Produk/]
+    In1 --> Proc1[Backend: Hapus Menu/]
+    Proc1 --> OutSucc[/Frontend: Produk Hilang/]
+    OutSucc --> End((Selesai))
+```
+
+## 81. View Shop Profile
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Buka Profil Toko/]
+    In1 --> Proc1[Backend: Ambil Data Toko/]
+    Proc1 --> OutView[/Frontend: Tampilkan Info/]
+    OutView --> End((Selesai))
+```
+
+## 82. Update Shop Profile
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Seller: Edit Nama/Logo/Deskripsi/]
+    In1 --> In2[/Seller: Klik Simpan/]
+    In2 --> Proc1[Backend: Update Data Toko/]
+    Proc1 --> OutSucc[/Frontend: Info Terupdate/]
+    OutSucc --> End((Selesai))
+```
+
+## 83. Seller Reply Review
 ```mermaid
 flowchart TD
     Start((Mulai)) --> In1[/Seller: Tulis Balasan/]
     In1 --> In2[/Seller: Klik Kirim/]
     In2 --> Proc1[Backend: Simpan Balasan/]
     Proc1 --> OutSucc[/Frontend: Balasan Tampil/]
+    OutSucc --> End((Selesai))
+```
+
+## 84. Admin Login
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Input Credential/]
+    In1 --> In2[/Admin: Klik Login/]
+    In2 --> Proc1[Backend: Validasi Admin/]
+    Proc1 --> Dec1{Valid?}
+    Dec1 -- Tidak --> OutErr[/Frontend: Akses Ditolak/]
+    Dec1 -- Ya --> Proc2[Backend: Buat Sesi Admin/]
+    Proc2 --> OutHome[/Frontend: Dashboard Admin/]
+    OutHome --> End((Selesai))
+```
+
+## 85. Admin Logout
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Klik Logout/]
+    In1 --> Proc1[Frontend: Hapus Sesi/]
+    Proc1 --> OutLog[/Frontend: Kembali ke Login/]
+    OutLog --> End((Selesai))
+```
+
+## 86. Update Admin Username
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Input Username Baru/]
+    In1 --> In2[/Admin: Klik Update/]
+    In2 --> Proc1[Backend: Update Data Admin/]
+    Proc1 --> OutSucc[/Frontend: Notifikasi Sukses/]
+    OutSucc --> End((Selesai))
+```
+
+## 87. Update Admin Password
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Input Password Baru/]
+    In1 --> In2[/Admin: Klik Simpan/]
+    In2 --> Proc1[Backend: Hash & Simpan Password/]
+    Proc1 --> OutSucc[/Frontend: Password Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 88. View Admin Dashboard
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Buka Dashboard/]
+    In1 --> Proc1[Backend: Agregasi Data Global/]
+    Proc1 --> OutDash[/Frontend: Tampilkan Metrik Utama/]
+    OutDash --> End((Selesai))
+```
+
+## 89. View User Profile Detail
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Pilih User/]
+    In1 --> Proc1[Backend: Ambil Detail User/]
+    Proc1 --> OutView[/Frontend: Tampilkan Info Lengkap/]
+    OutView --> End((Selesai))
+```
+
+## 90. View User Order History
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Pilih Tab Order User/]
+    In1 --> Proc1[Backend: Ambil Riwayat Transaksi/]
+    Proc1 --> OutList[/Frontend: Tampilkan Daftar Order/]
+    OutList --> End((Selesai))
+```
+
+## 91. View User Authentication Logs
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Buka Log Login/]
+    In1 --> Proc1[Backend: Ambil Log Akses/]
+    Proc1 --> OutList[/Frontend: Tampilkan Waktu & IP/]
+    OutList --> End((Selesai))
+```
+
+## 92. Update User Status
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Ubah Status (Suspend/Ban)/]
+    In1 --> In2[/Admin: Klik Update/]
+    In2 --> Proc1[Backend: Set Flag Status/]
+    Proc1 --> OutSucc[/Frontend: Status Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 93. Update User Internal Note
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Tulis Catatan Internal/]
+    In1 --> In2[/Admin: Simpan Note/]
+    In2 --> Proc1[Backend: Simpan ke Profil User/]
+    Proc1 --> OutSucc[/Frontend: Catatan Tersimpan/]
+    OutSucc --> End((Selesai))
+```
+
+## 94. Force Reset User Password
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Klik Reset Password/]
+    In1 --> Proc1[Backend: Generate Pass Sementara/]
+    Proc1 --> Proc2[Backend: Kirim Email ke User/]
+    Proc2 --> OutSucc[/Frontend: Notifikasi Terkirim/]
+    OutSucc --> End((Selesai))
+```
+
+## 95. Review Seller Approval Request
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Buka Request Seller/]
+    In1 --> In2[/Admin: Validasi Dokumen/]
+    In2 --> Dec1{Setuju?}
+    Dec1 -- Tolak --> ProcRej[Backend: Set Status Ditolak/]
+    Dec1 -- Terima --> ProcAcc[Backend: Set Status Aktif/]
+    ProcRej --> OutStat[/Frontend: Status Terupdate/]
+    ProcAcc --> OutStat
+    OutStat --> End((Selesai))
+```
+
+## 96. Review Menu Approval Request
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Buka Request Menu/]
+    In1 --> In2[/Admin: Cek Kelayakan/]
+    In2 --> Dec1{Layak?}
+    Dec1 -- Tidak --> ProcRej[Backend: Tolak Menu/]
+    Dec1 -- Ya --> ProcAcc[Backend: Publish Menu/]
+    ProcRej --> OutStat[/Frontend: Update Status/]
+    ProcAcc --> OutStat
+    OutStat --> End((Selesai))
+```
+
+## 97. View Seller Details
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Pilih Seller/]
+    In1 --> Proc1[Backend: Ambil Data Bisnis/]
+    Proc1 --> OutView[/Frontend: Tampilkan Profil Seller/]
+    OutView --> End((Selesai))
+```
+
+## 98. Update Seller Status
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Ubah Status Toko/]
+    In1 --> In2[/Admin: Klik Simpan/]
+    In2 --> Proc1[Backend: Update Status DB/]
+    Proc1 --> OutSucc[/Frontend: Status Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 99. Update Seller Internal Note
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Input Catatan Seller/]
+    In1 --> In2[/Admin: Simpan/]
+    In2 --> Proc1[Backend: Simpan Note/]
+    Proc1 --> OutSucc[/Frontend: Tersimpan/]
+    OutSucc --> End((Selesai))
+```
+
+## 100. View Foods Database
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Buka Master Data Makanan/]
+    In1 --> Proc1[Backend: Ambil Semua Makanan/]
+    Proc1 --> OutList[/Frontend: Tampilkan Tabel/]
+    OutList --> End((Selesai))
+```
+
+## 101. Set Food Visibility
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Toggle Visibility/]
+    In1 --> Proc1[Backend: Update Flag Visible/]
+    Proc1 --> OutSucc[/Frontend: Status Update/]
+    OutSucc --> End((Selesai))
+```
+
+## 102. Hard Delete Food
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Klik Hapus Permanen/]
+    In1 --> In2[/Admin: Konfirmasi/]
+    In2 --> Proc1[Backend: Delete Row/]
+    Proc1 --> OutSucc[/Frontend: Data Hilang/]
+    OutSucc --> End((Selesai))
+```
+
+## 103. Monitor AI Usage & Analytics
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Buka Menu AI/]
+    In1 --> Proc1[Backend: Hitung Token/Request/]
+    Proc1 --> OutChart[/Frontend: Tampilkan Grafik Usage/]
+    OutChart --> End((Selesai))
+```
+
+## 104. Monitor Server Health
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Buka System Health/]
+    In1 --> Proc1[Backend: Cek CPU/RAM/Disk/]
+    Proc1 --> OutStat[/Frontend: Tampilkan Indikator/]
+    OutStat --> End((Selesai))
+```
+
+## 105. View System Authentication Logs
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/Admin: Buka Global Logs/]
+    In1 --> Proc1[Backend: Ambil Log Sistem/]
+    Proc1 --> OutList[/Frontend: Tampilkan Aktivitas/]
+    OutList --> End((Selesai))
+```
+
+## 106. Create New Admin
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/SuperAdmin: Input Data Admin Baru/]
+    In1 --> In2[/SuperAdmin: Klik Buat/]
+    In2 --> Proc1[Backend: Create Account/]
+    Proc1 --> OutSucc[/Frontend: Admin Bertambah/]
+    OutSucc --> End((Selesai))
+```
+
+## 107. Update Admin Role
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/SuperAdmin: Pilih Role/]
+    In1 --> In2[/SuperAdmin: Update/]
+    In2 --> Proc1[Backend: Ubah Hak Akses/]
+    Proc1 --> OutSucc[/Frontend: Role Berubah/]
+    OutSucc --> End((Selesai))
+```
+
+## 108. Delete Admin
+```mermaid
+flowchart TD
+    Start((Mulai)) --> In1[/SuperAdmin: Klik Hapus Admin/]
+    In1 --> In2[/SuperAdmin: Konfirmasi/]
+    In2 --> Proc1[Backend: Hapus Akun Admin/]
+    Proc1 --> OutSucc[/Frontend: Akun Hilang/]
     OutSucc --> End((Selesai))
 ```
