@@ -14,17 +14,17 @@ abstract class Failure extends Equatable {
 
 /// Kegagalan yang terjadi karena masalah pada cache lokal (misal: data tidak ditemukan).
 class CacheFailure extends Failure {
-  const CacheFailure([String message = 'Cache error.']) : super(message);
+  const CacheFailure([super.message = 'Cache error.']);
 }
 
 /// Kegagalan yang terjadi karena masalah di sisi server (misal: API error).
 class ServerFailure extends Failure {
-  const ServerFailure(String message) : super(message);
+  const ServerFailure(super.message);
 
   @override
   List<Object> get props => [message];
 }
 
 class ConnectionFailure extends Failure {
-  const ConnectionFailure([String message = 'No internet connection.']) : super(message);
+  const ConnectionFailure([super.message = 'No internet connection.']);
 }

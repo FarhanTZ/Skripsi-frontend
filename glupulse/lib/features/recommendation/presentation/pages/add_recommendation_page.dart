@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:glupulse/features/Food/domain/entities/food.dart';
-import 'package:glupulse/features/Food/domain/entities/food_category.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_category_cubit.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_category_state.dart';
 import 'package:glupulse/features/recommendation/presentation/cubit/recommendation_cubit.dart';
-import 'package:glupulse/features/recommendation/presentation/pages/recommendation_page.dart';
 import 'package:glupulse/injection_container.dart';
 
 class AddRecommendationPage extends StatefulWidget {
@@ -294,14 +291,14 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
                   height: 55,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [primaryColor, primaryColor.withOpacity(0.8)],
+                      colors: [primaryColor, primaryColor.withValues(alpha: 0.8)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withOpacity(0.3),
+                        color: primaryColor.withValues(alpha: 0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -352,8 +349,8 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
               width: 2,
             ),
             boxShadow: isSelected
-                ? [BoxShadow(color: color.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))]
-                : [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
+                ? [BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))]
+                : [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))],
           ),
           child: Column(
             children: [
@@ -383,7 +380,7 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -397,7 +394,7 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
+                  color: iconColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: iconColor, size: 20),
@@ -453,7 +450,7 @@ class _AddRecommendationPageState extends State<AddRecommendationPage> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? color.withOpacity(0.1) : Colors.grey.shade100,
+                  color: isSelected ? color.withValues(alpha: 0.1) : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected ? color : Colors.transparent,

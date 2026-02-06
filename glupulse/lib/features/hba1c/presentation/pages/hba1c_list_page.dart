@@ -244,7 +244,7 @@ class _Hba1cListPageState extends State<Hba1cListPage> {
                                   unit: 'mg/dL',
                                   backgroundColor: Colors.white,
                                   valueColor: Colors.redAccent,
-                                  iconBackgroundColor: Colors.redAccent.withOpacity(0.1),
+                                  iconBackgroundColor: Colors.redAccent.withValues(alpha: 0.1),
                                   textColor: Colors.black87,
                                 ),
                               ),

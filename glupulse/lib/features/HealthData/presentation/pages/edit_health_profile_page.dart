@@ -122,11 +122,7 @@ class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedTreatments = Map.fromIterable(
-      _treatmentOptions.values,
-      key: (item) => item as String,
-      value: (item) => false,
-    );
+    _selectedTreatments = { for (var item in _treatmentOptions.values) item : false };
     // Data akan di-fetch oleh BlocProvider di atas
   }
 
@@ -968,7 +964,7 @@ class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: value
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -1007,7 +1003,7 @@ class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: value ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Colors.white,
+          color: value ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: value ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
@@ -1026,42 +1022,6 @@ class _EditHealthProfileScreenState extends State<EditHealthProfileScreen> {
             Flexible(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w500))),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSettingSwitchTile({
-    required String title,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: Theme.of(context).colorScheme.primary,
-          ),
-        ],
       ),
     );
   }

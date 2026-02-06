@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+// ignore_for_file: constant_identifier_names
+
 import 'dart:convert';
 import 'package:glupulse/core/error/exceptions.dart';
 import 'package:glupulse/features/auth/data/models/user_model.dart';
@@ -27,12 +30,12 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<UserModel> getLastUser() {
     final jsonString = sharedPreferences.getString(CACHED_USER);
-    print('AuthLocalDataSourceImpl: Mengambil CACHED_USER. JSON string: $jsonString'); // DEBUG
+    debugPrint('AuthLocalDataSourceImpl: Mengambil CACHED_USER. JSON string: $jsonString'); // DEBUG
     if (jsonString != null) {
       // Jika ada data user tersimpan, parse dan kembalikan sebagai UserModel
       return Future.value(UserModel.fromJson(json.decode(jsonString), source: 'local_cache_get'));
     } else {
-      print('AuthLocalDataSourceImpl: CACHED_USER tidak ditemukan.'); // DEBUG
+      debugPrint('AuthLocalDataSourceImpl: CACHED_USER tidak ditemukan.'); // DEBUG
       // Jika tidak ada, lempar exception
       throw CacheException();
     }
@@ -40,7 +43,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<void> cacheUser(UserModel userToCache) {
-    print('AuthLocalDataSourceImpl: Mencache user: username="${userToCache.username}", email="${userToCache.email}"'); // DEBUG
+    debugPrint('AuthLocalDataSourceImpl: Mencache user: username="${userToCache.username}", email="${userToCache.email}"'); // DEBUG
     return sharedPreferences.setString(
       CACHED_USER,
       json.encode(userToCache.toJson()),

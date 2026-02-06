@@ -212,6 +212,7 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
           ),
         ),
       );
+      if (!mounted) return;
       if (navResult is MealItem) {
         result = navResult;
       }
@@ -222,6 +223,7 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
           builder: (_) => const ManualFoodInputPage(),
         ),
       );
+      if (!mounted) return;
       if (navResult is MealItem) {
         result = navResult;
       }
@@ -295,7 +297,7 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
             Expanded(
               child: BlocListener<MealLogCubit, MealLogState>(
                 listener: (context, state) {
-                  print('UI LISTENER: Received state $state');
+                  debugPrint('UI LISTENER: Received state $state');
                   if (state is MealLogDetailLoaded) {
                     // Update state lokal saat detail berhasil diambil
                     setState(() {
@@ -308,7 +310,7 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
                       _tagsController.text = state.mealLog.tags?.join(', ') ?? '';
                     });
                   } else if (state is MealLogAdded || state is MealLogUpdated) {
-                    print('UI LISTENER: Success state received. Popping...');
+                    debugPrint('UI LISTENER: Success state received. Popping...');
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Meal log saved successfully!')),
                     );
@@ -748,7 +750,7 @@ class _AddMealLogPageState extends State<AddMealLogPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 28),

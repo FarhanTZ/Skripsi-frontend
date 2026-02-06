@@ -2,28 +2,17 @@ import 'package:glupulse/features/medication/domain/entities/medication_log.dart
 
 class MedicationLogModel extends MedicationLog {
   const MedicationLogModel({
-    String? id,
-    String? userId,
-    required int medicationId,
-    String? medicationName,
-    required DateTime timestamp,
-    required double doseAmount,
-    required String reason,
-    bool isPumpDelivery = false,
-    int deliveryDurationMinutes = 0,
-    String? notes,
-  }) : super(
-          id: id,
-          userId: userId,
-          medicationId: medicationId,
-          medicationName: medicationName,
-          timestamp: timestamp,
-          doseAmount: doseAmount,
-          reason: reason,
-          isPumpDelivery: isPumpDelivery,
-          deliveryDurationMinutes: deliveryDurationMinutes,
-          notes: notes,
-        );
+    super.id,
+    super.userId,
+    required super.medicationId,
+    super.medicationName,
+    required super.timestamp,
+    required super.doseAmount,
+    required super.reason,
+    super.isPumpDelivery,
+    super.deliveryDurationMinutes,
+    super.notes,
+  });
 
   factory MedicationLogModel.fromJson(Map<String, dynamic> json) {
     return MedicationLogModel(

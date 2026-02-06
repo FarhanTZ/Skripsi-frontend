@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/medication/domain/entities/medication.dart';
 import 'package:glupulse/features/medication/domain/entities/medication_log.dart';
 import 'package:glupulse/features/medication/presentation/cubit/medication_cubit.dart';
@@ -122,6 +121,7 @@ class _AddEditMedicationLogPageState extends State<AddEditMedicationLogPage> {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const AddEditMedicationPage()),
     );
+    if (!mounted) return;
     if (result == true) {
       context.read<MedicationCubit>().fetchMedications();
     }
@@ -194,7 +194,7 @@ class _AddEditMedicationLogPageState extends State<AddEditMedicationLogPage> {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.orange.shade200),
                             boxShadow: [
-                              BoxShadow(color: Colors.orange.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))
+                              BoxShadow(color: Colors.orange.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 4))
                             ],
                           ),
                           child: Column(
@@ -281,8 +281,8 @@ class _AddEditMedicationLogPageState extends State<AddEditMedicationLogPage> {
                         final selectedMed = medState.medications.firstWhereOrNull(
                           (med) => med.id == _selectedMedicationId,
                         );
-                        if (selectedMed != null && selectedMed.defaultDoseUnit != null) {
-                          doseUnit = selectedMed.defaultDoseUnit!;
+                        if (selectedMed != null) {
+                          doseUnit = selectedMed.defaultDoseUnit;
                         }
                       }
                       
@@ -348,7 +348,7 @@ class _AddEditMedicationLogPageState extends State<AddEditMedicationLogPage> {
                         onSelected: (selected) {
                           if (selected) setState(() => _reason = r['value']!);
                         },
-                        selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                        selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                         labelStyle: TextStyle(
                           color: isSelected ? Theme.of(context).colorScheme.primary : Colors.black87,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,

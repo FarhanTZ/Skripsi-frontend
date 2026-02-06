@@ -203,7 +203,7 @@ class SellerProfilePage extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.black.withOpacity(0.2), Colors.transparent],
+                  colors: [Colors.black.withValues(alpha: 0.2), Colors.transparent],
                   stops: const [0.0, 0.4],
                 ),
               ),
@@ -235,7 +235,7 @@ class SellerProfilePage extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 3),
                       boxShadow: [
-                        BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
+                        BoxShadow(color: Colors.grey.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 4)),
                       ],
                       image: DecorationImage(
                         image: (seller.logoUrl != null ? NetworkImage(seller.logoUrl!) : const AssetImage('assets/images/seller.jpg')) as ImageProvider,
@@ -292,7 +292,7 @@ class SellerProfilePage extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildInfoChip(Icons.star_rounded, '${seller.averageRating.toStringAsFixed(1)}', Colors.amber),
+                    _buildInfoChip(Icons.star_rounded, seller.averageRating.toStringAsFixed(1), Colors.amber),
                     const SizedBox(width: 12),
                     _buildInfoChip(Icons.location_on, seller.city ?? 'Unknown', Colors.blue),
                     const SizedBox(width: 12),

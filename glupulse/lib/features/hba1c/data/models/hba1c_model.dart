@@ -2,34 +2,20 @@ import 'package:glupulse/features/hba1c/domain/entities/hba1c.dart';
 
 class Hba1cModel extends Hba1c {
   const Hba1cModel({
-    String? id,
-    required DateTime testDate,
-    required double hba1cPercentage,
-    int? estimatedAvgGlucose,
-    bool? treatmentChanged,
-    String? medicationChanges,
-    String? dietChanges,
-    String? activityChanges,
-    int? hba1cMmolMol,
-    num? changeFromPrevious,
-    String? trend,
-    String? notes,
-    String? documentUrl,
-  }) : super(
-          id: id,
-          testDate: testDate,
-          hba1cPercentage: hba1cPercentage,
-          estimatedAvgGlucose: estimatedAvgGlucose,
-          treatmentChanged: treatmentChanged,
-          medicationChanges: medicationChanges,
-          dietChanges: dietChanges,
-          activityChanges: activityChanges,
-          hba1cMmolMol: hba1cMmolMol,
-          changeFromPrevious: changeFromPrevious,
-          trend: trend,
-          notes: notes,
-          documentUrl: documentUrl,
-        );
+    super.id,
+    required super.testDate,
+    required super.hba1cPercentage,
+    super.estimatedAvgGlucose,
+    super.treatmentChanged,
+    super.medicationChanges,
+    super.dietChanges,
+    super.activityChanges,
+    super.hba1cMmolMol,
+    super.changeFromPrevious,
+    super.trend,
+    super.notes,
+    super.documentUrl,
+  });
 
   factory Hba1cModel.fromJson(Map<String, dynamic> json) {
     return Hba1cModel(

@@ -229,7 +229,7 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -416,7 +416,7 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
               gradient: LinearGradient(
                 colors: [
                   Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                 ],
               ),
               barWidth: 4,
@@ -436,8 +436,8 @@ class _GlucoseListPageState extends State<GlucoseListPage> {
                 show: true,
                 gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                    Theme.of(context).colorScheme.primary.withOpacity(0.0),
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.0),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,

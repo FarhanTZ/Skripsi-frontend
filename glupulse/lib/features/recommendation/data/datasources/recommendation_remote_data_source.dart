@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/recommendation_model.dart';
@@ -20,13 +21,13 @@ class RecommendationRemoteDataSourceImpl implements RecommendationRemoteDataSour
   @override
   Future<RecommendationModel> postRecommendation(Map<String, dynamic> requestData, String token) async {
     try {
-      print('DEBUG: Sending Recommendation Request: $requestData'); // Added debug print
+      debugPrint('DEBUG: Sending Recommendation Request: $requestData'); // Added debug print
       final response = await apiClient.post(
         '/recommendations',
         body: requestData,
         token: token,
       );
-      print('DEBUG: Received Recommendation Response: $response'); // Added debug print
+      debugPrint('DEBUG: Received Recommendation Response: $response'); // Added debug print
       return RecommendationModel.fromJson(response);
     } catch (e) {
       throw ServerException(e.toString());
@@ -104,14 +105,14 @@ class RecommendationRemoteDataSourceImpl implements RecommendationRemoteDataSour
           '/recommendation/$sessionId', 
           token: token,
         );
-        print('DEBUG: Received Recommendation Detail: $responseDetail'); // Added debug print
+        debugPrint('DEBUG: Received Recommendation Detail: $responseDetail'); // Added debug print
 
         return RecommendationModel.fromJson(responseDetail);
       } catch (e) {
         // If detail fetch fails (e.g. 404), fallback to the list item
         // This handles the case where the endpoint might be wrong or unavailable,
         // but ensures we at least show the summary data we have.
-        print('DEBUG: Failed to fetch detail, falling back to session list item: $latestSession. Error: $e'); // Added debug print
+        debugPrint('DEBUG: Failed to fetch detail, falling back to session list item: $latestSession. Error: $e'); // Added debug print
         
         return RecommendationModel.fromJson(latestSession);
       }

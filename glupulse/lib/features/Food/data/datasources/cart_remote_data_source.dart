@@ -1,5 +1,4 @@
 import 'package:glupulse/core/api/api_client.dart';
-import 'package:glupulse/core/error/exceptions.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:glupulse/features/Food/data/models/cart_model.dart';
 

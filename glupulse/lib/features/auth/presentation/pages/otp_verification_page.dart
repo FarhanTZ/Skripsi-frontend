@@ -144,7 +144,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
           );
         }
 
-        print('OtpVerificationPage Listener: Menerima state -> ${state.runtimeType}'); // DEBUG
+        debugPrint('OtpVerificationPage Listener: Menerima state -> ${state.runtimeType}'); // DEBUG
         if (state is AuthProfileIncomplete) {
           // Jika profil dasar belum lengkap, arahkan ke halaman edit profil.
           Navigator.of(context).pushAndRemoveUntil(
@@ -175,7 +175,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         }
       },
       builder: (context, state) {
-        print('OtpVerificationPage Builder: Membangun untuk state -> ${state.runtimeType}'); // DEBUG
+        debugPrint('OtpVerificationPage Builder: Membangun untuk state -> ${state.runtimeType}'); // DEBUG
         final isLoading = state is AuthLoading;
 
         return Scaffold(
@@ -286,7 +286,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
           borderRadius: BorderRadius.circular(15.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
               spreadRadius: 1,
               blurRadius: 7,
               offset: const Offset(0, 3),

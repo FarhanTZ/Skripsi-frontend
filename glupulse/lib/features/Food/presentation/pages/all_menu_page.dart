@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/features/Food/domain/entities/food.dart';
-import 'package:glupulse/features/Food/domain/entities/food_category.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_category_cubit.dart';
 import 'package:glupulse/features/Food/presentation/cubit/food_category_state.dart';
 import 'package:glupulse/features/Food/presentation/pages/food_detail_page.dart';
@@ -14,10 +13,10 @@ class AllMenuPage extends StatefulWidget {
   final List<dynamic> foods; // Using dynamic to match the type in MenuTab, but conceptually List<Food>
 
   const AllMenuPage({
-    Key? key,
+    super.key,
     required this.title,
     required this.foods,
-  }) : super(key: key);
+  });
 
   @override
   State<AllMenuPage> createState() => _AllMenuPageState();
@@ -112,7 +111,7 @@ class _AllMenuPageState extends State<AllMenuPage> {
                 borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
+                    color: Colors.grey.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -209,7 +208,7 @@ class _AllMenuPageState extends State<AllMenuPage> {
                                     boxShadow: isSelected
                                         ? [
                                             BoxShadow(
-                                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                                               blurRadius: 8,
                                               offset: const Offset(0, 4),
                                             )

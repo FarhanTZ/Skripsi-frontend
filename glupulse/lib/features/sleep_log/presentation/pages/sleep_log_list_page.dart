@@ -218,7 +218,7 @@ class _SleepLogListPageState extends State<SleepLogListPage> {
                                       Container(
                                         padding: const EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(10),
                                         ),
                                         child: Column(
@@ -260,7 +260,7 @@ class _SleepLogListPageState extends State<SleepLogListPage> {
                                                 Container(
                                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                                   decoration: BoxDecoration(
-                                                    color: _getQualityColor(log.qualityRating).withOpacity(0.1),
+                                                    color: _getQualityColor(log.qualityRating).withValues(alpha: 0.1),
                                                     borderRadius: BorderRadius.circular(4),
                                                   ),
                                                   child: Text(
@@ -471,13 +471,13 @@ class _SleepLogListPageState extends State<SleepLogListPage> {
                     color: isSelected 
                         ? selectedBlueColor 
                         : (isToday 
-                            ? selectedBlueColor.withOpacity(0.1) 
+                            ? selectedBlueColor.withValues(alpha: 0.1) 
                             : (isCurrentMonth ? Colors.white : Colors.transparent)),
                     borderRadius: BorderRadius.circular(8),
                     border: isToday && !isSelected ? Border.all(color: selectedBlueColor, width: 1.5) : null,
                     boxShadow: isSelected ? [
                       BoxShadow(
-                        color: selectedBlueColor.withOpacity(0.4),
+                        color: selectedBlueColor.withValues(alpha: 0.4),
                         blurRadius: 8,
                         spreadRadius: 2,
                         offset: const Offset(0, 2),

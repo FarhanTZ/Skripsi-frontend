@@ -2,20 +2,13 @@ import 'package:glupulse/features/medication/domain/entities/medication.dart';
 
 class MedicationModel extends Medication {
   const MedicationModel({
-    int? id,
-    String? userId,
-    required String displayName,
-    required String medicationType,
-    required String defaultDoseUnit,
-    bool? isActive,
-  }) : super(
-          id: id,
-          userId: userId,
-          displayName: displayName,
-          medicationType: medicationType,
-          defaultDoseUnit: defaultDoseUnit,
-          isActive: isActive,
-        );
+    super.id,
+    super.userId,
+    required super.displayName,
+    required super.medicationType,
+    required super.defaultDoseUnit,
+    super.isActive,
+  });
 
   factory MedicationModel.fromJson(Map<String, dynamic> json) {
     return MedicationModel(

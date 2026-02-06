@@ -5,16 +5,11 @@ import 'package:glupulse/features/Food/domain/entities/cart.dart';
 
 class CartModel extends Cart {
   const CartModel({
-    required String cartId,
-    required String userId,
-    required double subtotal,
-    required List<CartItemModel> items,
-  }) : super(
-          cartId: cartId,
-          userId: userId,
-          subtotal: subtotal,
-          items: items,
-        );
+    required super.cartId,
+    required super.userId,
+    required super.subtotal,
+    required List<CartItemModel> super.items,
+  });
 
   factory CartModel.fromJson(Map<String, dynamic> json) {
     return CartModel(

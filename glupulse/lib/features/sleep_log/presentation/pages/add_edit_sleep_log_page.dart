@@ -117,15 +117,6 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
         // Usually sleep date is the "night of".
         // BedTime usually on SleepDate (night). WakeTime usually on SleepDate + 1 (morning).
         
-        DateTime newDateTime;
-        if (isBedTime) {
-           newDateTime = DateTime(baseDate.year, baseDate.month, baseDate.day, picked.hour, picked.minute);
-           // If choosing e.g. 1 AM for bed time, it might be "next day" technically, but let's stick to simple logic first
-           // Or let user pick simple time and we construct standard overnight
-        } else {
-           // Wake time usually next day
-           newDateTime = DateTime(baseDate.year, baseDate.month, baseDate.day + 1, picked.hour, picked.minute);
-        }
         
         // Update the specific variable
         if (isBedTime) {
@@ -214,7 +205,7 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
                     ),
                     child: Column(
                       children: [
@@ -254,7 +245,7 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -285,7 +276,7 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,7 +329,7 @@ class _AddEditSleepLogPageState extends State<AddEditSleepLogPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
                     ),
                     child: ExpansionTile(
                       title: const Text('Data Lanjutan (Optional)', style: TextStyle(fontWeight: FontWeight.bold)),

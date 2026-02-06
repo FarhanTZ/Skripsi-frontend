@@ -2,16 +2,11 @@ import 'package:glupulse/features/activity/domain/entities/activity_type.dart';
 
 class ActivityTypeModel extends ActivityType {
   const ActivityTypeModel({
-    required int activityTypeId,
-    required String activityCode,
-    required String displayName,
-    required String intensityLevel,
-  }) : super(
-          activityTypeId: activityTypeId,
-          activityCode: activityCode,
-          displayName: displayName,
-          intensityLevel: intensityLevel,
-        );
+    required super.activityTypeId,
+    required super.activityCode,
+    required super.displayName,
+    required super.intensityLevel,
+  });
 
   factory ActivityTypeModel.fromJson(Map<String, dynamic> json) {
     return ActivityTypeModel(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/Address/presentation/cubit/address_cubit.dart';
 import 'package:glupulse/features/Address/presentation/pages/address_list_page.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
@@ -200,7 +199,7 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
           border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -211,7 +210,7 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.location_on_rounded, color: Theme.of(context).colorScheme.primary, size: 24),
@@ -282,7 +281,7 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
                 ],
               ),
             );
-          }).toList(),
+          }),
           const Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -399,7 +398,7 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -555,7 +554,7 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.05) : Colors.white,
+                    color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.05) : Colors.white,
                     border: Border.all(
                       color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade200,
                     ),
@@ -570,7 +569,7 @@ class _PaymentOrderPageState extends State<PaymentOrderPage> {
                     trailing: isSelected ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary) : null,
                   ),
                 );
-              }).toList(),
+              }),
               const SizedBox(height: 16),
             ],
           ),

@@ -56,10 +56,6 @@ class _RecommendationPageState extends State<RecommendationPage>
     );
   }
 
-  Future<void> _onRefresh() async {
-    await context.read<RecommendationCubit>().fetchLatestRecommendation();
-  }
-
   void _showFeedbackDialog(BuildContext context, String sessionId) {
     showDialog(
       context: context,
@@ -161,7 +157,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF0F67FE).withOpacity(0.4),
+                                    color: const Color(0xFF0F67FE).withValues(alpha: 0.4),
                                     blurRadius: 20,
                                     spreadRadius: 5,
                                     offset: const Offset(0, 10),
@@ -432,7 +428,7 @@ class _RecommendationPageState extends State<RecommendationPage>
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F67FE).withOpacity(0.3),
+            color: const Color(0xFF0F67FE).withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -450,7 +446,7 @@ class _RecommendationPageState extends State<RecommendationPage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
@@ -491,7 +487,7 @@ class _RecommendationPageState extends State<RecommendationPage>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -553,7 +549,7 @@ class _RecommendationPageState extends State<RecommendationPage>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -579,7 +575,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: cardColor.withOpacity(0.1),
+                            color: cardColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
@@ -620,7 +616,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                   child: Container(
                     height: double.infinity,
                     decoration: BoxDecoration(
-                      color: cardColor.withOpacity(0.05),
+                      color: cardColor.withValues(alpha: 0.05),
                     ),
                     child: imageAsset != null
                         ? Image.asset(
@@ -631,7 +627,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                                   child: Icon(
                                     _getIconForActivity(activity.activityCode),
                                     size: 50,
-                                    color: cardColor.withOpacity(0.5),
+                                    color: cardColor.withValues(alpha: 0.5),
                                   ),
                                 );
                               },
@@ -640,7 +636,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                             child: Icon(
                               _getIconForActivity(activity.activityCode),
                               size: 60,
-                              color: cardColor.withOpacity(0.3),
+                              color: cardColor.withValues(alpha: 0.3),
                             ),
                           ),
                   ),
@@ -652,7 +648,7 @@ class _RecommendationPageState extends State<RecommendationPage>
               top: 8,
               right: 8,
               child: Material(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 shape: const CircleBorder(),
                 elevation: 2,
                 child: InkWell(
@@ -794,7 +790,7 @@ class _RecommendationPageState extends State<RecommendationPage>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1062,7 +1058,7 @@ class _FeedbackDialogState extends State<_FeedbackDialog> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
+                  color: primaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.thumb_up_alt_outlined, color: primaryColor),
@@ -1233,7 +1229,6 @@ class _FoodFeedbackDialogState extends State<_FoodFeedbackDialog> {
       },
       builder: (context, state) {
         final isLoading = state is RecommendationFeedbackLoading;
-        final primaryColor = Theme.of(context).colorScheme.primary;
 
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -1242,7 +1237,7 @@ class _FoodFeedbackDialogState extends State<_FoodFeedbackDialog> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.restaurant, color: Colors.orange),
@@ -1448,7 +1443,7 @@ class _ActivityFeedbackDialogState extends State<_ActivityFeedbackDialog> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.directions_run, color: Colors.blue),

@@ -2,36 +2,21 @@ import 'package:glupulse/features/activity/domain/entities/activity_log.dart';
 
 class ActivityLogModel extends ActivityLog {
   const ActivityLogModel({
-    String? activityId,
-    String? userId,
-    required DateTime activityTimestamp,
-    required String activityCode,
-    required String intensity,
-    required int durationMinutes,
-    int? perceivedExertion,
-    int? stepsCount,
-    int? preActivityCarbs,
-    int? waterIntakeMl,
-    String? issueDescription,
-    required String source,
-    String? syncId,
-    String? notes,
-  }) : super(
-          activityId: activityId,
-          userId: userId,
-          activityTimestamp: activityTimestamp,
-          activityCode: activityCode,
-          intensity: intensity,
-          durationMinutes: durationMinutes,
-          perceivedExertion: perceivedExertion,
-          stepsCount: stepsCount,
-          preActivityCarbs: preActivityCarbs,
-          waterIntakeMl: waterIntakeMl,
-          issueDescription: issueDescription,
-          source: source,
-          syncId: syncId,
-          notes: notes,
-        );
+    super.activityId,
+    super.userId,
+    required super.activityTimestamp,
+    required super.activityCode,
+    required super.intensity,
+    required super.durationMinutes,
+    super.perceivedExertion,
+    super.stepsCount,
+    super.preActivityCarbs,
+    super.waterIntakeMl,
+    super.issueDescription,
+    required super.source,
+    super.syncId,
+    super.notes,
+  });
 
   factory ActivityLogModel.fromJson(Map<String, dynamic> json) {
     return ActivityLogModel(

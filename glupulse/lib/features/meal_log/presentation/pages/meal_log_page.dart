@@ -49,11 +49,11 @@ class _MealLogViewState extends State<MealLogView> {
           final date = dates[index];
           final isSelected = _isSameDay(date, _selectedDate);
           final hasLog = logs.any((log) => _isSameDay(log.mealTimestamp, date));
+          
+          bool isCurrentlyPressed = false;
 
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setStateInner) {
-              bool isCurrentlyPressed = false;
-
               return GestureDetector(
                 onTapDown: (_) {
                   setStateInner(() => isCurrentlyPressed = true);
@@ -76,13 +76,13 @@ class _MealLogViewState extends State<MealLogView> {
                         : Border.all(color: Colors.grey.shade300),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 6,
                         offset: const Offset(0, 3),
                       ),
                       if (isCurrentlyPressed)
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.6),
+                          color: Colors.blue.withValues(alpha: 0.6),
                           blurRadius: 10,
                           spreadRadius: 2,
                           offset: const Offset(0, 4),
@@ -136,7 +136,7 @@ class _MealLogViewState extends State<MealLogView> {
   }
 
   Future<void> _refreshMealLogs(BuildContext context) async {
-    print('MEAL_LOG_PAGE: _refreshMealLogs called');
+    debugPrint('MEAL_LOG_PAGE: _refreshMealLogs called');
     await context.read<MealLogCubit>().getMealLogs();
   }
 
@@ -187,7 +187,7 @@ class _MealLogViewState extends State<MealLogView> {
                   }
                 },
                 builder: (context, state) {
-                  print('MEAL_LOG_PAGE: Builder state: $state');
+                  debugPrint('MEAL_LOG_PAGE: Builder state: $state');
 
                   if (state is MealLogLoading ||
                       state is MealLogInitial ||
@@ -323,7 +323,7 @@ class _MealLogViewState extends State<MealLogView> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          print('MEAL_LOG_PAGE: Navigating to Add Page...');
+          debugPrint('MEAL_LOG_PAGE: Navigating to Add Page...');
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => BlocProvider.value(
@@ -332,7 +332,7 @@ class _MealLogViewState extends State<MealLogView> {
               ),
             ),
           );
-          print('MEAL_LOG_PAGE: Returned from Add Page.');
+          debugPrint('MEAL_LOG_PAGE: Returned from Add Page.');
           if (context.mounted) {
             _refreshMealLogs(context);
           }
@@ -341,31 +341,6 @@ class _MealLogViewState extends State<MealLogView> {
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text('Log Meal'),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.restaurant_menu, size: 80, color: Colors.grey.shade300),
-          const SizedBox(height: 16),
-          Text(
-            'No meals logged yet',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Track your nutrition by adding a meal.',
-            style: TextStyle(color: Colors.grey.shade500),
-          ),
-        ],
       ),
     );
   }
@@ -453,7 +428,7 @@ class _MealLogViewState extends State<MealLogView> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
-            print('MEAL_LOG_PAGE: Navigating to Edit Page for ${log.mealId}');
+            debugPrint('MEAL_LOG_PAGE: Navigating to Edit Page for ${log.mealId}');
             await Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => BlocProvider.value(
@@ -462,7 +437,7 @@ class _MealLogViewState extends State<MealLogView> {
                 ),
               ),
             );
-            print('MEAL_LOG_PAGE: Returned from Edit Page.');
+            debugPrint('MEAL_LOG_PAGE: Returned from Edit Page.');
             if (context.mounted) {
               _refreshMealLogs(context);
             }
@@ -626,10 +601,10 @@ class _MealLogViewState extends State<MealLogView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),

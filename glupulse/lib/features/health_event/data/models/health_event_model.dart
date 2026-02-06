@@ -2,28 +2,17 @@ import 'package:glupulse/features/health_event/domain/entities/health_event.dart
 
 class HealthEventModel extends HealthEvent {
   const HealthEventModel({
-    String? id,
-    required DateTime eventDate,
-    required String eventType,
-    required String severity,
-    int? glucoseValue,
-    double? ketoneValueMmol,
-    required List<String> symptoms,
-    required List<String> treatments,
-    required bool requiredMedicalAttention,
-    String? notes,
-  }) : super(
-          id: id,
-          eventDate: eventDate,
-          eventType: eventType,
-          severity: severity,
-          glucoseValue: glucoseValue,
-          ketoneValueMmol: ketoneValueMmol,
-          symptoms: symptoms,
-          treatments: treatments,
-          requiredMedicalAttention: requiredMedicalAttention,
-          notes: notes,
-        );
+    super.id,
+    required super.eventDate,
+    required super.eventType,
+    required super.severity,
+    super.glucoseValue,
+    super.ketoneValueMmol,
+    required super.symptoms,
+    required super.treatments,
+    required super.requiredMedicalAttention,
+    super.notes,
+  });
 
   factory HealthEventModel.fromJson(Map<String, dynamic> json) {
     return HealthEventModel(

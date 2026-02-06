@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:bloc/bloc.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/HealthData/domain/usecases/get_health_profile.dart';
@@ -67,7 +68,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Metode untuk memeriksa status otentikasi saat aplikasi dimulai.
   Future<void> checkAuthenticationStatus() async {
-    print('AuthCubit: Memeriksa status otentikasi...'); // DEBUG
+    debugPrint('AuthCubit: Memeriksa status otentikasi...'); // DEBUG
     emit(AuthLoading());
 
     // Menjalankan pengecekan status dan timer secara bersamaan.
@@ -83,21 +84,21 @@ class AuthCubit extends Cubit<AuthState> {
     authResult.fold(
       (failure) {
         // Jika tidak ada user di cache, anggap tidak terotentikasi
-        print('AuthCubit: Gagal mendapatkan user dari local storage: $failure. Emitting AuthUnauthenticated.'); // DEBUG
-        print('AuthCubit: Tidak ada sesi ditemukan. Emitting AuthUnauthenticated.'); // DEBUG
+        debugPrint('AuthCubit: Gagal mendapatkan user dari local storage: $failure. Emitting AuthUnauthenticated.'); // DEBUG
+        debugPrint('AuthCubit: Tidak ada sesi ditemukan. Emitting AuthUnauthenticated.'); // DEBUG
         emit(AuthUnauthenticated());
       },
       (user) {
         // Setelah mendapatkan user, cek kelengkapan profilnya
         if (user.isProfileComplete) {
           // Jika profil dasar lengkap, cek juga profil kesehatannya
-          print(
+          debugPrint(
               'AuthCubit: Sesi ditemukan, profil dasar lengkap. Mengecek profil kesehatan...');
           // Kita tidak bisa langsung emit AuthAuthenticated, harus cek health profile dulu
           // Kita panggil helper yang sudah ada
           _checkHealthProfileAndEmitState(user);
         } else {
-          print('AuthCubit: Sesi ditemukan tapi profil tidak lengkap untuk user: ${user.username}. Emitting AuthProfileIncomplete.'); // DEBUG
+          debugPrint('AuthCubit: Sesi ditemukan tapi profil tidak lengkap untuk user: ${user.username}. Emitting AuthProfileIncomplete.'); // DEBUG
           emit(AuthProfileIncomplete(user));
         }
       },
@@ -107,7 +108,7 @@ class AuthCubit extends Cubit<AuthState> {
   /// Metode untuk memeriksa ulang status otentikasi tanpa menampilkan loading.
   /// Berguna setelah menyelesaikan langkah terakhir dari alur pendaftaran (misal: isi profil kesehatan).
   Future<void> revalidateAuthenticationStatus() async {
-    print('AuthCubit: Memvalidasi ulang status otentikasi...'); // DEBUG
+    debugPrint('AuthCubit: Memvalidasi ulang status otentikasi...'); // DEBUG
     final authResult = await getCurrentUserUseCase(NoParams());
 
     authResult.fold(
@@ -123,22 +124,22 @@ class AuthCubit extends Cubit<AuthState> {
   }
   /// Metode untuk melakukan proses login.
   Future<void> login(String username, String password) async {
-    print('AuthCubit: Memulai proses login untuk username: $username'); // DEBUG
+    debugPrint('AuthCubit: Memulai proses login untuk username: $username'); // DEBUG
     emit(AuthLoading()); // Emit state loading
-    print('AuthCubit: Emitting AuthLoading...'); // DEBUG
+    debugPrint('AuthCubit: Emitting AuthLoading...'); // DEBUG
 
     final result = await loginUseCase(LoginParams(username: username, password: password));
 
     result.fold(
       (failure) {
         final message = _mapFailureToMessage(failure);
-        print('AuthCubit: Login gagal. Emitting AuthError: $message'); // DEBUG
+        debugPrint('AuthCubit: Login gagal. Emitting AuthError: $message'); // DEBUG
         emit(AuthError(message)); // Jika gagal, emit AuthError
       },
       (user) {
         // Sesuai permintaan, selalu arahkan ke halaman OTP setelah login berhasil.
-        print('AuthCubit: Login berhasil. Emitting AuthOtpRequired untuk user ID: ${user.id}'); // DEBUG
-        print('AuthCubit: User dari login: username="${user.username}", email="${user.email}"'); // DEBUG
+        debugPrint('AuthCubit: Login berhasil. Emitting AuthOtpRequired untuk user ID: ${user.id}'); // DEBUG
+        debugPrint('AuthCubit: User dari login: username="${user.username}", email="${user.email}"'); // DEBUG
         emit(AuthOtpRequired(userId: user.id));
       },
     );
@@ -146,15 +147,15 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Metode untuk melakukan proses login dengan Google.
   Future<void> loginWithGoogle() async {
-    print('AuthCubit: Memulai proses login dengan Google'); // DEBUG
+    debugPrint('AuthCubit: Memulai proses login dengan Google'); // DEBUG
     emit(AuthLoading());
-    print('AuthCubit: Emitting AuthLoading...'); // DEBUG
+    debugPrint('AuthCubit: Emitting AuthLoading...'); // DEBUG
 
     try {
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         // Pengguna membatalkan proses login
-        print('AuthCubit: Login Google dibatalkan oleh pengguna.'); // DEBUG
+        debugPrint('AuthCubit: Login Google dibatalkan oleh pengguna.'); // DEBUG
         emit(AuthInitial()); // Kembali ke state awal
         return;
       }
@@ -163,7 +164,7 @@ class AuthCubit extends Cubit<AuthState> {
       final idToken = googleAuth.idToken;
 
       if (idToken == null) {
-        print('AuthCubit: Gagal mendapatkan idToken dari Google.'); // DEBUG
+        debugPrint('AuthCubit: Gagal mendapatkan idToken dari Google.'); // DEBUG
         emit(const AuthError('Gagal mendapatkan token dari Google.'));
         return;
       }
@@ -174,21 +175,21 @@ class AuthCubit extends Cubit<AuthState> {
         (failure) => emit(AuthError(_mapFailureToMessage(failure))), (user) => _fetchProfileAndEmitState(user),
       );
     } catch (e) {
-      print('AuthCubit: Terjadi error saat login Google: $e'); // DEBUG
+      debugPrint('AuthCubit: Terjadi error saat login Google: $e'); // DEBUG
       emit(AuthError(_mapFailureToMessage(ServerFailure('Gagal login dengan Google. Silakan coba lagi.'))));
     }
   }
 
   /// Metode untuk menautkan akun yang sudah ada dengan Google.
   Future<void> linkGoogleAccount() async {
-    print('AuthCubit: Memulai proses penautan akun Google'); // DEBUG
+    debugPrint('AuthCubit: Memulai proses penautan akun Google'); // DEBUG
     emit(AuthLoading()); // Tampilkan loading indicator di UI
 
     try {
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         // Pengguna membatalkan proses
-        print('AuthCubit: Penautan Google dibatalkan oleh pengguna.'); // DEBUG
+        debugPrint('AuthCubit: Penautan Google dibatalkan oleh pengguna.'); // DEBUG
         checkAuthenticationStatus(); // Kembali ke state sebelumnya dengan memuat ulang user
         return;
       }
@@ -197,7 +198,7 @@ class AuthCubit extends Cubit<AuthState> {
       final idToken = googleAuth.idToken;
 
       if (idToken == null) {
-        print('AuthCubit: Gagal mendapatkan idToken dari Google untuk penautan.'); // DEBUG
+        debugPrint('AuthCubit: Gagal mendapatkan idToken dari Google untuk penautan.'); // DEBUG
         emit(const AuthError('Gagal mendapatkan token dari Google.'));
         return;
       }
@@ -208,16 +209,16 @@ class AuthCubit extends Cubit<AuthState> {
         (failure) => emit(AuthError(_mapFailureToMessage(failure))), (user) => _fetchProfileAndEmitState(user),
       );
     } catch (e) {
-      print('AuthCubit: Terjadi error saat menautkan akun Google: $e'); // DEBUG
+      debugPrint('AuthCubit: Terjadi error saat menautkan akun Google: $e'); // DEBUG
       emit(AuthError(_mapFailureToMessage(ServerFailure('Gagal menautkan akun Google. Silakan coba lagi.'))));
     }
   }
 
   /// Metode untuk melakukan proses registrasi.
   Future<void> register(RegisterParams params) async {
-    print('AuthCubit: Memulai proses registrasi untuk username: ${params.username}'); // DEBUG
+    debugPrint('AuthCubit: Memulai proses registrasi untuk username: ${params.username}'); // DEBUG
     emit(AuthLoading());
-    print('AuthCubit: Emitting AuthLoading...'); // DEBUG
+    debugPrint('AuthCubit: Emitting AuthLoading...'); // DEBUG
 
     final result = await registerUseCase(params);
 
@@ -229,7 +230,7 @@ class AuthCubit extends Cubit<AuthState> {
         // Setelah registrasi, kita mendapatkan pending_id dari response model.
         final pendingId = responseModel.pendingId;
         if (pendingId != null) {
-          print('AuthCubit: Registrasi berhasil. Emitting AuthOtpRequired untuk pending ID: $pendingId'); // DEBUG
+          debugPrint('AuthCubit: Registrasi berhasil. Emitting AuthOtpRequired untuk pending ID: $pendingId'); // DEBUG
           emit(AuthOtpRequired(pendingId: pendingId));
         } else {
           emit(const AuthError('Gagal mendapatkan ID registrasi dari server.'));
@@ -240,17 +241,17 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Metode untuk verifikasi OTP.
   Future<void> verifyOtp({String? userId, String? pendingId, required String otpCode}) async {
-    print('AuthCubit: Memulai verifikasi OTP...'); // DEBUG
+    debugPrint('AuthCubit: Memulai verifikasi OTP...'); // DEBUG
     emit(AuthLoading());
-    print('AuthCubit: Emitting AuthLoading...'); // DEBUG
+    debugPrint('AuthCubit: Emitting AuthLoading...'); // DEBUG
 
     late final Future<Either<Failure, UserEntity>> result;
 
     if (pendingId != null) {
-      print('AuthCubit: Verifikasi OTP untuk pendaftaran dengan pending ID: $pendingId'); // DEBUG
+      debugPrint('AuthCubit: Verifikasi OTP untuk pendaftaran dengan pending ID: $pendingId'); // DEBUG
       result = verifySignupOtpUseCase(VerifySignupOtpParams(pendingId: pendingId, otpCode: otpCode));
     } else if (userId != null) {
-      print('AuthCubit: Verifikasi OTP untuk login dengan user ID: $userId'); // DEBUG
+      debugPrint('AuthCubit: Verifikasi OTP untuk login dengan user ID: $userId'); // DEBUG
       result = verifyOtpUseCase(VerifyOtpParams(userId: userId, otpCode: otpCode));
     } else {
       emit(const AuthError("ID untuk verifikasi OTP tidak ditemukan."));
@@ -260,7 +261,7 @@ class AuthCubit extends Cubit<AuthState> {
     (await result).fold(
       (failure) {
         final message = _mapFailureToMessage(failure);
-        print('AuthCubit: Verifikasi OTP gagal. Emitting AuthError: $message'); // DEBUG
+        debugPrint('AuthCubit: Verifikasi OTP gagal. Emitting AuthError: $message'); // DEBUG
         emit(AuthError(message)); // Jika gagal, emit AuthError
       },
       (user) => _fetchProfileAndEmitState(user),
@@ -269,18 +270,18 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Helper untuk mengambil profil terbaru dan memancarkan state yang sesuai.
   Future<void> _fetchProfileAndEmitState(UserEntity initialUser) async {
-    print('AuthCubit: Mengambil profil lengkap untuk user: ${initialUser.id}');
+    debugPrint('AuthCubit: Mengambil profil lengkap untuk user: ${initialUser.id}');
     // Ambil profil lengkap dari repository
     final profileResult = await profileRepository.getUserProfile();
 
     profileResult.fold(
       (failure) {
         // Jika gagal mengambil profil, gunakan data awal dan anggap profil tidak lengkap
-        print('AuthCubit: Gagal mengambil profil lengkap, menggunakan data awal. Error: $failure');
+        debugPrint('AuthCubit: Gagal mengambil profil lengkap, menggunakan data awal. Error: $failure');
         emit(AuthProfileIncomplete(initialUser));
       },
       (fullUser) {
-        print('AuthCubit: Profil lengkap didapatkan. isProfileComplete: ${fullUser.isProfileComplete}');
+        debugPrint('AuthCubit: Profil lengkap didapatkan. isProfileComplete: ${fullUser.isProfileComplete}');
         if (fullUser.isProfileComplete) {
           // Jika profil dasar lengkap, cek profil kesehatan
           _checkHealthProfileAndEmitState(fullUser);
@@ -304,7 +305,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Metode untuk mengirim ulang kode OTP.
   Future<void> resendOtp({String? userId, String? pendingId}) async {
-    print('AuthCubit: Meminta pengiriman ulang OTP...'); // DEBUG
+    debugPrint('AuthCubit: Meminta pengiriman ulang OTP...'); // DEBUG
     // Tidak mengubah state menjadi loading agar UI tidak terblokir total,
     // hanya menampilkan snackbar.
 
@@ -313,12 +314,12 @@ class AuthCubit extends Cubit<AuthState> {
     result.fold(
       (failure) {
         final message = _mapFailureToMessage(failure);
-        print('AuthCubit: Gagal mengirim ulang OTP. Emitting AuthError: $message'); // DEBUG
+        debugPrint('AuthCubit: Gagal mengirim ulang OTP. Emitting AuthError: $message'); // DEBUG
         // Emit error agar bisa ditangkap listener di UI untuk menampilkan snackbar
         emit(AuthError(message));
       },
       (_) {
-        print('AuthCubit: Permintaan kirim ulang OTP berhasil.'); // DEBUG
+        debugPrint('AuthCubit: Permintaan kirim ulang OTP berhasil.'); // DEBUG
         // Emit state baru untuk menandakan sukses dan menampilkan pesan di UI
         emit(const AuthOtpResent('Kode OTP baru telah dikirimkan.'));
       },
@@ -415,8 +416,8 @@ class AuthCubit extends Cubit<AuthState> {
   /// Metode untuk memperbarui data user di state saat ini.
   /// Ini berguna setelah update profil, agar UI di seluruh aplikasi konsisten.
   void updateUser(UserEntity user) {
-    print('AuthCubit: Memperbarui user di state. isProfileComplete: ${user.isProfileComplete}'); // DEBUG
-    print('AuthCubit: User yang diperbarui: username="${user.username}", email="${user.email}"'); // DEBUG
+    debugPrint('AuthCubit: Memperbarui user di state. isProfileComplete: ${user.isProfileComplete}'); // DEBUG
+    debugPrint('AuthCubit: User yang diperbarui: username="${user.username}", email="${user.email}"'); // DEBUG
     if (user.isProfileComplete) {
       // JANGAN LANGSUNG EMIT AuthAuthenticated.
       // Panggil helper untuk cek health profile terlebih dahulu.
@@ -429,29 +430,29 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Metode untuk logout atau membersihkan sesi.
   Future<void> logout() async {
-    print('AuthCubit: Melakukan logout...'); // DEBUG
+    debugPrint('AuthCubit: Melakukan logout...'); // DEBUG
     await authRepository.logout(); // Hapus token dan user dari cache
     // Repository sudah seharusnya menghapus semua token, tapi kita pastikan di sini
     await sl<AuthLocalDataSource>().clearRefreshToken();
     await googleSignIn.signOut(); // Logout juga dari Google jika login via Google
-    print('AuthCubit: Sesi dibersihkan. Emitting AuthUnauthenticated.'); // DEBUG
+    debugPrint('AuthCubit: Sesi dibersihkan. Emitting AuthUnauthenticated.'); // DEBUG
     emit(AuthUnauthenticated());
   }
 
   /// Metode untuk menghapus akun pengguna.
   Future<void> deleteAccount(String password) async {
-    print('AuthCubit: Memulai proses hapus akun...'); // DEBUG
+    debugPrint('AuthCubit: Memulai proses hapus akun...'); // DEBUG
     emit(AuthLoading());
 
     final result = await deleteAccountUseCase(DeleteAccountParams(password: password));
     result.fold(
       (failure) {
         final message = _mapFailureToMessage(failure);
-        print('AuthCubit: Gagal menghapus akun. Emitting AuthError: $message'); // DEBUG
+        debugPrint('AuthCubit: Gagal menghapus akun. Emitting AuthError: $message'); // DEBUG
         emit(AuthError(message));
       },
       (_) {
-        print('AuthCubit: Akun berhasil dihapus. Melakukan logout...'); // DEBUG
+        debugPrint('AuthCubit: Akun berhasil dihapus. Melakukan logout...'); // DEBUG
         logout(); // Panggil logout untuk membersihkan sesi dan emit AuthUnauthenticated
       },
     );

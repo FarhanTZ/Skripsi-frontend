@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:glupulse/core/api/api_client.dart';
 import 'package:glupulse/core/error/exceptions.dart';
 import 'package:glupulse/features/auth/data/models/login_response_model.dart';
@@ -43,7 +44,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'Password': password,
         },
       );
-      print('AuthRemoteDataSourceImpl: Respon API /login: $response'); // DEBUG
+      debugPrint('AuthRemoteDataSourceImpl: Respon API /login: $response'); // DEBUG
       // Parsing response JSON menjadi LoginResponseModel
       final loginResponse = LoginResponseModel.fromJson(response);
       await _cacheTokens(loginResponse);
@@ -65,7 +66,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'id_token': idToken,
         },
       );
-      print('AuthRemoteDataSourceImpl: Respon API /auth/mobile/google: $response'); // DEBUG
+      debugPrint('AuthRemoteDataSourceImpl: Respon API /auth/mobile/google: $response'); // DEBUG
       // Parsing response JSON menjadi LoginResponseModel
       final loginResponse = LoginResponseModel.fromJson(response);
       await _cacheTokens(loginResponse);
@@ -95,16 +96,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           "address_city": params.city,
         },
       );
-      print('AuthRemoteDataSourceImpl: Respon API /signup: $response'); // DEBUG
+      debugPrint('AuthRemoteDataSourceImpl: Respon API /signup: $response'); // DEBUG
       // Kita asumsikan responsenya sama dengan login (mengembalikan data user)
       final loginResponse = LoginResponseModel.fromJson(response);
       await _cacheTokens(loginResponse);
       return loginResponse;
     } on ServerException catch (e) {
-      print('AuthRemoteDataSourceImpl: ServerException ditangkap di register: ${e.message}'); // DEBUG
+      debugPrint('AuthRemoteDataSourceImpl: ServerException ditangkap di register: ${e.message}'); // DEBUG
       rethrow;
     } catch (e) {
-      print('AuthRemoteDataSourceImpl: Exception umum ditangkap di register: $e'); // DEBUG
+      debugPrint('AuthRemoteDataSourceImpl: Exception umum ditangkap di register: $e'); // DEBUG
       throw ServerException('Gagal melakukan registrasi. Terjadi kesalahan tidak terduga.');
     }
   }
@@ -119,7 +120,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'otp_code': otpCode, // Sesuai dengan spesifikasi Anda
         },
       );
-      print('AuthRemoteDataSourceImpl: Respon API /verify-otp: $response'); // DEBUG
+      debugPrint('AuthRemoteDataSourceImpl: Respon API /verify-otp: $response'); // DEBUG
       // Parsing response JSON menjadi LoginResponseModel
       final loginResponse = LoginResponseModel.fromJson(response);
       await _cacheTokens(loginResponse);
@@ -148,7 +149,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         // Untuk saat ini, kita biarkan tanpa token sesuai logika sebelumnya,
         // karena respons signup tidak memberikan token.
       );
-      print('AuthRemoteDataSourceImpl: Respon API /verify-signup-otp: $response'); // DEBUG
+      debugPrint('AuthRemoteDataSourceImpl: Respon API /verify-signup-otp: $response'); // DEBUG
       // Parsing response JSON menjadi LoginResponseModel
       final loginResponse = LoginResponseModel.fromJson(response);
       await _cacheTokens(loginResponse);
@@ -169,7 +170,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'id_token': idToken,
         },
       );
-      print('AuthRemoteDataSourceImpl: Respon API /auth/mobile/google/link: $response'); // DEBUG
+      debugPrint('AuthRemoteDataSourceImpl: Respon API /auth/mobile/google/link: $response'); // DEBUG
       // Parsing response JSON menjadi LoginResponseModel
       final loginResponse = LoginResponseModel.fromJson(response);
       await _cacheTokens(loginResponse);

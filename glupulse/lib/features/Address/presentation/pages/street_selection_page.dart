@@ -157,7 +157,7 @@ class _StreetSelectionPageState extends State<StreetSelectionPage> {
 
         // Gabungkan informasi jalan, nomor, dan area sekitar
         String streetAddress =
-            '${place.street ?? ''}'.trim();
+            (place.street ?? '').trim();
 
         if (streetAddress.isEmpty) {
           throw Exception('Gagal mendapatkan nama jalan dari lokasi Anda.');

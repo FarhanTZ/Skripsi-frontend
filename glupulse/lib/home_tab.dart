@@ -83,7 +83,7 @@ class _HomeTabState extends State<HomeTab> {
                 end: Alignment.bottomRight,
                 colors: [
                   Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
                 ],
               ),
               borderRadius: const BorderRadius.vertical(
@@ -91,7 +91,7 @@ class _HomeTabState extends State<HomeTab> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -202,7 +202,7 @@ class _HomeTabState extends State<HomeTab> {
                       hintText: 'Search for articles, doctors...',
                       prefixIcon: Icon(
                         Icons.search,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
                       ),
                       filled: true,
                       fillColor: Colors.white,
@@ -819,7 +819,7 @@ class _HomeTabState extends State<HomeTab> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(category.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: iconColor.withOpacity(0.8))),
+                          Text(category.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: iconColor.withValues(alpha: 0.8))),
                           if (statusText != null && statusColor != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 6.0),
@@ -882,7 +882,7 @@ class _HomeTabState extends State<HomeTab> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -904,7 +904,7 @@ class _HomeTabState extends State<HomeTab> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: cardColor.withOpacity(0.1),
+                          color: cardColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
@@ -942,7 +942,7 @@ class _HomeTabState extends State<HomeTab> {
                 child: Container(
                   height: double.infinity,
                   decoration: BoxDecoration(
-                    color: cardColor.withOpacity(0.05),
+                    color: cardColor.withValues(alpha: 0.05),
                   ),
                   child: imageAsset != null
                       ? Image.asset(
@@ -953,7 +953,7 @@ class _HomeTabState extends State<HomeTab> {
                                 child: Icon(
                                   _getIconForActivity(activity.activityCode),
                                   size: 50,
-                                  color: cardColor.withOpacity(0.5),
+                                  color: cardColor.withValues(alpha: 0.5),
                                 ),
                               );
                             },
@@ -962,7 +962,7 @@ class _HomeTabState extends State<HomeTab> {
                           child: Icon(
                             _getIconForActivity(activity.activityCode),
                             size: 60,
-                            color: cardColor.withOpacity(0.3),
+                            color: cardColor.withValues(alpha: 0.3),
                           ),
                         ),
                 ),
@@ -1017,7 +1017,7 @@ class _HomeTabState extends State<HomeTab> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 5,
               offset: const Offset(0, 2),
@@ -1032,7 +1032,7 @@ class _HomeTabState extends State<HomeTab> {
               child: Container(
                   height: 100,
                   width: double.infinity,
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   child: const Center(child: Icon(Icons.fastfood_outlined, color: Colors.grey, size: 40))),
             ),
             Padding(

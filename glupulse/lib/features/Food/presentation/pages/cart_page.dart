@@ -172,7 +172,7 @@ class _CartPageState extends State<CartPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: Padding(
@@ -315,7 +315,8 @@ class _CartPageState extends State<CartPage> {
       ),
     );
 
-    if (confirmed == true && mounted) {
+    if (confirmed == true) {
+      if(!mounted) return;
       context.read<CartCubit>().removeItemFromCart(item.foodId);
     }
   }
@@ -328,7 +329,7 @@ class _CartPageState extends State<CartPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -4)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -4)),
         ],
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),

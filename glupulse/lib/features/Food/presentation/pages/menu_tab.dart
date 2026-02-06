@@ -21,7 +21,7 @@ import 'package:glupulse/features/recommendation/presentation/pages/recommendati
 
 
 class MenuTab extends StatefulWidget {
-  const MenuTab({Key? key}) : super(key: key);
+  const MenuTab({super.key});
 
   @override
   State<MenuTab> createState() => _MenuTabState();
@@ -146,7 +146,7 @@ class _MenuTabState extends State<MenuTab> {
                   end: Alignment.bottomRight,
                   colors: [
                     Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
                   ],
                 ),
                 borderRadius: const BorderRadius.vertical(
@@ -154,7 +154,7 @@ class _MenuTabState extends State<MenuTab> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -297,7 +297,7 @@ class _MenuTabState extends State<MenuTab> {
                   borderRadius: BorderRadius.circular(15.0),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),

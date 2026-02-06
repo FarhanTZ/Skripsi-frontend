@@ -48,20 +48,20 @@ class _MedicationLogListPageState extends State<MedicationLogListPage> {
           final isSelected = _isSameDay(date, _selectedDate);
           final hasLog = logs.any((log) => _isSameDay(log.timestamp, date));
           
+          bool isCurrentlyPressed = false; // State lokal untuk efek tekan
+
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setStateInner) {
-              bool _isCurrentlyPressed = false; // State lokal untuk efek tekan
-
               return GestureDetector(
                 onTapDown: (_) {
-                  setStateInner(() => _isCurrentlyPressed = true);
+                  setStateInner(() => isCurrentlyPressed = true);
                 },
                 onTapUp: (_) {
-                  setStateInner(() => _isCurrentlyPressed = false);
-                  this.setState(() => _selectedDate = date); // Perbarui tanggal terpilih di parent state
+                  setStateInner(() => isCurrentlyPressed = false);
+                  setState(() => _selectedDate = date); // Perbarui tanggal terpilih di parent state
                 },
                 onTapCancel: () {
-                  setStateInner(() => _isCurrentlyPressed = false);
+                  setStateInner(() => isCurrentlyPressed = false);
                 },
                 onTap: () {
                   // Jika hanya ingin onTap, tapi kita sudah pakai onTapUp untuk perubahan state
@@ -78,13 +78,13 @@ class _MedicationLogListPageState extends State<MedicationLogListPage> {
                       : Border.all(color: Colors.grey.shade300),
                     boxShadow: [ // Shadow konsisten untuk semua kartu
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1), // Sedikit lebih gelap agar terlihat
+                        color: Colors.black.withValues(alpha: 0.1), // Sedikit lebih gelap agar terlihat
                         blurRadius: 6, // Sedikit lebih blur
                         offset: const Offset(0, 3), // Sedikit lebih offset
                       ),
-                      if (_isCurrentlyPressed) // Shadow biru saat ditekan
+                      if (isCurrentlyPressed) // Shadow biru saat ditekan
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.6), // Warna biru untuk highlight
+                          color: Colors.blue.withValues(alpha: 0.6), // Warna biru untuk highlight
                           blurRadius: 10,
                           spreadRadius: 2, // Menyebar sedikit
                           offset: const Offset(0, 4),
@@ -281,7 +281,7 @@ class _MedicationLogListPageState extends State<MedicationLogListPage> {
                                             margin: EdgeInsets.only(top: showTime ? 0 : 0), 
                                             color: isLast 
                                               ? Colors.transparent 
-                                              : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                                           ),
                                         ),
                                       ],
@@ -448,7 +448,7 @@ class _MedicationLogListPageState extends State<MedicationLogListPage> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       spreadRadius: 2,
                       offset: const Offset(0, -2),
@@ -543,13 +543,13 @@ class _MedicationLogListPageState extends State<MedicationLogListPage> {
                                   leading: Container(
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
                                       shape: BoxShape.circle
                                     ),
                                     child: Icon(Icons.medication_liquid, color: Theme.of(context).colorScheme.primary),
                                   ),
                                   title: Text(med.displayName, style: const TextStyle(fontWeight: FontWeight.w600)),
-                                  subtitle: Text(med.defaultDoseUnit ?? med.medicationType, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                  subtitle: Text(med.defaultDoseUnit, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [

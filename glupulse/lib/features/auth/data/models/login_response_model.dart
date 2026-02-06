@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:glupulse/features/auth/data/models/user_model.dart';
 
 /// Model untuk merepresentasikan response lengkap dari API login.
@@ -12,7 +13,7 @@ class LoginResponseModel {
   const LoginResponseModel({required this.token, required this.refreshToken, required this.user, this.pendingId});
 
   factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
-    print('LoginResponseModel.fromJson: Menerima JSON: $json'); // DEBUG
+    debugPrint('LoginResponseModel.fromJson: Menerima JSON: $json'); // DEBUG
 
     // Cek jika ini adalah respons dari signup yang hanya berisi pending_id
     if (json.containsKey('pending_id') && !json.containsKey('data')) {

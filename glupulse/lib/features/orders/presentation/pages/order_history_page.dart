@@ -112,13 +112,13 @@ class _OrderHistoryCard extends StatelessWidget {
     Color statusTextColor;
 
     if (isCompleted) {
-      statusColor = Colors.green.withOpacity(0.1);
+      statusColor = Colors.green.withValues(alpha: 0.1);
       statusTextColor = Colors.green;
     } else if (isPending) {
-      statusColor = Colors.orange.withOpacity(0.1);
+      statusColor = Colors.orange.withValues(alpha: 0.1);
       statusTextColor = Colors.orange;
     } else {
-      statusColor = Colors.blue.withOpacity(0.1);
+      statusColor = Colors.blue.withValues(alpha: 0.1);
       statusTextColor = Colors.blue;
     }
 

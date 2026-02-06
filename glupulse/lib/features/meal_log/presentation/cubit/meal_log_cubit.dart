@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:glupulse/core/error/failures.dart';
@@ -70,19 +71,19 @@ class MealLogCubit extends Cubit<MealLogState> {
   }
 
   Future<void> updateMealLog(MealLog mealLog) async {
-    print('CUBIT: updateMealLog called');
+    debugPrint('CUBIT: updateMealLog called');
     emit(MealLogLoading());
     final failureOrSuccess =
         await updateMealLogUseCase(UpdateMealLogParams(mealLog: mealLog));
-    print('CUBIT: updateMealLog result received');
+    debugPrint('CUBIT: updateMealLog result received');
     emit(
       failureOrSuccess.fold(
         (failure) {
-          print('CUBIT: updateMealLog failed: ${_mapFailureToMessage(failure)}');
+          debugPrint('CUBIT: updateMealLog failed: ${_mapFailureToMessage(failure)}');
           return MealLogError(message: _mapFailureToMessage(failure));
         },
         (updatedLog) {
-          print('CUBIT: updateMealLog success');
+          debugPrint('CUBIT: updateMealLog success');
           return MealLogUpdated();
         },
       ),

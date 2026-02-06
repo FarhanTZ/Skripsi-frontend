@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:glupulse/features/health_event/domain/entities/health_event.dart';
 import 'package:glupulse/app/theme/app_theme.dart';
 import 'package:glupulse/features/health_event/presentation/cubit/health_event_cubit.dart';
-import 'package:glupulse/injection_container.dart';
 
 class AddEditHealthEventPage extends StatefulWidget {
   final HealthEvent? healthEvent; // Optional for editing existing record
@@ -79,9 +78,9 @@ class _AddEditHealthEventPageState extends State<AddEditHealthEventPage> {
   }
 
   void _submitForm() {
-    print('[_submitForm] method called.');
+    debugPrint('[_submitForm] method called.');
     if (_formKey.currentState!.validate()) {
-      print('[_submitForm] Form validation successful.');
+      debugPrint('[_submitForm] Form validation successful.');
       final newHealthEvent = HealthEvent(
         id: widget.healthEvent?.id,
         eventDate: _eventDate,
@@ -104,14 +103,14 @@ class _AddEditHealthEventPageState extends State<AddEditHealthEventPage> {
       );
 
       if (widget.healthEvent == null) {
-        print('[_submitForm] Calling addHealthEvent with data: $newHealthEvent');
+        debugPrint('[_submitForm] Calling addHealthEvent with data: $newHealthEvent');
         context.read<HealthEventCubit>().addHealthEvent(newHealthEvent);
       } else {
-        print('[_submitForm] Calling updateHealthEvent with data: $newHealthEvent');
+        debugPrint('[_submitForm] Calling updateHealthEvent with data: $newHealthEvent');
         context.read<HealthEventCubit>().updateHealthEvent(newHealthEvent);
       }
     } else {
-      print('[_submitForm] Form validation failed.');
+      debugPrint('[_submitForm] Form validation failed.');
     }
   }
 
@@ -135,21 +134,21 @@ class _AddEditHealthEventPageState extends State<AddEditHealthEventPage> {
       body: BlocConsumer<HealthEventCubit, HealthEventState>(
         listener: (context, state) {
           if (state is HealthEventAdded) {
-            print('[BlocConsumer] HealthEventAdded state received.');
+            debugPrint('[BlocConsumer] HealthEventAdded state received.');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                   content: Text('Health Event Added Successfully!')),
             );
             Navigator.of(context).pop();
           } else if (state is HealthEventUpdated) {
-            print('[BlocConsumer] HealthEventUpdated state received.');
+            debugPrint('[BlocConsumer] HealthEventUpdated state received.');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                   content: Text('Health Event Updated Successfully!')),
             );
             Navigator.of(context).pop();
           } else if (state is HealthEventError) {
-            print('[BlocConsumer] HealthEventError state received: ${state.message}');
+            debugPrint('[BlocConsumer] HealthEventError state received: ${state.message}');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error: ${state.message}')),
             );

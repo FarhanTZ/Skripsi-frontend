@@ -99,7 +99,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
               } else if (state is HealthProfileSaved) { // Dihapus agar tidak ada notifikasi setiap auto-save
                 // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pengaturan berhasil diperbarui!')));
-                print('Pengaturan berhasil disimpan otomatis.'); // Log untuk debugging
+                debugPrint('Pengaturan berhasil disimpan otomatis.'); // Log untuk debugging
               } else if (state is HealthProfileSaveError) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menyimpan pengaturan: ${state.message}')));
               }
@@ -153,7 +153,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                               text: 'Ganti Email',
                               onTap: () {
                                 // TODO: Implement navigation to Change Email page
-                                print('Tombol Ganti Email diklik');
+                                debugPrint('Tombol Ganti Email diklik');
                               },
                             ),
                             _buildProfileMenuItem(
@@ -265,15 +265,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15.0),
-        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 5))],
+        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 5))],
       ),
       child: ListTile(
         leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
                 color: (iconColor == Colors.redAccent // Cek jika ini item destruktif
-                    ? Colors.redAccent.withOpacity(0.15) // Latar merah transparan
-                    : AppTheme.inputFieldColor.withOpacity(0.7)),
+                    ? Colors.redAccent.withValues(alpha: 0.15) // Latar merah transparan
+                    : AppTheme.inputFieldColor.withValues(alpha: 0.7)),
                 borderRadius: BorderRadius.circular(12)),
             child: Icon(icon, color: iconColor ?? defaultIconColor)),
         title: Text(text,
@@ -394,7 +394,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.05), spreadRadius: 1, blurRadius: 5)],
+        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.05), spreadRadius: 1, blurRadius: 5)],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

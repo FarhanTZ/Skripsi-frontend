@@ -73,9 +73,9 @@ class _AddEditHba1cPageState extends State<AddEditHba1cPage> {
   }
 
   void _submitForm() {
-    print('[_submitForm] method called.');
+    debugPrint('[_submitForm] method called.');
     if (_formKey.currentState!.validate()) {
-      print('[_submitForm] Form validation successful.');
+      debugPrint('[_submitForm] Form validation successful.');
       final newHba1c = Hba1c(
         id: widget.hba1c?.id,
         testDate: _testDate,
@@ -91,22 +91,22 @@ class _AddEditHba1cPageState extends State<AddEditHba1cPage> {
       );
 
       if (widget.hba1c == null) {
-        print('[_submitForm] Calling addHba1c with data: $newHba1c');
+        debugPrint('[_submitForm] Calling addHba1c with data: $newHba1c');
         context.read<Hba1cCubit>().addHba1c(newHba1c);
       } else {
         // Validasi penting untuk operasi update
         if (newHba1c.id == null) {
-          print('[_submitForm] Error: ID is null for an update operation.');
+          debugPrint('[_submitForm] Error: ID is null for an update operation.');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Error: Cannot update record without an ID.')),
           );
           return; // Hentikan eksekusi jika ID null
         }
-        print('[_submitForm] Calling updateHba1c with data: $newHba1c');
+        debugPrint('[_submitForm] Calling updateHba1c with data: $newHba1c');
         context.read<Hba1cCubit>().updateHba1c(newHba1c);
       }
     } else {
-      print('[_submitForm] Form validation failed.');
+      debugPrint('[_submitForm] Form validation failed.');
     }
   }
 
@@ -128,19 +128,19 @@ class _AddEditHba1cPageState extends State<AddEditHba1cPage> {
       body: BlocConsumer<Hba1cCubit, Hba1cState>(
         listener: (context, state) {
           if (state is Hba1cAdded) {
-            print('[BlocConsumer] Hba1cAdded state received.');
+            debugPrint('[BlocConsumer] Hba1cAdded state received.');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Hba1c Record Added Successfully!')),
             );
             Navigator.of(context).pop();
           } else if (state is Hba1cUpdated) {
-            print('[BlocConsumer] Hba1cUpdated state received.');
+            debugPrint('[BlocConsumer] Hba1cUpdated state received.');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Hba1c Record Updated Successfully!')),
             );
             Navigator.of(context).pop();
           } else if (state is Hba1cError) {
-            print('[BlocConsumer] Hba1cError state received: ${state.message}');
+            debugPrint('[BlocConsumer] Hba1cError state received: ${state.message}');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error: ${state.message}')),
             );

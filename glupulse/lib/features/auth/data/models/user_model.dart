@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:glupulse/features/auth/domain/entities/user_entity.dart';
 import 'package:glupulse/features/profile/data/models/address_model.dart';
 
@@ -5,11 +6,11 @@ import 'package:glupulse/features/profile/data/models/address_model.dart';
 /// Ini adalah implementasi dari UserEntity.
 class UserModel extends UserEntity {
   const UserModel({
-    required String id,
-    required String username,
-    required String email,
-    String? firstName,
-    String? lastName,
+    required super.id,
+    required super.username,
+    required super.email,
+    super.firstName,
+    super.lastName,
     this.dob,
     this.gender,
     this.accountType,
@@ -18,21 +19,21 @@ class UserModel extends UserEntity {
     this.isGoogleLinked,
     this.addresses,
   }) : super(
-          id: id,
-          username: username,
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
           avatarUrl: avatarUrl,
           isGoogleLinked: isGoogleLinked,
         );
 
+  @override
   final String? dob;
+  @override
   final String? gender;
   final int? accountType;
   final bool? isEmailVerified;
+  @override
   final String? avatarUrl;
+  @override
   final bool? isGoogleLinked;
+  @override
   final List<AddressModel>? addresses;
 
   @override
@@ -58,7 +59,7 @@ class UserModel extends UserEntity {
     String? fallbackUsername,
     String? fallbackEmail,
   }) {
-    print('UserModel.fromJson (Source: $source): Menerima JSON: $json'); // DEBUG
+    debugPrint('UserModel.fromJson (Source: $source): Menerima JSON: $json'); // DEBUG
     // Gunakan fallback jika field tidak ada di JSON (kasus setelah register)
 
     // Data profil bisa ada di dalam key 'profile' atau langsung di root.
@@ -69,7 +70,7 @@ class UserModel extends UserEntity {
     final parsedUsername =
         profileData['username'] as String? ?? fallbackUsername ?? '';
     final parsedEmail = profileData['email'] as String? ?? fallbackEmail ?? '';
-    print('UserModel.fromJson (Source: $source): Parsed Username: "$parsedUsername", Parsed Email: "$parsedEmail"'); // DEBUG
+    debugPrint('UserModel.fromJson (Source: $source): Parsed Username: "$parsedUsername", Parsed Email: "$parsedEmail"'); // DEBUG
 
     // Parsing daftar alamat
     List<AddressModel> parsedAddresses = [];
@@ -97,7 +98,7 @@ class UserModel extends UserEntity {
           }
         }
       }
-      print('UserModel.fromJson (Source: $source): Berhasil mem-parsing dan membersihkan ${parsedAddresses.length} alamat.'); // DEBUG
+      debugPrint('UserModel.fromJson (Source: $source): Berhasil mem-parsing dan membersihkan ${parsedAddresses.length} alamat.'); // DEBUG
     }
 
     return UserModel(
@@ -133,9 +134,7 @@ class UserModel extends UserEntity {
       'avatar_url': avatarUrl,
       'is_google_linked': isGoogleLinked,
       // toJson untuk addresses bisa ditambahkan jika diperlukan
-      'addresses': addresses != null
-          ? addresses!.map((address) => address.toJson()).toList()
-          : null,
+      'addresses': addresses?.map((address) => address.toJson()).toList(),
     };
   }
 }

@@ -4,20 +4,13 @@ import 'package:glupulse/features/Food/domain/entities/cart_item.dart';
 
 class CartItemModel extends CartItem {
   const CartItemModel({
-    required String cartItemId,
-    required String foodId,
-    required int quantity,
-    required String foodName,
-    required double price,
-    String? photoUrl,
-  }) : super(
-          cartItemId: cartItemId,
-          foodId: foodId,
-          quantity: quantity,
-          foodName: foodName,
-          price: price,
-          photoUrl: photoUrl,
-        );
+    required super.cartItemId,
+    required super.foodId,
+    required super.quantity,
+    required super.foodName,
+    required super.price,
+    super.photoUrl,
+  });
 
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
     return CartItemModel(

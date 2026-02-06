@@ -196,7 +196,7 @@ class _DeleteAccountConfirmationPageState
             onPressed: () => Navigator.of(context).pop(),
             style: ElevatedButton.styleFrom(
               elevation: 0,
-              backgroundColor: Colors.redAccent.withOpacity(0.15),
+              backgroundColor: Colors.redAccent.withValues(alpha: 0.15),
               foregroundColor: Colors.redAccent,
               minimumSize: const Size(double.infinity, 55),
               shape: RoundedRectangleBorder(
@@ -226,7 +226,7 @@ class _DeleteAccountConfirmationPageState
         borderRadius: BorderRadius.circular(15.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             spreadRadius: 1,
             blurRadius: 7,
             offset: const Offset(0, 3),

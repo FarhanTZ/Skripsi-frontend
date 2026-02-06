@@ -176,7 +176,7 @@ class _ActivityTypeListPageState extends State<ActivityTypeListPage> {
                                             Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: Colors.grey.withOpacity(0.2),
+                                                color: Colors.grey.withValues(alpha: 0.2),
                                                 borderRadius: BorderRadius.circular(10),
                                               ),
                                               child: Icon(
@@ -201,7 +201,7 @@ class _ActivityTypeListPageState extends State<ActivityTypeListPage> {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                               decoration: BoxDecoration(
-                                                color: _getIntensityColor(type.intensityLevel).withOpacity(0.1),
+                                                color: _getIntensityColor(type.intensityLevel).withValues(alpha: 0.1),
                                                 borderRadius: BorderRadius.circular(6),
                                               ),
                                               child: Text(
@@ -224,7 +224,7 @@ class _ActivityTypeListPageState extends State<ActivityTypeListPage> {
                                       child: Container(
                                         height: double.infinity,
                                         decoration: BoxDecoration(
-                                          color: _getColorForActivity(type.activityCode).withOpacity(0.05),
+                                          color: _getColorForActivity(type.activityCode).withValues(alpha: 0.05),
                                         ),
                                         child: imageAsset != null
                                             ? Image.asset(
@@ -235,7 +235,7 @@ class _ActivityTypeListPageState extends State<ActivityTypeListPage> {
                                                       child: Icon(
                                                         _getIconForActivity(type.activityCode),
                                                         size: 50,
-                                                        color: _getColorForActivity(type.activityCode).withOpacity(0.5),
+                                                        color: _getColorForActivity(type.activityCode).withValues(alpha: 0.5),
                                                       ),
                                                     );
                                                   },
@@ -244,7 +244,7 @@ class _ActivityTypeListPageState extends State<ActivityTypeListPage> {
                                                 child: Icon(
                                                   _getIconForActivity(type.activityCode),
                                                   size: 60,
-                                                  color: _getColorForActivity(type.activityCode).withOpacity(0.3),
+                                                  color: _getColorForActivity(type.activityCode).withValues(alpha: 0.3),
                                                 ),
                                               ),
                                       ),
@@ -283,7 +283,7 @@ class _ActivityTypeListPageState extends State<ActivityTypeListPage> {
             borderRadius: BorderRadius.circular(12),
             border: isActive ? null : Border.all(color: Colors.grey.shade300),
             boxShadow: isActive 
-              ? [BoxShadow(color: activeColor.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 4))]
+              ? [BoxShadow(color: activeColor.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 4))]
               : null,
           ),
           child: Text(

@@ -230,7 +230,7 @@ class _HealthMetricDetailPageState extends State<HealthMetricDetailPage>
             end: Alignment.bottomRight,
             colors: [
               Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
             ],
           ),
           borderRadius: const BorderRadius.vertical(
@@ -238,7 +238,7 @@ class _HealthMetricDetailPageState extends State<HealthMetricDetailPage>
           ),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -255,8 +255,8 @@ class _HealthMetricDetailPageState extends State<HealthMetricDetailPage>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    widget.iconColor.withOpacity(0.3),
-                    widget.iconColor.withOpacity(0.1),
+                    widget.iconColor.withValues(alpha: 0.3),
+                    widget.iconColor.withValues(alpha: 0.1),
                   ],
                 ),
               ),
@@ -280,14 +280,14 @@ class _HealthMetricDetailPageState extends State<HealthMetricDetailPage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.3)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
               ),
               child: Text(
                 '${widget.unit} • ${widget.status}',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.95),
+                  color: Colors.white.withValues(alpha: 0.95),
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.5,
@@ -305,7 +305,7 @@ class _HealthMetricDetailPageState extends State<HealthMetricDetailPage>
       elevation: 8,
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
         child: SizedBox(
@@ -326,7 +326,7 @@ class _HealthMetricDetailPageState extends State<HealthMetricDetailPage>
       elevation: 6,
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      shadowColor: accentColor.withOpacity(0.15),
+      shadowColor: accentColor.withValues(alpha: 0.15),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -396,7 +396,7 @@ class _HealthMetricDetailPageState extends State<HealthMetricDetailPage>
                   TextSpan(
                     text: widget.unit,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -473,19 +473,19 @@ class _HealthMetricDetailPageState extends State<HealthMetricDetailPage>
           toY: y,
           color: isTouched
               ? widget.iconColor
-              : widget.iconColor.withOpacity(0.6),
+              : widget.iconColor.withValues(alpha: 0.6),
           width: width,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(8),
             topRight: Radius.circular(8),
           ),
           borderSide: isTouched
-              ? BorderSide(color: widget.iconColor.withOpacity(0.9), width: 3)
+              ? BorderSide(color: widget.iconColor.withValues(alpha: 0.9), width: 3)
               : BorderSide.none,
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
             toY: _metricContent.chartMaxY,
-            color: widget.iconColor.withOpacity(0.08),
+            color: widget.iconColor.withValues(alpha: 0.08),
           ),
         ),
       ],

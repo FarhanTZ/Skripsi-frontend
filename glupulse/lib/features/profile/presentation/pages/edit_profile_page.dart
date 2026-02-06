@@ -76,7 +76,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _populateFields(UserEntity user) {
-    print('EditProfilePage: _populateFields dipanggil dengan user dari ProfileCubit: ${user.username}, ${user.email}'); // DEBUG
+    debugPrint('EditProfilePage: _populateFields dipanggil dengan user dari ProfileCubit: ${user.username}, ${user.email}'); // DEBUG
     // Ambil data user dari AuthCubit sebagai basis, karena pasti punya username & email.
     final authState = context.read<auth.AuthCubit>().state;
     UserEntity? authUser;
@@ -85,7 +85,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } else if (authState is AuthProfileIncomplete) {
       authUser = authState.user;
     }
-    print('EditProfilePage: authUser dari AuthCubit: ${authUser?.username}, ${authUser?.email}'); // DEBUG
+    debugPrint('EditProfilePage: authUser dari AuthCubit: ${authUser?.username}, ${authUser?.email}'); // DEBUG
 
     // Isi field dari data yang paling lengkap.
     _firstNameController.text = user.firstName ?? authUser?.firstName ?? '';
@@ -100,18 +100,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   }
   void _saveChanges() async {
-    print('--- DEBUG: _saveChanges() dipanggil ---'); // DEBUG
+    debugPrint('--- DEBUG: _saveChanges() dipanggil ---'); // DEBUG
     // Validasi field yang wajib diisi (username tidak lagi divalidasi)
     if (_firstNameController.text.isEmpty || // Username tidak lagi wajib
         _lastNameController.text.isEmpty ||
         _dobController.text.isEmpty || // Tetap validasi DOB
         _selectedGender == null) { // Tetap validasi Gender
-      print('--- DEBUG: Validasi GAGAL. Detail: ---'); // DEBUG
-      print('First Name Kosong: ${_firstNameController.text.isEmpty}');
-      print('Last Name Kosong: ${_lastNameController.text.isEmpty}');
-      print('DOB Kosong: ${_dobController.text.isEmpty}');
-      print('Gender Kosong: ${_selectedGender == null}');
-      print('------------------------------------'); // DEBUG
+      debugPrint('--- DEBUG: Validasi GAGAL. Detail: ---'); // DEBUG
+      debugPrint('First Name Kosong: ${_firstNameController.text.isEmpty}');
+      debugPrint('Last Name Kosong: ${_lastNameController.text.isEmpty}');
+      debugPrint('DOB Kosong: ${_dobController.text.isEmpty}');
+      debugPrint('Gender Kosong: ${_selectedGender == null}');
+      debugPrint('------------------------------------'); // DEBUG
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Harap lengkapi semua field yang wajib diisi.')));
       return;
@@ -122,7 +122,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _proceedWithUpdate() {
-     print('--- DEBUG: Validasi BERHASIL ---'); // DEBUG
+     debugPrint('--- DEBUG: Validasi BERHASIL ---'); // DEBUG
      // TODO: Jika _pickedImage tidak null, panggil cubit untuk upload avatar dulu.
      // if (_pickedImage != null) {
      //   context.read<ProfileCubit>().updateAvatar(_pickedImage!);
@@ -135,9 +135,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
        gender: _selectedGender,
      );
  
-     print('--- DEBUG: Parameter yang akan dikirim: ${params.toJson()} ---'); // DEBUG
+     debugPrint('--- DEBUG: Parameter yang akan dikirim: ${params.toJson()} ---'); // DEBUG
      context.read<ProfileCubit>().updateProfile(params);
-     print('--- DEBUG: Memanggil ProfileCubit.updateProfile... ---'); // DEBUG
+     debugPrint('--- DEBUG: Memanggil ProfileCubit.updateProfile... ---'); // DEBUG
   }
 
   // Fungsi untuk memilih gambar dari galeri
@@ -363,7 +363,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         borderRadius: BorderRadius.circular(15.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             spreadRadius: 1,
             blurRadius: 7,
             offset: const Offset(0, 3), // Posisi bayangan
@@ -404,7 +404,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         borderRadius: BorderRadius.circular(15.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             spreadRadius: 1,
             blurRadius: 7,
             offset: const Offset(0, 3),
@@ -445,7 +445,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15.0),
-        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.2), spreadRadius: 1, blurRadius: 7, offset: const Offset(0, 3))],
+        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.2), spreadRadius: 1, blurRadius: 7, offset: const Offset(0, 3))],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(

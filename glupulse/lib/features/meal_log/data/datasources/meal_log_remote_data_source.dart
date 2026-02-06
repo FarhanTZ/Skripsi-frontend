@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:glupulse/core/api/api_client.dart';
 import 'package:glupulse/core/error/exceptions.dart';
 import 'package:glupulse/features/meal_log/data/models/meal_log_model.dart';
@@ -18,28 +19,28 @@ class MealLogRemoteDataSourceImpl implements MealLogRemoteDataSource {
   @override
   Future<List<MealLogModel>> getMealLogs(String token) async {
     try {
-      print('DEBUG: Calling getMealLogs...');
+      debugPrint('DEBUG: Calling getMealLogs...');
       final response = await apiClient.getList(
         '/health/log/meals',
         token: token,
       );
-      print('DEBUG: getMealLogs response received. items count: ${response.length}');
+      debugPrint('DEBUG: getMealLogs response received. items count: ${response.length}');
       
       return response.map((json) {
         try {
           // Print raw JSON to debug server response
-          print('DEBUG: Raw Meal Log JSON: $json');
+          debugPrint('DEBUG: Raw Meal Log JSON: $json');
           return MealLogModel.fromJson(json);
         } catch (e) {
-          print('DEBUG: Error parsing meal log item: $e');
-          print('DEBUG: JSON that failed: $json');
+          debugPrint('DEBUG: Error parsing meal log item: $e');
+          debugPrint('DEBUG: JSON that failed: $json');
           rethrow;
         }
       }).toList();
     } on ServerException {
       rethrow;
     } catch (e) {
-      print('DEBUG: Error in getMealLogs: $e');
+      debugPrint('DEBUG: Error in getMealLogs: $e');
       throw ServerException(e.toString());
     }
   }
@@ -74,16 +75,16 @@ class MealLogRemoteDataSourceImpl implements MealLogRemoteDataSource {
   @override
   Future<MealLogModel> updateMealLog(MealLogModel mealLog, String token) async {
     try {
-      print('DEBUG: Calling PUT updateMealLog for ID ${mealLog.mealId}');
+      debugPrint('DEBUG: Calling PUT updateMealLog for ID ${mealLog.mealId}');
       final response = await apiClient.put(
         '/health/log/meal/${mealLog.mealId}',
         body: mealLog.toJson(),
         token: token,
       );
-      print('DEBUG: PUT response received: $response');
+      debugPrint('DEBUG: PUT response received: $response');
       return _parseMealLogResponse(response);
     } catch (e) {
-      print('DEBUG: Error in updateMealLog: $e');
+      debugPrint('DEBUG: Error in updateMealLog: $e');
       throw ServerException(e.toString());
     }
   }
@@ -110,7 +111,7 @@ class MealLogRemoteDataSourceImpl implements MealLogRemoteDataSource {
       }
       return MealLogModel.fromJson(response);
     } catch (e) {
-      print('DEBUG: Error parsing response: $e');
+      debugPrint('DEBUG: Error parsing response: $e');
       rethrow;
     }
   }

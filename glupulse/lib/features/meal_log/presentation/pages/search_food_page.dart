@@ -230,7 +230,7 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -369,7 +369,7 @@ class _SearchFoodPageState extends State<SearchFoodPage> {
             Icon(Icons.search_off, size: 80, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
-              _query.isEmpty ? 'Start typing to search for food' : 'No results found for "${_query}"',
+              _query.isEmpty ? 'Start typing to search for food' : 'No results found for "$_query"',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),

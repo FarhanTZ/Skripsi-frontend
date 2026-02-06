@@ -23,7 +23,7 @@ class RegionSelectionPage extends StatefulWidget {
   const RegionSelectionPage({super.key});
 
   @override
-  _RegionSelectionPageState createState() => _RegionSelectionPageState();
+  State<RegionSelectionPage> createState() => _RegionSelectionPageState();
 }
 class _RegionSelectionPageState extends State<RegionSelectionPage> {
   int _currentStep = 0;

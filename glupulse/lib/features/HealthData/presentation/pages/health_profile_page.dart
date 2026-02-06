@@ -159,11 +159,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
   @override
   void initState() {
     super.initState();
-    _selectedTreatments = Map.fromIterable(
-      _treatmentOptions.values,
-      key: (item) => item as String,
-      value: (item) => false,
-    );
+    _selectedTreatments = { for (var item in _treatmentOptions.values) item : false };
 
     // Dispatch event to get health profile
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1295,7 +1291,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: value
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -1334,7 +1330,7 @@ class _HealthProfilePageState extends State<HealthProfilePage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: value ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Colors.white,
+          color: value ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: value ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,

@@ -321,10 +321,10 @@ class ActivityLogListPage extends StatelessWidget {
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
-                                              color: _getIntensityColor(log.intensity).withOpacity(0.1),
+                                              color: _getIntensityColor(log.intensity).withValues(alpha: 0.1),
                                               borderRadius: BorderRadius.circular(8),
                                               border: Border.all(
-                                                color: _getIntensityColor(log.intensity).withOpacity(0.3),
+                                                color: _getIntensityColor(log.intensity).withValues(alpha: 0.3),
                                                 width: 1
                                               ),
                                             ),

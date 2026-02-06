@@ -196,7 +196,7 @@ class _ActivityHistoryPageState extends State<ActivityHistoryPage> {
                                   Container(
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Column(
@@ -241,7 +241,7 @@ class _ActivityHistoryPageState extends State<ActivityHistoryPage> {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                               decoration: BoxDecoration(
-                                                color: _getIntensityColor(log.intensity).withOpacity(0.1),
+                                                color: _getIntensityColor(log.intensity).withValues(alpha: 0.1),
                                                 borderRadius: BorderRadius.circular(4),
                                               ),
                                               child: Text(
@@ -384,7 +384,7 @@ class _ActivityHistoryPageState extends State<ActivityHistoryPage> {
             borderRadius: BorderRadius.circular(12),
             border: isActive ? null : Border.all(color: Colors.grey.shade300),
             boxShadow: isActive 
-              ? [BoxShadow(color: activeColor.withOpacity(0.4), blurRadius: 4, offset: const Offset(0, 2))]
+              ? [BoxShadow(color: activeColor.withValues(alpha: 0.4), blurRadius: 4, offset: const Offset(0, 2))]
               : null,
           ),
           child: Text(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:glupulse/core/api/api_client.dart';
 import 'package:glupulse/core/error/exceptions.dart';
 import 'package:glupulse/features/auth/data/datasources/auth_local_data_source.dart';
@@ -26,7 +27,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       final token = await localDataSource.getLastToken();
       final response = await apiClient.get('/profile', token: token);
-      print(
+      debugPrint(
           'ProfileRemoteDataSourceImpl: Respon API /profile: $response'); // DEBUG - Tetap ada
 
       if (response['profile'] == null || response['profile'] is! Map<String, dynamic>) {
@@ -52,7 +53,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         body: params.toJson(), // Menggunakan method toJson dari params
         token: token,
       );
-      print('ProfileRemoteDataSourceImpl: Respon API PUT /profile: $response'); // DEBUG
+      debugPrint('ProfileRemoteDataSourceImpl: Respon API PUT /profile: $response'); // DEBUG
       // PERBAIKAN: Asumsikan backend mengembalikan data user yang sudah diupdate di dalam key 'user',
       // sama seperti endpoint GET /profile.
       if (response.containsKey('user') && response['user'] is Map<String, dynamic>) {

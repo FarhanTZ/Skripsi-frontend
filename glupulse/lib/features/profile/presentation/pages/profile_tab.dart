@@ -257,7 +257,7 @@ class ProfileTab extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F67FE).withOpacity(0.3),
+            color: const Color(0xFF0F67FE).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -293,7 +293,7 @@ class ProfileTab extends StatelessWidget {
           Text(
             email,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 15,
             ),
           ),
@@ -318,7 +318,7 @@ class ProfileTab extends StatelessWidget {
         borderRadius: BorderRadius.circular(15.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 10,
             offset: const Offset(0, 5),
@@ -330,8 +330,8 @@ class ProfileTab extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(            
             color: (iconColor == Colors.redAccent // Cek jika ini item destruktif
-                ? Colors.redAccent.withOpacity(0.15) // Latar merah transparan
-                : AppTheme.inputFieldColor.withOpacity(0.7)),
+                ? Colors.redAccent.withValues(alpha: 0.15) // Latar merah transparan
+                : AppTheme.inputFieldColor.withValues(alpha: 0.7)),
             borderRadius: BorderRadius.circular(12),
           ),
           child: iconWidget,

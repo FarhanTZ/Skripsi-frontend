@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glupulse/features/medication/domain/entities/medication.dart';
 import 'package:glupulse/features/medication/presentation/cubit/medication_cubit.dart';
-import 'package:glupulse/app/theme/app_theme.dart';
 
 class AddEditMedicationPage extends StatefulWidget {
   final Medication? medication;

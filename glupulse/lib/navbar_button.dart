@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
                       color: Theme.of(context).colorScheme.primary, // Warna biru dari tema
                       shape: BoxShape.circle,
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5)),
+                        BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 5)),
                       ],
                     ),
                     child: SvgPicture.asset('assets/images/shopping_cart.svg', colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn), width: 28, height: 28),
@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage> {
             _buildNavItem(unselectedAsset: 'assets/images/Profile.svg', selectedAsset: 'assets/images/Profile_On.svg', index: 3, label: 'Profile'),
           ],
           color: Colors.white, // Latar belakang navbar menjadi putih
-          buttonBackgroundColor: const Color(0xFF4043FD).withOpacity(0.1), // Latar belakang tombol aktif menjadi biru transparan
+          buttonBackgroundColor: const Color(0xFF4043FD).withValues(alpha: 0.1), // Latar belakang tombol aktif menjadi biru transparan
           backgroundColor: Colors.transparent,
           animationCurve: Curves.easeInOut,
           animationDuration: const Duration(milliseconds: 400),
