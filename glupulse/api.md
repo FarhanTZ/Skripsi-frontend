@@ -1063,3 +1063,11 @@ Get
         "description": null
     }
 ]
+
+
+/profile/update-email
+
+{
+    "new_email": "marvelstefano001300@gmail.com",
+    "password": "P@ssw0rd"
+}

@@ -11,6 +11,7 @@ import 'package:glupulse/features/auth/presentation/cubit/auth_state.dart';
 import 'package:glupulse/features/profile/presentation/pages/change_username_page.dart';
 import 'package:glupulse/features/auth/presentation/pages/login_page.dart';
 import 'package:glupulse/features/profile/presentation/pages/change_password_page.dart';
+import 'package:glupulse/features/profile/presentation/pages/change_email_page.dart';
 import 'package:glupulse/injection_container.dart';
 
 class ProfileSettingsPage extends StatelessWidget {
@@ -152,8 +153,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                               icon: Icons.email_outlined,
                               text: 'Ganti Email',
                               onTap: () {
-                                // TODO: Implement navigation to Change Email page
-                                debugPrint('Tombol Ganti Email diklik');
+                                final currentUser = user;
+                                if (currentUser != null) {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (_) => ChangeEmailPage(currentEmail: currentUser.email),
+                                  ));
+                                }
                               },
                             ),
                             _buildProfileMenuItem(

@@ -73,6 +73,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<Either<Failure, void>> updateEmail(String newEmail, String password) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.updateEmail(newEmail, password);
+        return const Right(null);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> updatePassword(
       UpdatePasswordParams params) async {
     if (await networkInfo.isConnected) {

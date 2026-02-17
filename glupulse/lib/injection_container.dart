@@ -38,6 +38,7 @@ import 'package:glupulse/features/profile/data/datasources/profile_remote_data_s
 import 'package:glupulse/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/update_email_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/delete_account_usecase.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_password_usecase.dart';
 import 'package:glupulse/features/auth/presentation/cubit/auth_cubit.dart';
@@ -158,6 +159,7 @@ Future<void> init() async {
       getHealthProfile: sl(),
       completePasswordResetUseCase: sl(),
       updateUsernameUseCase: sl(), // Tambahkan ini
+      updateEmailUseCase: sl(),
       updatePasswordUseCase: sl(),
       deleteAccountUseCase: sl(),
       authRepository: sl(), // Sudah ada
@@ -176,6 +178,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
   sl.registerLazySingleton(() => RequestPasswordResetUseCase(sl()));
   sl.registerLazySingleton(() => CompletePasswordResetUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateEmailUseCase(sl()));
   sl.registerLazySingleton(() => DeleteAccountUseCase(sl()));
 
   // Repository

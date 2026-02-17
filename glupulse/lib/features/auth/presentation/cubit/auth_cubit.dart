@@ -16,6 +16,7 @@ import 'package:glupulse/features/profile/domain/usecases/delete_account_usecase
 import 'package:glupulse/features/profile/domain/usecases/update_password_usecase.dart';
 import 'package:glupulse/features/profile/domain/repositories/profile_repository.dart';
 import 'package:glupulse/features/profile/domain/usecases/update_username_usecase.dart';
+import 'package:glupulse/features/profile/domain/usecases/update_email_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_signup_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:glupulse/features/auth/domain/usecases/login_usecase.dart';
@@ -42,6 +43,7 @@ class AuthCubit extends Cubit<AuthState> {
   final GetHealthProfile getHealthProfile; // Tambahkan use case health profile
   final CompletePasswordResetUseCase completePasswordResetUseCase;
   final UpdateUsernameUseCase updateUsernameUseCase;
+  final UpdateEmailUseCase updateEmailUseCase;
   final UpdatePasswordUseCase updatePasswordUseCase;
   final DeleteAccountUseCase deleteAccountUseCase;
   final AuthRepository authRepository; // Tambahkan AuthRepository
@@ -59,6 +61,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.getHealthProfile, // Injeksi use case
     required this.completePasswordResetUseCase,
     required this.updateUsernameUseCase,
+    required this.updateEmailUseCase,
     required this.updatePasswordUseCase,
     required this.deleteAccountUseCase,
     required this.authRepository, // Injeksi AuthRepository
@@ -383,6 +386,25 @@ class AuthCubit extends Cubit<AuthState> {
         // kita mendapatkan data user yang paling baru dari server.
         // Kita gunakan 'updatedUser' sebagai data awal jika fetch gagal.
         _fetchProfileAndEmitState(updatedUser);
+      },
+    );
+  }
+
+  /// Metode untuk memperbarui email.
+  Future<void> updateEmail(String newEmail, String password) async {
+    emit(AuthLoading());
+    final result = await updateEmailUseCase(UpdateEmailParams(newEmail: newEmail, password: password));
+
+    result.fold(
+      (failure) {
+        emit(AuthError(_mapFailureToMessage(failure)));
+      },
+      (_) {
+        // Setelah email berhasil diperbarui, kita bisa memberi tahu user atau memaksa login ulang
+        // Sesuai praktik keamanan, biasanya ganti email sensitif, tapi di sini kita ikuti alur yang diinginkan.
+        // Jika backend tidak otomatis logout, kita bisa arahkan user.
+        emit(const AuthSuccess('Email berhasil diperbarui! Silakan login kembali dengan email baru Anda.'));
+        logout();
       },
     );
   }
