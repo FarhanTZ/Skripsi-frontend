@@ -12,6 +12,7 @@ import 'package:glupulse/features/profile/presentation/pages/change_username_pag
 import 'package:glupulse/features/auth/presentation/pages/login_page.dart';
 import 'package:glupulse/features/profile/presentation/pages/change_password_page.dart';
 import 'package:glupulse/features/profile/presentation/pages/change_email_page.dart';
+import 'package:glupulse/features/profile/presentation/pages/unlink_google_page.dart';
 import 'package:glupulse/injection_container.dart';
 
 class ProfileSettingsPage extends StatelessWidget {
@@ -89,6 +90,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       backgroundColor: Colors.green));
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
+              } else if (state is AuthAuthenticated) {
+                // Bisa tambahkan feedback jika diperlukan saat berhasil link Google
+                // Karena _fetchProfileAndEmitState di AuthCubit akan memancarkan AuthAuthenticated
+              } else if (state is AuthError) {
+                 ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.red));
               }
             },
           ),
@@ -169,6 +179,20 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                                 Navigator.of(context).push(MaterialPageRoute(
                                   builder: (_) => const ChangePasswordPage(),
                                 ));
+                              },
+                            ),
+                            _buildProfileMenuItem(
+                              context: context,
+                              icon: Icons.link,
+                              text: (user?.isGoogleLinked ?? false) ? 'Putus Tautan Google' : 'Tautkan Akun Google',
+                              onTap: () {
+                                if (user?.isGoogleLinked ?? false) {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (_) => const UnlinkGooglePage(),
+                                  ));
+                                } else {
+                                  context.read<AuthCubit>().linkGoogleAccount();
+                                }
                               },
                             ),
                             const SizedBox(height: 24),

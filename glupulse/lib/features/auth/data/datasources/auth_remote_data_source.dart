@@ -14,6 +14,7 @@ abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> verifyOtp(String userId, String otpCode);
   Future<LoginResponseModel> verifySignupOtp(String pendingId, String otpCode); // Metode baru
   Future<LoginResponseModel> linkGoogleAccount(String idToken);
+  Future<LoginResponseModel> unlinkGoogleAccount(String password);
   Future<void> resendOtp({String? userId, String? pendingId});
   Future<LoginResponseModel> requestPasswordReset(String email);
   Future<void> completePasswordReset({
@@ -179,6 +180,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       rethrow;
     } catch (e) {
       throw ServerException('Gagal menautkan akun Google. Periksa koneksi internet Anda.');
+    }
+  }
+
+  @override
+  Future<LoginResponseModel> unlinkGoogleAccount(String password) async {
+    try {
+      final token = await localDataSource.getLastToken();
+      final response = await apiClient.post(
+        '/auth/mobile/google/unlink', // Endpoint spesifik untuk unlink Google
+        body: {
+          'password': password,
+        },
+        token: token,
+      );
+      debugPrint('AuthRemoteDataSourceImpl: Respon API /auth/mobile/google/unlink: $response'); // DEBUG
+      // Parsing response JSON menjadi LoginResponseModel
+      final loginResponse = LoginResponseModel.fromJson(response);
+      await _cacheTokens(loginResponse);
+      return loginResponse;
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal memutus tautan akun Google. Periksa koneksi internet Anda.');
     }
   }
 

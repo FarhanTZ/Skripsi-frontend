@@ -1071,3 +1071,17 @@ Get
     "new_email": "marvelstefano001300@gmail.com",
     "password": "P@ssw0rd"
 }
+
+
+/auth/mobile/google/link
+
+{
+    "id_token": "PASTE_YOUR_GOOGLE_ID_TOKEN_HERE"
+}
+
+
+/auth/mobile/google/unlink
+
+{
+    "password": "YourCurrentPassword123!"
+}

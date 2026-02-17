@@ -149,6 +149,23 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, UserEntity>> unlinkGoogleAccount(String password) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final loginResponse = await remoteDataSource.unlinkGoogleAccount(password);
+        // Setelah berhasil unlink, backend akan memberikan token baru, jadi kita simpan.
+        await localDataSource.cacheToken(loginResponse.token);
+        await localDataSource.cacheUser(loginResponse.user);
+        return Right(loginResponse.user);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> resendOtp(
       {String? userId, String? pendingId}) async {
     if (await networkInfo.isConnected) {

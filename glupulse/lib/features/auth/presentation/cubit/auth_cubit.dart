@@ -217,6 +217,18 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  /// Metode untuk memutus tautan akun Google.
+  Future<void> unlinkGoogleAccount(String password) async {
+    debugPrint('AuthCubit: Memulai proses pemutusan tautan akun Google');
+    emit(AuthLoading());
+
+    final result = await authRepository.unlinkGoogleAccount(password);
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (user) => _fetchProfileAndEmitState(user),
+    );
+  }
+
   /// Metode untuk melakukan proses registrasi.
   Future<void> register(RegisterParams params) async {
     debugPrint('AuthCubit: Memulai proses registrasi untuk username: ${params.username}'); // DEBUG
