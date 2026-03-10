@@ -1085,3 +1085,28 @@ Get
 {
     "password": "YourCurrentPassword123!"
 }
+
+
+
+
+
+/order/history?limit=10&offset=0
+[
+    {
+        "order_id": "ea5fc55c-d834-4c49-b97e-712086e8cab5",
+        "store_name": "Kwetiau Apeng",
+        "store_slug": "kwetiau-apeng-ybdj",
+        "store_logo": "",
+        "total_price": 150000,
+        "status": "completed",
+        "payment_status": "unpaid",
+        "created_at": "2025-12-18T20:27:47.689488+07:00",
+        "items": [
+            {
+                "food_name": "anejo cheese",
+                "quantity": 1,
+                "price": 150000
+            }
+        ]
+    }
+]

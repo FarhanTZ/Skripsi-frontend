@@ -21,8 +21,9 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   Future<List<OrderModel>> getTrackOrders() async {
     try {
       final token = await localDataSource.getLastToken();
-      final List<dynamic> jsonList = await apiClient.getList('/orders/track', token: token);
-      return jsonList.map((json) => OrderModel.fromJson(json)).toList();
+      final response = await apiClient.getList('/order/track', token: token);
+      print('OrderRemoteDataSourceImpl: getTrackOrders response: $response');
+      return response.map((json) => OrderModel.fromJson(json)).toList();
     } on ServerException {
       rethrow;
     }
@@ -32,11 +33,12 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   Future<List<OrderModel>> getOrderHistory({int limit = 10, int offset = 0}) async {
     try {
       final token = await localDataSource.getLastToken();
-      final List<dynamic> jsonList = await apiClient.getList(
-        '/orders/history?limit=$limit&offset=$offset',
+      final response = await apiClient.getList(
+        '/order/history?limit=$limit&offset=$offset',
         token: token,
       );
-      return jsonList.map((json) => OrderModel.fromJson(json)).toList();
+      print('OrderRemoteDataSourceImpl: getOrderHistory response: $response');
+      return response.map((json) => OrderModel.fromJson(json)).toList();
     } on ServerException {
       rethrow;
     }
